@@ -18,7 +18,7 @@ const TrackerTransactions = ({ transactions, setTransactions }: Props) => {
     initial={{ opacity: 0, y: 20 }} 
     animate={{ opacity: 1, y: 0 }} 
     transition={{ delay: 0.2 }} 
-    className="">
+    className="my-4 w-full flex justify-center">
 
         {transactionType === 'e' && (
             <TrackerAddExpense transactions={transactions} setTransactions={setTransactions} setTransactionType={setTransactionType} showForm={showForm} setShowForm={setShowForm} />
@@ -27,7 +27,7 @@ const TrackerTransactions = ({ transactions, setTransactions }: Props) => {
             <TrackerAddIncome transactions={transactions} setTransactions={setTransactions} setTransactionType={setTransactionType} showForm={showForm} setShowForm={setShowForm} />
         )}
         {transactionType === 'n' && (
-            <div className="flex gap-4">
+            <div className="flex gap-10">
                 <TrackerAddExpense transactions={transactions} setTransactions={setTransactions} setTransactionType={setTransactionType} showForm={showForm} setShowForm={setShowForm} />
                 <TrackerAddIncome transactions={transactions} setTransactions={setTransactions} setTransactionType={setTransactionType} showForm={showForm} setShowForm={setShowForm} />
             </div>

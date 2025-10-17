@@ -13,7 +13,7 @@ interface Props {
 
 const TrackerAddExpense = ({ transactions, setTransactions, setTransactionType, showForm, setShowForm }: Props) => {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 w-full">
         <motion.button
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -25,7 +25,7 @@ const TrackerAddExpense = ({ transactions, setTransactions, setTransactionType, 
             className="bg-red-600 hover:bg-red-700 flex items-center justify-center gap-2 text-white px-4 py-2 rounded-lg font-medium shadow-lg transition-colors text-xs cursor-pointer"
             >
             <Minus size={16} />
-            <span className="text-xs">Agregar Gasto</span>
+            <span className="text-xs">Gasto</span>
     </motion.button>
     {showForm && (
         <TrackerTransactionForm setTransactionType={setTransactionType} transactions={transactions} setTransactions={setTransactions} showForm={showForm} setShowForm={setShowForm} />

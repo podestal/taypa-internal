@@ -1,6 +1,5 @@
 import { motion } from "framer-motion"
 import { Plus } from "lucide-react"
-import { useState } from "react"
 import TrackerTransactionForm from "./TrackerTransactionForm"
 import type { Transaction } from "./TrackerMain"
 
@@ -16,7 +15,7 @@ interface Props {
 const TrackerAddIncome = ({ transactions, setTransactions, setTransactionType, showForm, setShowForm }: Props) => {
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 w-full">
     <motion.button
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -28,7 +27,7 @@ const TrackerAddIncome = ({ transactions, setTransactions, setTransactionType, s
         className="bg-green-600 hover:bg-green-700 flex items-center justify-center gap-2 text-white px-4 py-2 rounded-lg font-medium shadow-lg transition-colors text-xs cursor-pointer"
     >
         <Plus size={16} />
-            <span className="text-xs">Agregar Ingreso</span>
+            <span className="text-xs">Ingreso</span>
         </motion.button>
     {showForm && (
         <TrackerTransactionForm setTransactionType={setTransactionType} transactions={transactions} setTransactions={setTransactions} showForm={showForm} setShowForm={setShowForm} />

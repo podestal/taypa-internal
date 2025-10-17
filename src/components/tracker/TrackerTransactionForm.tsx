@@ -13,7 +13,7 @@ interface Props {
 const TrackerTransactionForm = ({ transactions, setTransactions, showForm, setShowForm, setTransactionType }: Props) => {
 
     const [formData, setFormData] = useState({
-      fecha: '',
+      fecha: new Date().toISOString().split('T')[0],
       monto: '',
       categoria: 0,
       observaciones: ''
@@ -47,7 +47,7 @@ const TrackerTransactionForm = ({ transactions, setTransactions, showForm, setSh
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mb-8 bg-white rounded-xl shadow-lg p-6 border"
+            className="mb-8 bg-white rounded-xl shadow-lg p-6 border w-full"
           >
             <h2 className="text-xl font-semibold mb-4 text-gray-800">Nueva Transacción</h2>
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
