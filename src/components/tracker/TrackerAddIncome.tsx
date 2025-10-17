@@ -25,10 +25,10 @@ const TrackerAddIncome = ({ transactions, setTransactions, setTransactionType, s
             setShowForm(true)
             setTransactionType('i')
         }}
-        className="bg-green-600 hover:bg-green-700 flex items-center justify-center gap-2 text-white px-4 py-2 rounded-lg font-medium shadow-lg transition-colors text-xs cursor-pointer"
+        className="bg-green-600 hover:bg-green-700 flex items-center justify-center gap-2 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-medium shadow-lg transition-colors text-sm sm:text-base cursor-pointer w-full"
     >
-        <Plus size={16} />
-            <span className="text-xs">Ingreso</span>
+        <Plus size={16} className="sm:w-5 sm:h-5" />
+            <span className="text-sm sm:text-base">Agregar Ingreso</span>
         </motion.button>
     {showForm && (
         <TrackerTransactionForm categories={categories} transactionType='i' setTransactionType={setTransactionType} transactions={transactions} setTransactions={setTransactions} showForm={showForm} setShowForm={setShowForm} />

@@ -291,23 +291,24 @@ const TrackerMain = () => {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-4 md:p-6">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-6 sm:mb-8"
         >
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Rastreador de Dinero</h1>
-          <p className="text-gray-600">Gestiona los ingresos y gastos de tu restaurante</p>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Rastreador de Dinero</h1>
+          <p className="text-sm sm:text-base text-gray-600">Gestiona los ingresos y gastos de tu restaurante</p>
         </motion.div>
 
-        {/* Add Transaction Button */}
-        <TrackerTransactions categories={categories} transactions={transactions} setTransactions={setTransactions} />
+        {/* Add Transaction Buttons */}
+        <div className="mb-6 sm:mb-8">
+          <TrackerTransactions categories={categories} transactions={transactions} setTransactions={setTransactions} />
+        </div>
 
-        {/* Form */}
-        
+        {/* Table */}
         <TrackerTable transactions={transactions} categories={categories} />
       </div>
     </div>

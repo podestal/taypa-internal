@@ -23,10 +23,10 @@ const TrackerAddExpense = ({ transactions, setTransactions, setTransactionType, 
                 setShowForm(true)
                 setTransactionType('e')
             }}
-            className="bg-red-600 hover:bg-red-700 flex items-center justify-center gap-2 text-white px-4 py-2 rounded-lg font-medium shadow-lg transition-colors text-xs cursor-pointer"
+            className="bg-red-600 hover:bg-red-700 flex items-center justify-center gap-2 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-medium shadow-lg transition-colors text-sm sm:text-base cursor-pointer w-full"
             >
-            <Minus size={16} />
-            <span className="text-xs">Gasto</span>
+            <Minus size={16} className="sm:w-5 sm:h-5" />
+            <span className="text-sm sm:text-base">Agregar Gasto</span>
     </motion.button>
     {showForm && (
         <TrackerTransactionForm setTransactionType={setTransactionType} transactions={transactions} setTransactions={setTransactions} showForm={showForm} setShowForm={setShowForm} categories={categories} transactionType='e' />

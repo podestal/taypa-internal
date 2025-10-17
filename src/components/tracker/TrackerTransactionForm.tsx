@@ -49,10 +49,10 @@ const TrackerTransactionForm = ({ transactions, setTransactions, showForm, setSh
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mb-8 bg-white rounded-xl shadow-lg p-6 border w-full"
+            className="mt-4 bg-white rounded-xl shadow-lg p-4 sm:p-6 border w-full"
           >
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Nueva Transacción</h2>
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-800">Nueva Transacción</h2>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   <Calendar className="inline w-4 h-4 mr-1" />
@@ -64,7 +64,7 @@ const TrackerTransactionForm = ({ transactions, setTransactions, showForm, setSh
                   value={formData.fecha}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
@@ -81,11 +81,11 @@ const TrackerTransactionForm = ({ transactions, setTransactions, showForm, setSh
                   onChange={handleInputChange}
                   placeholder="0.00"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
-              <div>
+              <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   <Tag className="inline w-4 h-4 mr-1" />
                   Categoría
@@ -95,7 +95,7 @@ const TrackerTransactionForm = ({ transactions, setTransactions, showForm, setSh
                   value={formData.categoria}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="0">Seleccionar categoría</option>
                   {categories
@@ -108,7 +108,7 @@ const TrackerTransactionForm = ({ transactions, setTransactions, showForm, setSh
                 </select>
               </div>
 
-              <div className="md:col-span-2">
+              <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   <FileText className="inline w-4 h-4 mr-1" />
                   Observaciones
@@ -119,24 +119,24 @@ const TrackerTransactionForm = ({ transactions, setTransactions, showForm, setSh
                   onChange={handleInputChange}
                   placeholder="Descripción de la transacción..."
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                 />
               </div>
 
-              <div className="md:col-span-2 flex gap-3 justify-end">
+              <div className="sm:col-span-2 flex flex-col sm:flex-row gap-2 sm:gap-3 justify-end">
                 <button
                   type="button"
                   onClick={() => {
                     setShowForm(false)
                     setTransactionType('n')
                   }}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                  className="px-4 py-2 text-sm sm:text-base text-gray-600 hover:text-gray-800 transition-colors rounded-lg border border-gray-300 hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                  className="px-4 sm:px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors text-sm sm:text-base"
                 >
                   Agregar
                 </button>
