@@ -8,8 +8,9 @@ interface Props {
   setTransactions: (transactions: Transaction[]) => void
   showForm: boolean
   setShowForm: (showForm: boolean) => void
+  setTransactionType: (transactionType: 'e' | 'i' | 'n') => void
 }
-const TrackerTransactionForm = ({ transactions, setTransactions, showForm, setShowForm }: Props) => {
+const TrackerTransactionForm = ({ transactions, setTransactions, showForm, setShowForm, setTransactionType }: Props) => {
 
     const [formData, setFormData] = useState({
       fecha: '',
@@ -121,7 +122,10 @@ const TrackerTransactionForm = ({ transactions, setTransactions, showForm, setSh
               <div className="md:col-span-2 flex gap-3 justify-end">
                 <button
                   type="button"
-                  onClick={() => setShowForm(false)}
+                  onClick={() => {
+                    setShowForm(false)
+                    setTransactionType('n')
+                  }}
                   className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
                 >
                   Cancelar

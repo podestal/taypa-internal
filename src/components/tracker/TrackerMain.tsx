@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import TrackerTable from './TrackerTable'
 import TrackerAddExpense from './TrackerAddExpense'
 import TrackerAddIncome from './TrackerAddIncome'
+import TrackerTransactions from './TrackerTransactions'
 
 // Transaction interface
 export interface Transaction {
@@ -305,14 +306,7 @@ const TrackerMain = () => {
         </motion.div>
 
         {/* Add Transaction Button */}
-        <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="flex gap-4 mb-6">
-            <TrackerAddExpense transactions={transactions} setTransactions={setTransactions} />
-            <TrackerAddIncome transactions={transactions} setTransactions={setTransactions} />
-        </motion.div>
+        <TrackerTransactions transactions={transactions} setTransactions={setTransactions} />
 
         {/* Form */}
         
