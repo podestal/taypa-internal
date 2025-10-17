@@ -299,8 +299,7 @@ const TrackerMain = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-6 sm:mb-8"
         >
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Rastreador de Dinero</h1>
-          <p className="text-sm sm:text-base text-gray-600">Gestiona los ingresos y gastos de tu restaurante</p>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 text-center">Ingresos y Gastos</h1>
         </motion.div>
 
         {/* Add Transaction Buttons */}

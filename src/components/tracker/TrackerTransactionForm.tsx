@@ -26,14 +26,13 @@ const TrackerTransactionForm = ({ transactions, setTransactions, showForm, setSh
       const newTransaction: Transaction = {
         id: Date.now().toString(),
         fecha: formData.fecha,
-        monto: parseFloat(formData.monto),
+        monto: transactionType === 'e' ? -parseFloat(formData.monto) : parseFloat(formData.monto),
         categoria: formData.categoria,
         observaciones: formData.observaciones
       }
       
       setTransactions([newTransaction, ...transactions])
-      setFormData({ fecha: '', monto: '', categoria: 0, observaciones: '' })
-      setShowForm(false)
+      setFormData({ ...formData, monto: '', categoria: 0, observaciones: '' })
     }
   
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -130,13 +129,13 @@ const TrackerTransactionForm = ({ transactions, setTransactions, showForm, setSh
                     setShowForm(false)
                     setTransactionType('n')
                   }}
-                  className="px-4 py-2 text-sm sm:text-base text-gray-600 hover:text-gray-800 transition-colors rounded-lg border border-gray-300 hover:bg-gray-50"
+                  className="px-4 py-2 cursor-pointer text-sm sm:text-base text-gray-600 hover:text-gray-800 transition-colors rounded-lg border border-gray-300 hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 sm:px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors text-sm sm:text-base"
+                  className="px-4 sm:px-6 py-2 cursor-pointer bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors text-sm sm:text-base"
                 >
                   Agregar
                 </button>
