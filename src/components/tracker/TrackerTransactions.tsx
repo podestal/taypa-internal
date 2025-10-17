@@ -1,15 +1,16 @@
 import { useState } from "react"
 import TrackerAddExpense from "./TrackerAddExpense"
 import TrackerAddIncome from "./TrackerAddIncome"
-import type { Transaction } from "./TrackerMain"
+import type { Category, Transaction } from "./TrackerMain"
 import { motion } from "framer-motion"
 
 
 interface Props {
   transactions: Transaction[]
   setTransactions: (transactions: Transaction[]) => void
+  categories: Category[]
 }
-const TrackerTransactions = ({ transactions, setTransactions }: Props) => {
+const TrackerTransactions = ({ transactions, setTransactions, categories }: Props) => {
 
     const [transactionType, setTransactionType] = useState<'e' | 'i' | 'n'>('n')
     const [showForm, setShowForm] = useState(false)
@@ -21,15 +22,15 @@ const TrackerTransactions = ({ transactions, setTransactions }: Props) => {
     className="my-4 w-full flex justify-center">
 
         {transactionType === 'e' && (
-            <TrackerAddExpense transactions={transactions} setTransactions={setTransactions} setTransactionType={setTransactionType} showForm={showForm} setShowForm={setShowForm} />
+            <TrackerAddExpense categories={categories} transactions={transactions} setTransactions={setTransactions} setTransactionType={setTransactionType} showForm={showForm} setShowForm={setShowForm} />
         )}
         {transactionType === 'i' && (
-            <TrackerAddIncome transactions={transactions} setTransactions={setTransactions} setTransactionType={setTransactionType} showForm={showForm} setShowForm={setShowForm} />
+            <TrackerAddIncome categories={categories} transactions={transactions} setTransactions={setTransactions} setTransactionType={setTransactionType} showForm={showForm} setShowForm={setShowForm} />
         )}
         {transactionType === 'n' && (
             <div className="flex gap-10">
-                <TrackerAddExpense transactions={transactions} setTransactions={setTransactions} setTransactionType={setTransactionType} showForm={showForm} setShowForm={setShowForm} />
-                <TrackerAddIncome transactions={transactions} setTransactions={setTransactions} setTransactionType={setTransactionType} showForm={showForm} setShowForm={setShowForm} />
+                <TrackerAddExpense categories={categories} transactions={transactions} setTransactions={setTransactions} setTransactionType={setTransactionType} showForm={showForm} setShowForm={setShowForm} />
+                <TrackerAddIncome categories={categories} transactions={transactions} setTransactions={setTransactions} setTransactionType={setTransactionType} showForm={showForm} setShowForm={setShowForm} />
             </div>
         )}
     </motion.div>

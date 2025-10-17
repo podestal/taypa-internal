@@ -1,5 +1,5 @@
 import { useState } from "react"
-import type { Transaction } from "./TrackerMain"
+import type { Category, Transaction } from "./TrackerMain"
 import { motion } from "framer-motion"
 import { Calendar, DollarSign, Tag, FileText } from "lucide-react"
 
@@ -9,8 +9,10 @@ interface Props {
   showForm: boolean
   setShowForm: (showForm: boolean) => void
   setTransactionType: (transactionType: 'e' | 'i' | 'n') => void
+  categories: Category[]
+  transactionType: 'e' | 'i' | 'n'
 }
-const TrackerTransactionForm = ({ transactions, setTransactions, showForm, setShowForm, setTransactionType }: Props) => {
+const TrackerTransactionForm = ({ transactions, setTransactions, showForm, setShowForm, setTransactionType, categories, transactionType }: Props) => {
 
     const [formData, setFormData] = useState({
       fecha: new Date().toISOString().split('T')[0],
@@ -96,11 +98,13 @@ const TrackerTransactionForm = ({ transactions, setTransactions, showForm, setSh
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="0">Seleccionar categoría</option>
-                  {/* {Categories.map((category) => (
+                  {categories
+                  .filter((category) => category.type === (transactionType === 'e' ? 'expense' : 'income'))
+                  .map((category) => (
                     <option key={category.id} value={category.id}>
-                      {category.name} ({category.type === 'income' ? 'Ingreso' : 'Gasto'})
+                      {category.name}
                     </option>
-                  ))} */}
+                  ))}
                 </select>
               </div>
 

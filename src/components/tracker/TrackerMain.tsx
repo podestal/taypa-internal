@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import TrackerTable from './TrackerTable'
-import TrackerAddExpense from './TrackerAddExpense'
-import TrackerAddIncome from './TrackerAddIncome'
 import TrackerTransactions from './TrackerTransactions'
 
 // Transaction interface
@@ -234,7 +232,7 @@ export interface Category {
   type: 'income' | 'expense'
 }
 
-const Categories = [
+const categories: Category[] = [
     {
         id: 1,
         name: 'Proteinas',
@@ -306,11 +304,11 @@ const TrackerMain = () => {
         </motion.div>
 
         {/* Add Transaction Button */}
-        <TrackerTransactions transactions={transactions} setTransactions={setTransactions} />
+        <TrackerTransactions categories={categories} transactions={transactions} setTransactions={setTransactions} />
 
         {/* Form */}
         
-        <TrackerTable transactions={transactions} categories={Categories as Category[]} />
+        <TrackerTable transactions={transactions} categories={categories} />
       </div>
     </div>
   )

@@ -1,7 +1,7 @@
 import { motion } from "framer-motion"
 import { Plus } from "lucide-react"
 import TrackerTransactionForm from "./TrackerTransactionForm"
-import type { Transaction } from "./TrackerMain"
+import type { Category, Transaction } from "./TrackerMain"
 
 interface Props {
     transactions: Transaction[]
@@ -9,10 +9,11 @@ interface Props {
     setTransactionType: (transactionType: 'e' | 'i' | 'n') => void
     showForm: boolean
     setShowForm: (showForm: boolean) => void
+    categories: Category[]
 }
 
 
-const TrackerAddIncome = ({ transactions, setTransactions, setTransactionType, showForm, setShowForm }: Props) => {
+const TrackerAddIncome = ({ transactions, setTransactions, setTransactionType, showForm, setShowForm, categories }: Props) => {
 
   return (
     <div className="flex flex-col gap-2 w-full">
@@ -30,7 +31,7 @@ const TrackerAddIncome = ({ transactions, setTransactions, setTransactionType, s
             <span className="text-xs">Ingreso</span>
         </motion.button>
     {showForm && (
-        <TrackerTransactionForm setTransactionType={setTransactionType} transactions={transactions} setTransactions={setTransactions} showForm={showForm} setShowForm={setShowForm} />
+        <TrackerTransactionForm categories={categories} transactionType='i' setTransactionType={setTransactionType} transactions={transactions} setTransactions={setTransactions} showForm={showForm} setShowForm={setShowForm} />
     )}
     </div>
     
