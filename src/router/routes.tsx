@@ -6,6 +6,7 @@ import DishesMain from "../components/dishes/DishesMain";
 import SalesMain from "../components/sales/SalesMain";
 import InventoryMain from "../components/inventory/InventoryMain";
 import CategoriesMain from "../components/categories/CategoriesMain";
+import KitchenMain from "../components/kitchen/KitchenMain";
 
 const routes = createBrowserRouter([
     {
@@ -36,6 +37,10 @@ const routes = createBrowserRouter([
             {
                 path: "categories",
                 element: <CategoriesMain />
+            },
+            {
+                path: "kitchen",
+                element: <KitchenMain />
             }
         ]
     }
