@@ -12,7 +12,7 @@ const KitchenMain = () => {
       ],
       total: 350,
       status: 'pending',
-      orderTime: '2025-10-23 08:10',
+      orderTime: '2025-10-23 08:35',
       estimatedDelivery: '15:00',
       kitchenNotes: 'Orden urgente'
     },
@@ -25,7 +25,7 @@ const KitchenMain = () => {
       ],
       total: 180,
       status: 'preparing',
-      orderTime: '2024-01-15 14:15',
+      orderTime: '2025-10-23 08:40',
       estimatedDelivery: '14:45',
       kitchenNotes: ''
     },
@@ -53,30 +53,6 @@ const KitchenMain = () => {
       estimatedDelivery: '14:15',
       kitchenNotes: 'Cliente VIP'
     },
-    {
-      id: 5,
-      items: [
-        { name: 'Hamburguesa BBQ', category: 'Hamburguesas', quantity: 2, price: 140, observations: 'Medio cocida' },
-        { name: 'Nachos', category: 'Acompañamientos', quantity: 1, price: 55, observations: 'Extra salsa' }
-      ],
-      total: 335,
-      status: 'preparing',
-      orderTime: '2024-01-15 13:30',
-      estimatedDelivery: '14:00',
-      kitchenNotes: ''
-    },
-    {
-      id: 6,
-      items: [
-        { name: 'Pizza Hawaiana', category: 'Pizzas', quantity: 1, price: 180, observations: '' },
-        { name: 'Coca Cola', category: 'Bebidas', quantity: 1, price: 25, observations: '' }
-      ],
-      total: 205,
-      status: 'pending',
-      orderTime: '2024-01-15 13:20',
-      estimatedDelivery: '13:50',
-      kitchenNotes: ''
-    }
   ])
 
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -139,7 +115,7 @@ const KitchenMain = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500"
+                  className={`rounded-xl shadow-lg p-6 border-l-4 ${getTimeColor(timeElapsed)}`}
                 >
                   {/* Order Header with Timer */}
                   <div className="flex items-center justify-between mb-4">
