@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Clock, CheckCircle, XCircle, User, Calendar, ShoppingCart, ChefHat, Coffee, Pizza, IceCream, ChevronDown, ChevronUp, ArrowRight, ArrowLeft } from 'lucide-react'
+import CreateCustomer from '../customers/CreateCustomer'
 
 const OrdersMain = () => {
   const [orders, setOrders] = useState([
@@ -152,14 +153,6 @@ const OrdersMain = () => {
     if (minutes < 5) return 'text-green-600 bg-green-100'
     if (minutes < 10) return 'text-yellow-600 bg-yellow-100'
     return 'text-red-600 bg-red-100'
-  }
-
-  const handleCustomerInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setCustomerInfo(prev => ({
-      ...prev,
-      [name]: value
-    }))
   }
 
   const toggleOrderExpansion = (orderId: number) => {
@@ -402,81 +395,10 @@ const OrdersMain = () => {
                   transition={{ duration: 0.3 }}
                 >
                   {/* Customer Information */}
-                  <div className="mb-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Información del Cliente</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Nombre
-                        </label>
-                        <input
-                          type="text"
-                          name="firstName"
-                          value={customerInfo.firstName}
-                          onChange={handleCustomerInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Nombre"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Apellido
-                        </label>
-                        <input
-                          type="text"
-                          name="lastName"
-                          value={customerInfo.lastName}
-                          onChange={handleCustomerInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Apellido"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Teléfono
-                        </label>
-                        <input
-                          type="tel"
-                          name="phone"
-                          value={customerInfo.phone}
-                          onChange={handleCustomerInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="+52 55 1234 5678"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Dirección
-                        </label>
-                        <input
-                          type="text"
-                          name="address"
-                          value={customerInfo.address}
-                          onChange={handleCustomerInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Calle, número, colonia"
-                          required
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Referencia de Dirección
-                        </label>
-                        <input
-                          type="text"
-                          name="addressReference"
-                          value={customerInfo.addressReference}
-                          onChange={handleCustomerInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Entre calles, edificio, etc."
-                          required
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  <CreateCustomer 
+                    customerInfo={customerInfo}
+                    setCustomerInfo={setCustomerInfo}
+                  />
 
                   <motion.button
                     onClick={handleNextStep}
