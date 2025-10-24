@@ -1,3 +1,5 @@
+import axios from "axios"
+
 interface Props {
     customerInfo: {
         firstName: string;
@@ -17,11 +19,27 @@ interface Props {
 
 const CustomerForm = ({ customerInfo, setCustomerInfo }: Props) => {
 
+    const access = ''
     const handleCustomerInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         setCustomerInfo({
             ...customerInfo,
             [name]: value
+        })
+    }
+
+    const handleGetCustomerByName = (name: string) => {
+        axios.get(`${import.meta.env.VITE_API_URL}customers/by_first_name/`, {
+            params: {
+                first_name: name
+            },
+            headers: {
+                'Authorization': `JWT ${access}`
+            }
+        }).then((response) => {
+            console.log(response.data)
+        }).catch((error) => {
+            console.log(error)
         })
     }
       
@@ -37,7 +55,13 @@ const CustomerForm = ({ customerInfo, setCustomerInfo }: Props) => {
                           type="text"
                           name="firstName"
                           value={customerInfo.firstName}
-                          onChange={handleCustomerInputChange}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            setCustomerInfo({
+                                ...customerInfo,
+                                firstName: e.target.value
+                            })
+                            handleGetCustomerByName(e.target.value)
+                          }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           placeholder="Nombre"
                           required
