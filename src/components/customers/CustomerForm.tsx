@@ -1,4 +1,7 @@
 import axios from "axios"
+import CustomerOptions from "./CustomerOptions"
+import { useState } from "react";
+import type { Customer } from "../../services/api/customerService";
 
 interface Props {
     customerInfo: {
@@ -20,6 +23,7 @@ interface Props {
 const CustomerForm = ({ customerInfo, setCustomerInfo }: Props) => {
 
     const access = ''
+    const [customers, setCustomers] = useState<Customer[]>([])
     const handleCustomerInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         setCustomerInfo({
@@ -30,6 +34,7 @@ const CustomerForm = ({ customerInfo, setCustomerInfo }: Props) => {
 
     const handleGetCustomerByName = (name: string) => {
         if (name.length < 1) {
+            setCustomers([])
             return
         }
         axios.get(`${import.meta.env.VITE_API_URL}customers/by_first_name/`, {
@@ -41,6 +46,7 @@ const CustomerForm = ({ customerInfo, setCustomerInfo }: Props) => {
             }
         }).then((response) => {
             console.log(response.data)
+            setCustomers(response.data)
         }).catch((error) => {
             console.log(error)
         })
@@ -48,6 +54,7 @@ const CustomerForm = ({ customerInfo, setCustomerInfo }: Props) => {
 
     const handleGetCustomerByLastName = (lastName: string) => {
         if (lastName.length < 1) {
+            setCustomers([])
             return
         }
         axios.get(`${import.meta.env.VITE_API_URL}customers/by_last_name/`, {
@@ -59,6 +66,7 @@ const CustomerForm = ({ customerInfo, setCustomerInfo }: Props) => {
             }
         }).then((response) => {
             console.log(response.data)
+            setCustomers(response.data)
         }).catch((error) => {
             console.log(error)
         })
@@ -68,7 +76,7 @@ const CustomerForm = ({ customerInfo, setCustomerInfo }: Props) => {
 <div className="mb-6">
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Información del Cliente</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
+                      <div className="relative">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Nombre
                         </label>
@@ -87,8 +95,10 @@ const CustomerForm = ({ customerInfo, setCustomerInfo }: Props) => {
                           placeholder="Nombre"
                           required
                         />
+                        {customerInfo.firstName.length > 0 && customers.length > 0 && <CustomerOptions setCustomerInfo={setCustomerInfo} customers={customers} byName={true} />}
                       </div>
-                      <div>
+
+                      <div className="relative">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Apellido
                         </label>
@@ -107,6 +117,7 @@ const CustomerForm = ({ customerInfo, setCustomerInfo }: Props) => {
                           placeholder="Apellido"
                           required
                         />
+                        {customerInfo.lastName.length > 0 && customers.length > 0 && <CustomerOptions setCustomerInfo={setCustomerInfo} customers={customers} byName={false} />}
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">

@@ -9,11 +9,11 @@ import APIClient from "./apiClient"
 
 export interface Customer {
     id: number
-    firstName: string
-    lastName: string
-    phoneNumber: string
-    createdAt: string
-    updatedAt: string
+    first_name: string
+    last_name: string
+    phone_number: string
+    created_at: string
+    updated_at: string
 }
 
 export type CreateUpdateCustomer = Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>
