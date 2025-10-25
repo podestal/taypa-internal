@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import useCreateCustomer from "../../hooks/api/customer/useCreateCustomer";
-import CustomerForm from "./CustomerForm"
+import useCreateAddress from "../../hooks/api/address/useCreateAddress"
+import AddressForm from "./AddressForm"
 
 interface Props {
     customerInfo: {
@@ -20,17 +20,12 @@ interface Props {
         addressReference: string;
     }) => void
     handleNextStep: () => void
-    isCustomerInfoComplete: () => boolean
 }
 
-const CreateCustomer = ({ 
-    customerInfo, 
-    setCustomerInfo, 
-    handleNextStep, 
-    isCustomerInfoComplete 
-}: Props) => {
-    const createCustomer = useCreateCustomer()
-  return (
+const CreateAddress = ({ handleNextStep, customerInfo, setCustomerInfo }: Props) => {
+
+    const createAddress = useCreateAddress()
+    return (
     <motion.div
         key="customer"
         initial={{ opacity: 0, x: -20 }}
@@ -38,15 +33,14 @@ const CreateCustomer = ({
         exit={{ opacity: 0, x: 20 }}
         transition={{ duration: 0.3 }}
     >
-        <CustomerForm 
+        <AddressForm
+            createAddress={createAddress}
+            handleNextStep={handleNextStep}
             customerInfo={customerInfo}
             setCustomerInfo={setCustomerInfo}
-            createCustomer={createCustomer}
-            handleNextStep={handleNextStep}
-            isCustomerInfoComplete={isCustomerInfoComplete}
         />
     </motion.div>
-  )
+    )
 }
 
-export default CreateCustomer
+export default CreateAddress

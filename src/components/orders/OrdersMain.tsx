@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Clock, CheckCircle, XCircle, User, Calendar, ShoppingCart, ChefHat, Coffee, Pizza, IceCream, ChevronDown, ChevronUp, ArrowRight, ArrowLeft } from 'lucide-react'
 import CreateCustomer from '../customers/CreateCustomer'
+import CreateAddress from '../addresses/CreateAddress'
 
 const OrdersMain = () => {
   const [orders, setOrders] = useState([
@@ -128,7 +129,7 @@ const OrdersMain = () => {
   })
   const [expandedOrders, setExpandedOrders] = useState<Set<number>>(new Set())
   const [currentTime, setCurrentTime] = useState(new Date())
-  const [orderStep, setOrderStep] = useState<'customer' | 'items'>('customer')
+  const [orderStep, setOrderStep] = useState<'customer' | 'address' | 'items'>('customer')
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -169,18 +170,31 @@ const OrdersMain = () => {
   }
 
   const handleNextStep = () => {
-    // Validate customer info
-    if (customerInfo.firstName && customerInfo.lastName && customerInfo.phone && customerInfo.address && customerInfo.addressReference) {
-      setOrderStep('items')
+    if (orderStep === 'customer') {
+      if (isCustomerInfoComplete()) {
+        setOrderStep('address')
+      }
+    } else if (orderStep === 'address') {
+      if (isAddressInfoComplete()) {
+        setOrderStep('items')
+      }
     }
   }
 
   const handleBackStep = () => {
-    setOrderStep('customer')
+    if (orderStep === 'address') {
+      setOrderStep('customer')
+    } else if (orderStep === 'items') {
+      setOrderStep('address')
+    }
   }
 
   const isCustomerInfoComplete = () => {
-    return customerInfo.firstName && customerInfo.lastName && customerInfo.phone && customerInfo.address && customerInfo.addressReference
+    return customerInfo.firstName && customerInfo.lastName && customerInfo.phone
+  }
+
+  const isAddressInfoComplete = () => {
+    return customerInfo.address && customerInfo.addressReference
   }
 
   const addItemToOrder = (item: { name: string; price: number }, category: string) => {
@@ -242,6 +256,7 @@ const OrdersMain = () => {
     setSelectedCategory('')
     setOrderStep('customer')
     setCustomerInfo({
+      id: 0,
       firstName: '',
       lastName: '',
       phone: '',
@@ -250,23 +265,23 @@ const OrdersMain = () => {
     })
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800'
-      case 'preparing': return 'bg-blue-100 text-blue-800'
-      case 'delivered': return 'bg-green-100 text-green-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
-  }
+  // const getStatusColor = (status: string) => {
+  //   switch (status) {
+  //     case 'pending': return 'bg-yellow-100 text-yellow-800'
+  //     case 'preparing': return 'bg-blue-100 text-blue-800'
+  //     case 'delivered': return 'bg-green-100 text-green-800'
+  //     default: return 'bg-gray-100 text-gray-800'
+  //   }
+  // }
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'pending': return <Clock className="w-4 h-4" />
-      case 'preparing': return <CheckCircle className="w-4 h-4" />
-      case 'delivered': return <CheckCircle className="w-4 h-4" />
-      default: return <Clock className="w-4 h-4" />
-    }
-  }
+  // const getStatusIcon = (status: string) => {
+  //   switch (status) {
+  //     case 'pending': return <Clock className="w-4 h-4" />
+  //     case 'preparing': return <CheckCircle className="w-4 h-4" />
+  //     case 'delivered': return <CheckCircle className="w-4 h-4" />
+  //     default: return <Clock className="w-4 h-4" />
+  //   }
+  // }
 
   return (
     <div className="h-full bg-gray-50">
@@ -388,23 +403,18 @@ const OrdersMain = () => {
 
             <AnimatePresence mode="wait">
               {orderStep === 'customer' ? (
-                <motion.div
-                  key="customer"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {/* Customer Information */}
-                  <CreateCustomer 
-                    customerInfo={customerInfo}
-                    setCustomerInfo={setCustomerInfo}
-                    handleNextStep={handleNextStep}
-                    isCustomerInfoComplete={isCustomerInfoComplete}
-                  />
-
-                  
-                </motion.div>
+                <CreateCustomer 
+                  customerInfo={customerInfo}
+                  setCustomerInfo={setCustomerInfo}
+                  handleNextStep={handleNextStep}
+                  isCustomerInfoComplete={isCustomerInfoComplete}
+                />
+              ) : orderStep === 'address' ? (
+                <CreateAddress
+                  customerInfo={customerInfo}
+                  setCustomerInfo={setCustomerInfo}
+                  handleNextStep={handleNextStep}
+                />
               ) : (
                 <motion.div
                   key="items"
