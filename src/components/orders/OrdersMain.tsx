@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Clock, CheckCircle, XCircle, User, Calendar, ShoppingCart, ChefHat, Coffee, Pizza, IceCream, ChevronDown, ChevronUp, ArrowRight, ArrowLeft } from 'lucide-react'
 import CreateCustomer from '../customers/CreateCustomer'
 import CreateAddress from '../addresses/CreateAddress'
+import AddressesMain from '../addresses/AddressesMain'
 
 const OrdersMain = () => {
   const [orders, setOrders] = useState([
@@ -139,12 +140,13 @@ const OrdersMain = () => {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [orderStep, setOrderStep] = useState<'customer' | 'address' | 'items'>('customer')
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date())
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [])
+  // timer
+  // useEffect(() => {
+  //   const timer = setInterval(() => {
+  //     setCurrentTime(new Date())
+  //   }, 1000)
+  //   return () => clearInterval(timer)
+  // }, [])
 
   const getTimeElapsed = (orderTime: string) => {
     const orderDate = new Date(orderTime)
@@ -280,6 +282,7 @@ const OrdersMain = () => {
 
   return (
     <div className="h-full bg-gray-50">
+      <>{console.log('customer Simple log', 6)}</>
       <div className="p-6">
         <motion.h1 
           className="text-3xl font-bold text-gray-900 mb-8"
@@ -404,7 +407,7 @@ const OrdersMain = () => {
                   handleNextStep={handleNextStep}
                 />
               ) : orderStep === 'address' ? (
-                <CreateAddress
+                <AddressesMain
                   addressInfo={addressInfo}
                   setAddressInfo={setAddressInfo}
                   handleNextStep={handleNextStep}

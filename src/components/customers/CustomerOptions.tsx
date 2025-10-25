@@ -8,8 +8,6 @@ interface Props {
         firstName: string
         lastName: string
         phone: string
-        address: string
-        addressReference: string
     }) => void
     setShowOptions: (showOptions: boolean) => void
 }
@@ -24,8 +22,6 @@ const CustomerOptions = ({ customers, byName=false, setCustomerInfo, setShowOpti
                     setCustomerInfo({
                         id: customer.id,
                         phone: customer.phone_number,
-                        address: '',
-                        addressReference: '',
                         firstName: customer.first_name,
                         lastName: customer.last_name,
                     })

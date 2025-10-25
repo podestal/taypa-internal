@@ -112,7 +112,7 @@ const AddressForm = ({ createAddress, handleNextStep, addressInfo, setAddressInf
         <motion.button
             onClick={handleCreateAddress}
             disabled={!isAddressInfoComplete}
-            className={`w-full py-3 rounded-lg font-medium transition-colors flex items-center justify-center ${
+            className={`w-full py-3 mt-6 rounded-lg font-medium transition-colors flex items-center justify-center ${
             isAddressInfoComplete
                 ? 'bg-blue-600 text-white hover:bg-blue-700'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
