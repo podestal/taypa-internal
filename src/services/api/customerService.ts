@@ -16,7 +16,7 @@ export interface Customer {
     updated_at: string
 }
 
-export type CreateUpdateCustomer = Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>
+export type CreateUpdateCustomer = Omit<Customer, 'id' | 'created_at' | 'updated_at'>
 
 interface Props {
     byFirstName?: boolean

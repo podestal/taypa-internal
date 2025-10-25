@@ -119,6 +119,7 @@ const OrdersMain = () => {
     observations: string
   }>>([])
   const [customerInfo, setCustomerInfo] = useState({
+    id: 0,
     firstName: '',
     lastName: '',
     phone: '',
@@ -398,22 +399,11 @@ const OrdersMain = () => {
                   <CreateCustomer 
                     customerInfo={customerInfo}
                     setCustomerInfo={setCustomerInfo}
+                    handleNextStep={handleNextStep}
+                    isCustomerInfoComplete={isCustomerInfoComplete}
                   />
 
-                  <motion.button
-                    onClick={handleNextStep}
-                    disabled={!isCustomerInfoComplete()}
-                    className={`w-full py-3 rounded-lg font-medium transition-colors flex items-center justify-center ${
-                      isCustomerInfoComplete()
-                        ? 'bg-blue-600 text-white hover:bg-blue-700'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    }`}
-                    whileHover={isCustomerInfoComplete() ? { scale: 1.02 } : {}}
-                    whileTap={isCustomerInfoComplete() ? { scale: 0.98 } : {}}
-                  >
-                    Continuar
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </motion.button>
+                  
                 </motion.div>
               ) : (
                 <motion.div

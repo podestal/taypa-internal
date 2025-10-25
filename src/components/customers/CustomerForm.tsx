@@ -3,9 +3,16 @@ import CustomerOptions from "./CustomerOptions"
 import { useState } from "react";
 import type { Customer } from "../../services/api/customerService";
 import useAuthStore from "../../store/useAuthStore";
+import type { UseMutationResult } from "@tanstack/react-query";
+import type { CreateCustomerData } from "../../hooks/api/customer/useCreateCustomer";
+import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 
 interface Props {
+    handleNextStep: () => void
+    isCustomerInfoComplete: () => boolean
     customerInfo: {
+        id: number;
         firstName: string;
         lastName: string;
         phone: string;
@@ -13,19 +20,52 @@ interface Props {
         addressReference: string;
     }
     setCustomerInfo: (customerInfo: {
+        id: number;
         firstName: string;
         lastName: string;
         phone: string;
         address: string;
         addressReference: string;
     }) => void
+    createCustomer: UseMutationResult<Customer, Error, CreateCustomerData>
 }
 
-const CustomerForm = ({ customerInfo, setCustomerInfo }: Props) => {
+const CustomerForm = ({ 
+    customerInfo, 
+    setCustomerInfo, 
+    createCustomer, 
+    handleNextStep, 
+    isCustomerInfoComplete }: Props) => {
 
-    const access = useAuthStore(s => s.access) || ''
+    const access = useAuthStore(s => s.access) || 'sdasdasd'
     const [customers, setCustomers] = useState<Customer[]>([])
     const [showOptions, setShowOptions] = useState(true)
+
+    const handleCreateCustomer = () => {
+        if (customerInfo.id > 0) {
+            handleNextStep()
+            return
+        }
+        createCustomer.mutate({
+            customer: {
+                first_name: customerInfo.firstName,
+                last_name: customerInfo.lastName,
+                phone_number: customerInfo.phone,
+            },
+            access: access
+        }, {
+            onSuccess: res => {
+                setCustomerInfo({
+                  ...customerInfo,
+                  id: res.id
+                })
+                handleNextStep()
+            },
+            onError: (error) => {
+                console.log(error)
+            }
+        })
+    }
     const handleCustomerInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         setCustomerInfo({
@@ -76,7 +116,6 @@ const CustomerForm = ({ customerInfo, setCustomerInfo }: Props) => {
       
   return (
                 <div className="mb-6">
-                    <>{console.log(customerInfo)}</>
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Información del Cliente</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="relative">
@@ -98,7 +137,6 @@ const CustomerForm = ({ customerInfo, setCustomerInfo }: Props) => {
                           placeholder="Nombre"
                           required
                         />
-                        <>{console.log(showOptions)}</>
                         {(customerInfo.firstName.length > 0 && customers.length > 0 && showOptions) && <CustomerOptions setShowOptions={setShowOptions} setCustomerInfo={setCustomerInfo} customers={customers} byName={true} />}
                       </div>
 
@@ -166,6 +204,20 @@ const CustomerForm = ({ customerInfo, setCustomerInfo }: Props) => {
                         />
                       </div>
                     </div>
+                    <motion.button
+                        onClick={handleCreateCustomer}
+                        disabled={!isCustomerInfoComplete()}
+                        className={`w-full py-3 rounded-lg font-medium transition-colors flex items-center justify-center ${
+                        isCustomerInfoComplete()
+                            ? 'bg-blue-600 text-white hover:bg-blue-700'
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }`}
+                        whileHover={isCustomerInfoComplete() ? { scale: 1.02 } : {}}
+                        whileTap={isCustomerInfoComplete() ? { scale: 0.98 } : {}}
+                    >
+                        Continuar
+                        <ArrowRight className="w-5 h-5 ml-2" />
+                    </motion.button>
                   </div>
   )
 }
