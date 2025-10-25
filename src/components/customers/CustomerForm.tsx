@@ -2,6 +2,7 @@ import axios from "axios"
 import CustomerOptions from "./CustomerOptions"
 import { useState } from "react";
 import type { Customer } from "../../services/api/customerService";
+import useAuthStore from "../../store/useAuthStore";
 
 interface Props {
     customerInfo: {
@@ -22,7 +23,7 @@ interface Props {
 
 const CustomerForm = ({ customerInfo, setCustomerInfo }: Props) => {
 
-    const access = ''
+    const access = useAuthStore(s => s.access) || ''
     const [customers, setCustomers] = useState<Customer[]>([])
     const [showOptions, setShowOptions] = useState(true)
     const handleCustomerInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
