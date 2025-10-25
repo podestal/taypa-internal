@@ -8,26 +8,20 @@ interface Props {
         firstName: string;
         lastName: string;
         phone: string;
-        address: string;
-        addressReference: string;
     }
     setCustomerInfo: (customerInfo: {
         id: number;
         firstName: string;
         lastName: string;
         phone: string;
-        address: string;
-        addressReference: string;
     }) => void
     handleNextStep: () => void
-    isCustomerInfoComplete: () => boolean
 }
 
 const CreateCustomer = ({ 
     customerInfo, 
     setCustomerInfo, 
     handleNextStep, 
-    isCustomerInfoComplete 
 }: Props) => {
     const createCustomer = useCreateCustomer()
   return (
@@ -43,7 +37,6 @@ const CreateCustomer = ({
             setCustomerInfo={setCustomerInfo}
             createCustomer={createCustomer}
             handleNextStep={handleNextStep}
-            isCustomerInfoComplete={isCustomerInfoComplete}
         />
     </motion.div>
   )

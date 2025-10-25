@@ -1,6 +1,6 @@
 import axios from "axios"
 import CustomerOptions from "./CustomerOptions"
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Customer } from "../../services/api/customerService";
 import useAuthStore from "../../store/useAuthStore";
 import type { UseMutationResult } from "@tanstack/react-query";
@@ -10,22 +10,17 @@ import { ArrowRight } from "lucide-react";
 
 interface Props {
     handleNextStep: () => void
-    isCustomerInfoComplete: () => boolean
     customerInfo: {
         id: number;
         firstName: string;
         lastName: string;
         phone: string;
-        address: string;
-        addressReference: string;
     }
     setCustomerInfo: (customerInfo: {
         id: number;
         firstName: string;
         lastName: string;
         phone: string;
-        address: string;
-        addressReference: string;
     }) => void
     createCustomer: UseMutationResult<Customer, Error, CreateCustomerData>
 }
@@ -34,12 +29,20 @@ const CustomerForm = ({
     customerInfo, 
     setCustomerInfo, 
     createCustomer, 
-    handleNextStep, 
-    isCustomerInfoComplete }: Props) => {
+    handleNextStep }: Props) => {
 
     const access = useAuthStore(s => s.access) || ''
     const [customers, setCustomers] = useState<Customer[]>([])
     const [showOptions, setShowOptions] = useState(true)
+    const [isCustomerInfoComplete, setIsCustomerInfoComplete] = useState(false)
+
+    useEffect(() => {
+        if (customerInfo.firstName && customerInfo.lastName && customerInfo.phone) {
+            setIsCustomerInfoComplete(true)
+        } else {
+            setIsCustomerInfoComplete(false)
+        }
+    }, [customerInfo.firstName, customerInfo.lastName, customerInfo.phone])
 
     const handleCreateCustomer = () => {
         if (customerInfo.id > 0) {
@@ -178,14 +181,14 @@ const CustomerForm = ({
                     </div>
                     <motion.button
                         onClick={handleCreateCustomer}
-                        disabled={!isCustomerInfoComplete()}
+                        disabled={!isCustomerInfoComplete}
                         className={`w-full py-3 rounded-lg font-medium transition-colors flex items-center justify-center ${
-                        isCustomerInfoComplete()
+                        isCustomerInfoComplete
                             ? 'bg-blue-600 text-white hover:bg-blue-700'
                             : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         }`}
-                        whileHover={isCustomerInfoComplete() ? { scale: 1.02 } : {}}
-                        whileTap={isCustomerInfoComplete() ? { scale: 0.98 } : {}}
+                        whileHover={isCustomerInfoComplete ? { scale: 1.02 } : {}}
+                        whileTap={isCustomerInfoComplete ? { scale: 0.98 } : {}}
                     >
                         Continuar
                         <ArrowRight className="w-5 h-5 ml-2" />

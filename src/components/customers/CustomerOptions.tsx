@@ -4,6 +4,7 @@ interface Props {
     customers: Customer[]
     byName: boolean
     setCustomerInfo: (customerInfo: {
+        id: number;
         firstName: string
         lastName: string
         phone: string
@@ -21,6 +22,7 @@ const CustomerOptions = ({ customers, byName=false, setCustomerInfo, setShowOpti
                 key={customer.id} 
                 onClick={() => {
                     setCustomerInfo({
+                        id: customer.id,
                         phone: customer.phone_number,
                         address: '',
                         addressReference: '',

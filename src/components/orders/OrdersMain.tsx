@@ -124,9 +124,16 @@ const OrdersMain = () => {
     firstName: '',
     lastName: '',
     phone: '',
-    address: '',
-    addressReference: ''
   })
+
+  const [addressInfo, setAddressInfo] = useState({
+    id: 0,
+    street: '',
+    reference: '',
+    is_primary: false
+  })
+
+
   const [expandedOrders, setExpandedOrders] = useState<Set<number>>(new Set())
   const [currentTime, setCurrentTime] = useState(new Date())
   const [orderStep, setOrderStep] = useState<'customer' | 'address' | 'items'>('customer')
@@ -194,7 +201,7 @@ const OrdersMain = () => {
   }
 
   const isAddressInfoComplete = () => {
-    return customerInfo.address && customerInfo.addressReference
+    return addressInfo.street && addressInfo.reference
   }
 
   const addItemToOrder = (item: { name: string; price: number }, category: string) => {
@@ -260,28 +267,14 @@ const OrdersMain = () => {
       firstName: '',
       lastName: '',
       phone: '',
-      address: '',
-      addressReference: ''
+    })
+    setAddressInfo({
+      id: 0,
+      street: '',
+      reference: '',
+      is_primary: false
     })
   }
-
-  // const getStatusColor = (status: string) => {
-  //   switch (status) {
-  //     case 'pending': return 'bg-yellow-100 text-yellow-800'
-  //     case 'preparing': return 'bg-blue-100 text-blue-800'
-  //     case 'delivered': return 'bg-green-100 text-green-800'
-  //     default: return 'bg-gray-100 text-gray-800'
-  //   }
-  // }
-
-  // const getStatusIcon = (status: string) => {
-  //   switch (status) {
-  //     case 'pending': return <Clock className="w-4 h-4" />
-  //     case 'preparing': return <CheckCircle className="w-4 h-4" />
-  //     case 'delivered': return <CheckCircle className="w-4 h-4" />
-  //     default: return <Clock className="w-4 h-4" />
-  //   }
-  // }
 
   return (
     <div className="h-full bg-gray-50">
@@ -407,7 +400,6 @@ const OrdersMain = () => {
                   customerInfo={customerInfo}
                   setCustomerInfo={setCustomerInfo}
                   handleNextStep={handleNextStep}
-                  isCustomerInfoComplete={isCustomerInfoComplete}
                 />
               ) : orderStep === 'address' ? (
                 <CreateAddress

@@ -46,7 +46,7 @@ const AddressForm = ({ createAddress, handleNextStep, customerInfo, setCustomerI
                 street: customerInfo.address,
                 reference: customerInfo.addressReference,
                 customer: customerInfo.id,
-                is_primary: true
+                is_primary: false
             },
             access: access
         }, {
