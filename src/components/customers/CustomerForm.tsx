@@ -24,6 +24,7 @@ const CustomerForm = ({ customerInfo, setCustomerInfo }: Props) => {
 
     const access = ''
     const [customers, setCustomers] = useState<Customer[]>([])
+    const [showOptions, setShowOptions] = useState(true)
     const handleCustomerInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         setCustomerInfo({
@@ -73,7 +74,8 @@ const CustomerForm = ({ customerInfo, setCustomerInfo }: Props) => {
     }
       
   return (
-<div className="mb-6">
+                <div className="mb-6">
+                    <>{console.log(customerInfo)}</>
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Información del Cliente</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="relative">
@@ -95,7 +97,8 @@ const CustomerForm = ({ customerInfo, setCustomerInfo }: Props) => {
                           placeholder="Nombre"
                           required
                         />
-                        {customerInfo.firstName.length > 0 && customers.length > 0 && <CustomerOptions setCustomerInfo={setCustomerInfo} customers={customers} byName={true} />}
+                        <>{console.log(showOptions)}</>
+                        {(customerInfo.firstName.length > 0 && customers.length > 0 && showOptions) && <CustomerOptions setShowOptions={setShowOptions} setCustomerInfo={setCustomerInfo} customers={customers} byName={true} />}
                       </div>
 
                       <div className="relative">
@@ -117,7 +120,7 @@ const CustomerForm = ({ customerInfo, setCustomerInfo }: Props) => {
                           placeholder="Apellido"
                           required
                         />
-                        {customerInfo.lastName.length > 0 && customers.length > 0 && <CustomerOptions setCustomerInfo={setCustomerInfo} customers={customers} byName={false} />}
+                        {customerInfo.lastName.length > 0 && customers.length > 0 && showOptions && <CustomerOptions setShowOptions={setShowOptions} setCustomerInfo={setCustomerInfo} customers={customers} byName={false} />}
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
