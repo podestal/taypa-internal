@@ -31,7 +31,7 @@ interface Props {
 const getAddressService = ({ byCustomer, addressId }: Props) => {
     let url = '/addresses/'
     if (byCustomer) {
-        url += `by_customer/${addressId}/`
+        url += `by_customer/`
     }
     if (addressId) {
         url += `${addressId}/`

@@ -1,3 +1,5 @@
+import useGetAddressesByCustomer from "../../hooks/api/address/useGetAddressesByCustomer";
+import useAuthStore from "../../store/useAuthStore";
 import CreateAddress from "./CreateAddress";
 
 interface Props {
@@ -26,11 +28,13 @@ interface Props {
 
 
 const AddressesMain = ({ addressInfo, setAddressInfo, customerInfo, handleNextStep }: Props) => {
+    const access = useAuthStore(s => s.access) || ''
+    const { data: addresses, isLoading, error } = useGetAddressesByCustomer({ access: access, customerId: customerInfo.id })
     
   return (
     <>
         <>
-            {console.log('customer id', customerInfo.id)}
+            {console.log('addresses', addresses)}
         </>
         {/* <CreateAddress 
             addressInfo={addressInfo}
