@@ -3,26 +3,30 @@ import useCreateAddress from "../../hooks/api/address/useCreateAddress"
 import AddressForm from "./AddressForm"
 
 interface Props {
+    addressInfo: {
+        id: number;
+        street: string;
+        reference: string;
+        is_primary: boolean;
+        customer: number;
+    }
+    setAddressInfo: (addressInfo: {
+        id: number;
+        street: string;
+        reference: string;
+        is_primary: boolean;
+        customer: number;
+    }) => void
+    handleNextStep: () => void
     customerInfo: {
         id: number;
         firstName: string;
         lastName: string;
         phone: string;
-        address: string;
-        addressReference: string;
     }
-    setCustomerInfo: (customerInfo: {
-        id: number;
-        firstName: string;
-        lastName: string;
-        phone: string;
-        address: string;
-        addressReference: string;
-    }) => void
-    handleNextStep: () => void
 }
 
-const CreateAddress = ({ handleNextStep, customerInfo, setCustomerInfo }: Props) => {
+const CreateAddress = ({ handleNextStep, addressInfo, setAddressInfo, customerInfo }: Props) => {
 
     const createAddress = useCreateAddress()
     return (
@@ -36,8 +40,9 @@ const CreateAddress = ({ handleNextStep, customerInfo, setCustomerInfo }: Props)
         <AddressForm
             createAddress={createAddress}
             handleNextStep={handleNextStep}
+            addressInfo={addressInfo}
+            setAddressInfo={setAddressInfo}
             customerInfo={customerInfo}
-            setCustomerInfo={setCustomerInfo}
         />
     </motion.div>
     )

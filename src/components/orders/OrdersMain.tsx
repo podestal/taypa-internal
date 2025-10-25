@@ -130,7 +130,8 @@ const OrdersMain = () => {
     id: 0,
     street: '',
     reference: '',
-    is_primary: false
+    is_primary: false,
+    customer: 0,
   })
 
 
@@ -272,7 +273,8 @@ const OrdersMain = () => {
       id: 0,
       street: '',
       reference: '',
-      is_primary: false
+      is_primary: false,
+      customer: 0,
     })
   }
 
@@ -403,9 +405,10 @@ const OrdersMain = () => {
                 />
               ) : orderStep === 'address' ? (
                 <CreateAddress
-                  customerInfo={customerInfo}
-                  setCustomerInfo={setCustomerInfo}
+                  addressInfo={addressInfo}
+                  setAddressInfo={setAddressInfo}
                   handleNextStep={handleNextStep}
+                  customerInfo={customerInfo}
                 />
               ) : (
                 <motion.div
