@@ -395,6 +395,7 @@ const OrdersMain = () => {
               <h2 className="text-xl font-semibold text-gray-900">Crear Orden</h2>
               <div className="ml-auto flex items-center space-x-2">
                 <div className={`w-3 h-3 rounded-full ${orderStep === 'customer' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                <div className={`w-3 h-3 rounded-full ${orderStep === 'address' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
                 <div className={`w-3 h-3 rounded-full ${orderStep === 'items' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
               </div>
             </div>

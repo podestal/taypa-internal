@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import type { Address } from "../../services/api/addressService"
 
 interface Props {
@@ -37,13 +38,14 @@ const AdrressCard = ({ address, isSelected, setAddressInfo }: Props) => {
   }
 
   return (
-    <div 
-      onClick={handleClick}
-      className={`my-4 p-4 border-2 rounded-lg shadow-sm cursor-pointer transition-all duration-300 ${
-        isSelected
-          ? 'border-blue-500 bg-blue-50 shadow-md'
-          : 'border-gray-200 hover:border-gray-300 hover:shadow-md hover:bg-gray-50'
-      }`}
+    <motion.div 
+        layout
+        onClick={handleClick}
+        className={`my-4 p-4 border-2 rounded-lg shadow-sm cursor-pointer transition-all duration-300 ${
+            isSelected
+            ? 'border-blue-500 bg-blue-50 shadow-md'
+            : 'border-gray-200 hover:border-gray-300 hover:shadow-md hover:bg-gray-50'
+        }`}
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
@@ -62,7 +64,7 @@ const AdrressCard = ({ address, isSelected, setAddressInfo }: Props) => {
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   )
 }
 

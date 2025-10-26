@@ -45,6 +45,11 @@ const AddressForm = ({ createAddress, handleNextStep, addressInfo, setAddressInf
     }, [addressInfo.street, addressInfo.reference])
 
     const handleCreateAddress = () => {
+        if (addressInfo.id > 0) {
+            handleNextStep()
+            return
+        }
+
         createAddress.mutate({
             address: {
                 street: addressInfo.street,

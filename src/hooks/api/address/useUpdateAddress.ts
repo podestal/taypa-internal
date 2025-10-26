@@ -1,26 +1,29 @@
 import { useMutation, type UseMutationResult, useQueryClient } from "@tanstack/react-query"
 import getAddressService, { type Address, type CreateUpdateAddress } from "../../../services/api/addressService"
 
-export interface CreateAddressData {
-    address: CreateUpdateAddress
+interface UpdateAddressData {
     access: string
+    address: CreateUpdateAddress
 }
 
 interface Props {
+    addressId: number
     customerId: number
 }
 
-const useCreateAddress = ({ customerId }: Props): UseMutationResult<Address, Error, CreateAddressData> => {
+const useUpdateAddress = ({ addressId, customerId }: Props): UseMutationResult<Address, Error, UpdateAddressData> => {
     const queryClient = useQueryClient()
-    const addressService = getAddressService({})
+    const addressService = getAddressService({ addressId })
     return useMutation({
-        mutationFn: (data: CreateAddressData) => addressService.post(data.address, data.access),
+        mutationFn: (data: UpdateAddressData) => addressService.update(data.address, data.access),
         onSuccess: res => {
             console.log(res)
             queryClient.invalidateQueries({ queryKey: ['addresses', customerId] })
         },
-        onError: (error) => console.error(error)
+        onError: (error) => {
+            console.error(error)
+        }
     })
 }
 
-export default useCreateAddress
+export default useUpdateAddress

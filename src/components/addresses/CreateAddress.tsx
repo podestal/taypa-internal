@@ -28,7 +28,7 @@ interface Props {
 
 const CreateAddress = ({ handleNextStep, addressInfo, setAddressInfo, customerInfo }: Props) => {
 
-    const createAddress = useCreateAddress()
+    const createAddress = useCreateAddress({ customerId: customerInfo.id })
     return (
     <motion.div
         key="customer"
