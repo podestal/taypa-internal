@@ -5,6 +5,7 @@ import useAuthStore from "../../store/useAuthStore"
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { ArrowRight } from "lucide-react"
+import useUpdateAddress from "../../hooks/api/address/useUpdateAddress"
 
 
 interface Props {
@@ -35,6 +36,11 @@ interface Props {
 const AddressForm = ({ createAddress, handleNextStep, addressInfo, setAddressInfo, customerInfo }: Props) => {
     const access = useAuthStore(s => s.access) || ''
     const [isAddressInfoComplete, setIsAddressInfoComplete] = useState(false)
+    const [street, setStreet] = useState(addressInfo.street)
+    const [reference, setReference] = useState(addressInfo.reference)
+
+    // update service
+    const updateAddress = useUpdateAddress({ addressId: addressInfo.id, customerId: customerInfo.id })
 
     useEffect(() => {
         if (addressInfo.street && addressInfo.reference) {
@@ -45,34 +51,64 @@ const AddressForm = ({ createAddress, handleNextStep, addressInfo, setAddressInf
     }, [addressInfo.street, addressInfo.reference])
 
     const handleCreateAddress = () => {
+
+
+
         if (addressInfo.id > 0) {
+            if (street !== addressInfo.street || reference !== addressInfo.reference) {
+                
+                console.log('updating address');
+                updateAddress.mutate({
+                    address: {
+                        street: street.trim(),
+                        reference: reference.trim(),
+                        customer: customerInfo.id,
+                        is_primary: false
+                    },
+                    access: access
+                }, {
+                    onSuccess: (data) => {
+                        console.log(data)
+                        setAddressInfo({
+                            ...addressInfo,
+                            street: data.street,
+                            reference: data.reference,
+                            customer: data.customer
+                        })
+                    },
+                    onError: (error) => {
+                        console.log(error)
+                    }
+                })
+            }
             handleNextStep()
-            return
+        } else {
+            createAddress.mutate({
+                address: {
+                    street: street.trim(),
+                    reference: reference.trim(),
+                    customer: customerInfo.id,
+                    is_primary: false
+                },
+                access: access
+            }, {
+                onSuccess: (data) => {
+                    console.log(data)
+                    setAddressInfo({
+                        ...addressInfo,
+                        street: data.street,
+                        reference: data.reference,
+                        customer: data.customer
+                    })
+                    handleNextStep()
+                },
+                onError: (error) => {
+                    console.log(error)
+                }
+            })
         }
 
-        createAddress.mutate({
-            address: {
-                street: addressInfo.street,
-                reference: addressInfo.reference,
-                customer: customerInfo.id,
-                is_primary: false
-            },
-            access: access
-        }, {
-            onSuccess: (data) => {
-                console.log(data)
-                setAddressInfo({
-                    ...addressInfo,
-                    street: data.street,
-                    reference: data.reference,
-                    customer: data.customer
-                })
-                handleNextStep()
-            },
-            onError: (error) => {
-                console.log(error)
-            }
-        })
+        
     }
   return (
     <>
@@ -83,12 +119,9 @@ const AddressForm = ({ createAddress, handleNextStep, addressInfo, setAddressInf
             <input
                 type="text"
                 name="address"
-                value={addressInfo.street}
+                value={street}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setAddressInfo({
-                        ...addressInfo,
-                        street: e.target.value
-                    })
+                    setStreet(e.target.value)
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Calle, número, colonia"
@@ -102,12 +135,9 @@ const AddressForm = ({ createAddress, handleNextStep, addressInfo, setAddressInf
             <input
                 type="text"
                 name="addressReference"
-                value={addressInfo.reference}
+                value={reference}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setAddressInfo({
-                        ...addressInfo,
-                        reference: e.target.value
-                    })
+                    setReference(e.target.value)
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Entre calles, edificio, etc."
