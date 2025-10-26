@@ -1,12 +1,12 @@
-import { useQuery } from "@tanstack/react-query"
-import getAddressService from "../../../services/api/addressService"
+import { useQuery, type UseQueryResult } from "@tanstack/react-query"
+import getAddressService, { type Address } from "../../../services/api/addressService"
 
 interface Props {
     access: string
     customerId: number
 }
 
-const useGetAddressesByCustomer = ({ access, customerId }: Props) => {
+const useGetAddressesByCustomer = ({ access, customerId }: Props): UseQueryResult<Address[], Error> => {
     const addressService = getAddressService({byCustomer: true})
     const params: Record<string, string> = {
         customer_id: customerId.toString(),

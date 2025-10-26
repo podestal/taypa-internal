@@ -411,6 +411,7 @@ const OrdersMain = () => {
                   addressInfo={addressInfo}
                   setAddressInfo={setAddressInfo}
                   handleNextStep={handleNextStep}
+                  setOrderStep={setOrderStep}
                   customerInfo={customerInfo}
                 />
               ) : (
@@ -428,7 +429,7 @@ const OrdersMain = () => {
                     whileHover={{ scale: 1.02 }}
                   >
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    Editar información del cliente
+                    Editar información del domicilio
                   </motion.button>
 
                   {/* Category Selection */}
