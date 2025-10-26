@@ -4,6 +4,13 @@ import AdrressCard from "./AdrressCard"
 
 interface Props {
     customerId: number
+    addressInfo: {
+        id: number;
+        street: string;
+        reference: string;
+        is_primary: boolean;
+        customer: number;
+    }
     setAddressInfo: (addressInfo: {
         id: number;
         street: string;
@@ -13,7 +20,7 @@ interface Props {
     }) => void
 }
 
-const AddressesList = ({ customerId, setAddressInfo }: Props) => {
+const AddressesList = ({ customerId, addressInfo, setAddressInfo }: Props) => {
 
     const access = useAuthStore(s => s.access) || ''
     const { data: addresses, isLoading, error, isError, isSuccess } = useGetAddressesByCustomer({ access: access, customerId: customerId })
@@ -28,7 +35,8 @@ const AddressesList = ({ customerId, setAddressInfo }: Props) => {
             <AdrressCard 
                 key={address.id} 
                 address={address} 
-                setAddressInfo={setAddressInfo} 
+                setAddressInfo={setAddressInfo}
+                isSelected={addressInfo.id === address.id}
             />
         ))}
     </div>

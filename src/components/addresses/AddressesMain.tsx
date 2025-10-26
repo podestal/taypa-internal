@@ -42,7 +42,7 @@ const AddressesMain = ({ addressInfo, setAddressInfo, customerInfo, handleNextSt
                 Editar información del cliente
             </motion.button>
             <h3 className="text-lg font-medium text-gray-900 mb-4">Información del domicilio</h3>
-            <AddressesList customerId={customerInfo.id} setAddressInfo={setAddressInfo} />
+            <AddressesList customerId={customerInfo.id} addressInfo={addressInfo} setAddressInfo={setAddressInfo} />
         <CreateAddress 
             addressInfo={addressInfo}
             setAddressInfo={setAddressInfo}
