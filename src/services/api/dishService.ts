@@ -18,9 +18,9 @@ interface Props {
 }
 
 const getDishService = ({ byCategory, dishId }: Props) => {
-    let url = '/dishes'
+    let url = '/dishes/'
     if (byCategory) {
-        url += `?category=${dishId}`
+        url += `by_category/`
     } else if (dishId) {
         url += `/${dishId}`
     }

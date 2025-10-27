@@ -5,6 +5,7 @@ import CreateCustomer from '../customers/CreateCustomer'
 import CreateAddress from '../addresses/CreateAddress'
 import AddressesMain from '../addresses/AddressesMain'
 import CategoriesMain from '../categories/CategoriesMain'
+import DishesMain from '../dishes/DishesMain'
 
 const OrdersMain = () => {
   const [orders, setOrders] = useState([
@@ -447,7 +448,8 @@ const OrdersMain = () => {
                       animate={{ opacity: 1, y: 0 }}
                       className="mb-6"
                     >
-                      <h3 className="text-lg font-medium text-gray-900 mb-3">
+                      <DishesMain categoryId={selectedCategory} />
+                      {/* <h3 className="text-lg font-medium text-gray-900 mb-3">
                         {categories.find(c => c.id === selectedCategory)?.name}
                       </h3>
                       <div className="grid grid-cols-1 gap-2">
@@ -473,7 +475,7 @@ const OrdersMain = () => {
                             </motion.button>
                           </motion.div>
                         ))}
-                      </div>
+                      </div> */}
                     </motion.div>
                   )}
                 </motion.div>
