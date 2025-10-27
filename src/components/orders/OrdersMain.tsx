@@ -113,7 +113,7 @@ const OrdersMain = () => {
     ]
   }
 
-  const [selectedCategory, setSelectedCategory] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState(0)
   const [currentOrder, setCurrentOrder] = useState<Array<{
     name: string
     category: string
@@ -435,30 +435,10 @@ const OrdersMain = () => {
                   </motion.button>
 
                   {/* Category Selection */}
-                  <CategoriesMain />
-                  <div className="mb-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-3">Seleccionar Categoría</h3>
-                    <div className="grid grid-cols-2 gap-3">
-                      {categories.map((category) => (
-                        <motion.button
-                          key={category.id}
-                          onClick={() => setSelectedCategory(category.id)}
-                          className={`p-4 rounded-lg border-2 transition-all ${
-                            selectedCategory === category.id
-                              ? 'border-blue-500 bg-blue-50 text-blue-700'
-                              : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                          }`}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <div className="flex items-center justify-center mb-2">
-                            {category.icon}
-                          </div>
-                          <div className="text-sm font-medium">{category.name}</div>
-                        </motion.button>
-                      ))}
-                    </div>
-                  </div>
+                  <CategoriesMain 
+                    setSelectedCategory={setSelectedCategory}
+                    selectedCategory={selectedCategory}
+                  />
 
                   {/* Items from Selected Category */}
                   {selectedCategory && (

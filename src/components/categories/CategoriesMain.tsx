@@ -1,7 +1,13 @@
 import useGetCategories from "../../hooks/api/category/useGetCategories"
 import useAuthStore from "../../store/useAuthStore"
+import CategoryList from "./CategoryList"
 
-const CategoriesMain = () => {
+interface Props {
+  setSelectedCategory: React.Dispatch<React.SetStateAction<number>>
+  selectedCategory: number
+}
+
+const CategoriesMain = ({ setSelectedCategory, selectedCategory }: Props) => {
   const access = useAuthStore((state) => state.access) || ''
   const { data: categories, isLoading, error, isError, isSuccess } = useGetCategories({ access: access })
 
@@ -10,9 +16,9 @@ const CategoriesMain = () => {
   if (isSuccess) 
 
   return (
-    <div>
-      <>{console.log(categories)}</>
-    </div>
+    <>
+      <CategoryList categories={categories} setSelectedCategory={setSelectedCategory} selectedCategory={selectedCategory} />
+    </>
   )
 }
 
