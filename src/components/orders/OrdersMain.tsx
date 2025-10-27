@@ -6,6 +6,7 @@ import CreateAddress from '../addresses/CreateAddress'
 import AddressesMain from '../addresses/AddressesMain'
 import CategoriesMain from '../categories/CategoriesMain'
 import DishesMain from '../dishes/DishesMain'
+import useCreateOrder from '../../hooks/api/order/useCreateOrder'
 
 const OrdersMain = () => {
   const [orders, setOrders] = useState([
@@ -66,54 +67,6 @@ const OrdersMain = () => {
     }
   ])
 
-  const categories = [
-    { id: 'pizzas', name: 'Pizzas', icon: <Pizza className="w-5 h-5" /> },
-    { id: 'hamburguesas', name: 'Hamburguesas', icon: <ChefHat className="w-5 h-5" /> },
-    { id: 'tacos', name: 'Tacos', icon: <ChefHat className="w-5 h-5" /> },
-    { id: 'bebidas', name: 'Bebidas', icon: <Coffee className="w-5 h-5" /> },
-    { id: 'acompañamientos', name: 'Acompañamientos', icon: <ChefHat className="w-5 h-5" /> },
-    { id: 'postres', name: 'Postres', icon: <IceCream className="w-5 h-5" /> }
-  ]
-
-  const menuItems = {
-    pizzas: [
-      { name: 'Pizza Margherita', price: 150 },
-      { name: 'Pizza Pepperoni', price: 170 },
-      { name: 'Pizza Hawaiana', price: 180 },
-      { name: 'Pizza Cuatro Quesos', price: 190 }
-    ],
-    hamburguesas: [
-      { name: 'Hamburguesa Clásica', price: 120 },
-      { name: 'Hamburguesa BBQ', price: 140 },
-      { name: 'Hamburguesa Doble', price: 160 },
-      { name: 'Hamburguesa Vegetariana', price: 130 }
-    ],
-    tacos: [
-      { name: 'Tacos al Pastor', price: 15 },
-      { name: 'Tacos de Asada', price: 18 },
-      { name: 'Tacos de Pollo', price: 16 },
-      { name: 'Tacos de Carnitas', price: 17 }
-    ],
-    bebidas: [
-      { name: 'Coca Cola', price: 25 },
-      { name: 'Agua Natural', price: 15 },
-      { name: 'Refresco', price: 20 },
-      { name: 'Jugo Natural', price: 30 }
-    ],
-    acompañamientos: [
-      { name: 'Papas Fritas', price: 45 },
-      { name: 'Aros de Cebolla', price: 50 },
-      { name: 'Nachos', price: 55 },
-      { name: 'Ensalada César', price: 60 }
-    ],
-    postres: [
-      { name: 'Helado de Vainilla', price: 40 },
-      { name: 'Pastel de Chocolate', price: 65 },
-      { name: 'Flan', price: 35 },
-      { name: 'Brownie', price: 45 }
-    ]
-  }
-
   const [selectedCategory, setSelectedCategory] = useState(0)
   const [currentOrder, setCurrentOrder] = useState<Array<{
     name: string
@@ -122,6 +75,14 @@ const OrdersMain = () => {
     price: number
     observations: string
   }>>([])
+  const [orderInfo, setOrderInfo] = useState({
+    id: 0,
+    orderNumber: '',
+    customer: 0,
+    address: 0,
+    createdAt: '',
+    updatedAt: '',
+  })
   const [customerInfo, setCustomerInfo] = useState({
     id: 0,
     firstName: '',
@@ -137,7 +98,7 @@ const OrdersMain = () => {
     customer: 0,
   })
 
-
+  const createOrder = useCreateOrder()
   const [expandedOrders, setExpandedOrders] = useState<Set<number>>(new Set())
   const [currentTime, setCurrentTime] = useState(new Date())
   const [orderStep, setOrderStep] = useState<'customer' | 'address' | 'items'>('customer')
@@ -189,6 +150,29 @@ const OrdersMain = () => {
     } else if (orderStep === 'address') {
       if (isAddressInfoComplete()) {
         setOrderStep('items')
+
+        orderInfo.id === 0 && createOrder.mutate({
+          access: 'access',
+          order: {
+            customer: customerInfo.id,
+            address: addressInfo.id,
+            created_by: 1,
+          }
+        }, {
+          onSuccess: (data) => {
+            setOrderInfo({
+              id: data.id,
+              orderNumber: data.order_number,
+              customer: data.customer,
+              address: data.address,
+              createdAt: data.created_at,
+              updatedAt: data.updated_at,
+            })
+          },
+          onError: (error) => {
+            console.log('error', error);
+          }
+        })
       }
     }
   }
@@ -249,7 +233,7 @@ const OrdersMain = () => {
     setCurrentOrder(prev => prev.filter((_, i) => i !== index))
   }
 
-  const createOrder = () => {
+  const createOrderInternal = () => {
     if (currentOrder.length === 0) return
     
     const total = currentOrder.reduce((sum, item) => sum + (item.price * item.quantity), 0)
@@ -428,7 +412,7 @@ const OrdersMain = () => {
                   {/* Back Button */}
                   <motion.button
                     onClick={handleBackStep}
-                    className="mb-6 flex items-center text-blue-600 hover:text-blue-800 font-medium"
+                    className="mb-6 cursor-pointer flex items-center text-blue-600 hover:text-blue-800 font-medium"
                     whileHover={{ scale: 1.02 }}
                   >
                     <ArrowLeft className="w-4 h-4 mr-2" />
@@ -443,40 +427,7 @@ const OrdersMain = () => {
 
                   {/* Items from Selected Category */}
                   {selectedCategory && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mb-6"
-                    >
-                      <DishesMain categoryId={selectedCategory} />
-                      {/* <h3 className="text-lg font-medium text-gray-900 mb-3">
-                        {categories.find(c => c.id === selectedCategory)?.name}
-                      </h3>
-                      <div className="grid grid-cols-1 gap-2">
-                        {menuItems[selectedCategory as keyof typeof menuItems]?.map((item, index) => (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
-                          >
-                            <div>
-                              <div className="font-medium text-gray-900">{item.name}</div>
-                              <div className="text-sm text-gray-600">${item.price}</div>
-                            </div>
-                            <motion.button
-                              onClick={() => addItemToOrder(item, categories.find(c => c.id === selectedCategory)?.name || '')}
-                              className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                            >
-                              Agregar
-                            </motion.button>
-                          </motion.div>
-                        ))}
-                      </div> */}
-                    </motion.div>
+                    <DishesMain categoryId={selectedCategory} />
                   )}
                 </motion.div>
               )}
@@ -558,7 +509,7 @@ const OrdersMain = () => {
                     </span>
                   </div>
                   <motion.button
-                    onClick={createOrder}
+                    onClick={createOrderInternal}
                     className="w-full mt-3 bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}

@@ -1,3 +1,4 @@
+import { motion } from "framer-motion"
 import DishList from "./DishList"
 
 interface Props {
@@ -7,7 +8,13 @@ interface Props {
 const DishesMain = ({ categoryId }: Props) => {
 
   return (
-    <DishList categoryId={categoryId} />
+    <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-6"
+      >
+        <DishList categoryId={categoryId} />
+      </motion.div>
   )
 }
 
