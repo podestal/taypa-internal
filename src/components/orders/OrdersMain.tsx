@@ -4,6 +4,7 @@ import { Plus, Clock, CheckCircle, XCircle, User, Calendar, ShoppingCart, ChefHa
 import CreateCustomer from '../customers/CreateCustomer'
 import CreateAddress from '../addresses/CreateAddress'
 import AddressesMain from '../addresses/AddressesMain'
+import CategoriesMain from '../categories/CategoriesMain'
 
 const OrdersMain = () => {
   const [orders, setOrders] = useState([
@@ -434,6 +435,7 @@ const OrdersMain = () => {
                   </motion.button>
 
                   {/* Category Selection */}
+                  <CategoriesMain />
                   <div className="mb-6">
                     <h3 className="text-lg font-medium text-gray-900 mb-3">Seleccionar Categoría</h3>
                     <div className="grid grid-cols-2 gap-3">
