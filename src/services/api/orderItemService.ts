@@ -6,7 +6,7 @@ export interface OrderItem {
     dish: number
     price: number
     quantity: number
-    observations: string
+    observation: string
     category: number
     created_at: string
     updated_at: string
@@ -25,7 +25,7 @@ const getOrderItemService = ({ orderItemId, byOrder }: Props) => {
         url += `${orderItemId}/`
     }
     if (byOrder) {
-        url += `/by_order/`
+        url += `by_order/`
     }
     return new APIClient<OrderItem[], CreateUpdateOrderItem>(url)
 }

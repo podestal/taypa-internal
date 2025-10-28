@@ -27,7 +27,7 @@ const OrderItemForm = ({ createOrderItem, orderId, dish }: Props) => {
                 price: dish.price * quantity,
                 quantity: quantity,
                 category: dish.category,
-                observations: observations.trim()
+                observation: observations.trim()
              }
         }, {
             onSuccess: (data) => {

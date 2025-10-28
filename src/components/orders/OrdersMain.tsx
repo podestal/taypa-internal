@@ -8,6 +8,7 @@ import CategoriesMain from '../categories/CategoriesMain'
 import DishesMain from '../dishes/DishesMain'
 import useCreateOrder from '../../hooks/api/order/useCreateOrder'
 import Order from './Order'
+import OrderItemList from '../orderItem/OrderItemList'
 
 const OrdersMain = () => {
   const [orders, setOrders] = useState([
@@ -431,8 +432,8 @@ const OrdersMain = () => {
               <ShoppingCart className="w-6 h-6 text-green-600 mr-2" />
               <h2 className="text-xl font-semibold text-gray-900">Orden Actual</h2>
             </div>
-            
-            {currentOrder.length > 0 ? (
+            <OrderItemList orderId={orderInfo.id} />
+            {/* {currentOrder.length > 0 ? (
               <div className="space-y-3">
                 <AnimatePresence>
                   {currentOrder.map((item, index) => (
@@ -509,7 +510,7 @@ const OrdersMain = () => {
                 <p>No hay artículos en la orden</p>
                 <p className="text-sm">Selecciona una categoría y agrega artículos</p>
               </div>
-            )}
+            )} */}
           </motion.div>
         </div>
       </div>
