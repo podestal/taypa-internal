@@ -7,6 +7,7 @@ import AddressesMain from '../addresses/AddressesMain'
 import CategoriesMain from '../categories/CategoriesMain'
 import DishesMain from '../dishes/DishesMain'
 import useCreateOrder from '../../hooks/api/order/useCreateOrder'
+import Order from './Order'
 
 const OrdersMain = () => {
   const [orders, setOrders] = useState([
@@ -157,6 +158,8 @@ const OrdersMain = () => {
             customer: customerInfo.id,
             address: addressInfo.id,
             created_by: 1,
+            order_type: 'D',
+            status: 'IP',
           }
         }, {
           onSuccess: (data) => {
@@ -402,34 +405,11 @@ const OrdersMain = () => {
                   customerInfo={customerInfo}
                 />
               ) : (
-                <motion.div
-                  key="items"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {/* Back Button */}
-                  <motion.button
-                    onClick={handleBackStep}
-                    className="mb-6 cursor-pointer flex items-center text-blue-600 hover:text-blue-800 font-medium"
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Editar información del domicilio
-                  </motion.button>
-
-                  {/* Category Selection */}
-                  <CategoriesMain 
-                    setSelectedCategory={setSelectedCategory}
-                    selectedCategory={selectedCategory}
-                  />
-
-                  {/* Items from Selected Category */}
-                  {selectedCategory && (
-                    <DishesMain categoryId={selectedCategory} />
-                  )}
-                </motion.div>
+                <Order
+                  handleBackStep={handleBackStep}
+                  setSelectedCategory={setSelectedCategory}
+                  selectedCategory={selectedCategory}
+                />
               )}
             </AnimatePresence>
 

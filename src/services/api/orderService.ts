@@ -8,6 +8,8 @@ export interface Order {
     address: number
     created_at: string
     updated_at: string
+    order_type: string
+    status: string
 }
 
 export type CreateUpdateOrder = Omit<Order, 'id' | 'created_at' | 'updated_at' | 'order_number'>
