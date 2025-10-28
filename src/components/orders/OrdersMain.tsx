@@ -409,6 +409,11 @@ const OrdersMain = () => {
                   handleBackStep={handleBackStep}
                   setSelectedCategory={setSelectedCategory}
                   selectedCategory={selectedCategory}
+                  setCustomerInfo={setCustomerInfo}
+                  setAddressInfo={setAddressInfo}
+                  orderInfo={orderInfo}
+                  setOrderInfo={setOrderInfo}
+                  setOrderStep={setOrderStep}
                 />
               )}
             </AnimatePresence>

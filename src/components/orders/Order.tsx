@@ -9,9 +9,39 @@ interface Props {
     handleBackStep: () => void
     setSelectedCategory: Dispatch<SetStateAction<number>>
     selectedCategory: number
+    setCustomerInfo: (customerInfo: {
+        id: number;
+        firstName: string;
+        lastName: string;
+        phone: string;
+    }) => void
+    setAddressInfo: (addressInfo: {
+        id: number;
+        street: string;
+        reference: string;
+        is_primary: boolean;
+        customer: number;
+    }) => void
+    orderInfo: {
+        id: number;
+        orderNumber: string;
+        customer: number;
+        address: number;
+        createdAt: string;
+        updatedAt: string;
+    }
+    setOrderInfo: (orderInfo: {
+        id: number;
+        orderNumber: string;
+        customer: number;
+        address: number;
+        createdAt: string;
+        updatedAt: string;
+    }) => void
+    setOrderStep: (orderStep: 'customer' | 'address' | 'items') => void
 }
 
-const Order = ({ handleBackStep, setSelectedCategory, selectedCategory }: Props) => {
+const Order = ({ handleBackStep, setSelectedCategory, selectedCategory, orderInfo, setOrderInfo, setCustomerInfo, setAddressInfo, setOrderStep }: Props) => {
   return (
     <motion.div
         key="items"
@@ -21,6 +51,7 @@ const Order = ({ handleBackStep, setSelectedCategory, selectedCategory }: Props)
         transition={{ duration: 0.3 }}
     >
         <div className="flex justify-between items-center mb-6">
+            <>{console.log(orderInfo)}</>
             {/* Back Button */}
             <motion.button
                 onClick={handleBackStep}
@@ -30,7 +61,13 @@ const Order = ({ handleBackStep, setSelectedCategory, selectedCategory }: Props)
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Editar información del domicilio
             </motion.button>
-            <RemoveOrder />
+            <RemoveOrder 
+                orderId={orderInfo.id}
+                setOrderStep={setOrderStep}
+                setOrderInfo={setOrderInfo}
+                setCustomerInfo={setCustomerInfo}
+                setAddressInfo={setAddressInfo}
+            />
         </div>
 
         {/* Category Selection */}
