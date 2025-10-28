@@ -16,10 +16,10 @@ const DishCard = ({ dish, index, orderId }: Props) => {
         transition={{ delay: index * 0.05 }}
         className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
     >
-        <div>
+        {/* <div>
         <div className="font-medium text-gray-900">{dish.name}</div>
         <div className="text-sm text-gray-600">${dish.price}</div>
-        </div>
+        </div> */}
         <CreateOrderItem orderId={orderId} dish={dish} />
     </motion.div>
   )

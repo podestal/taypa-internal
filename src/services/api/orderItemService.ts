@@ -7,6 +7,7 @@ export interface OrderItem {
     price: number
     quantity: number
     observations: string
+    category: number
     created_at: string
     updated_at: string
 }

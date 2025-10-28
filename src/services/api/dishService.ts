@@ -6,6 +6,7 @@ export interface Dish {
     description: string
     price: number
     category: number
+    is_active: boolean
     created_at: string
     updated_at: string
 }
