@@ -1,12 +1,14 @@
 import { motion } from "framer-motion"
 import type { Dish } from "../../services/api/dishService"
+import CreateOrderItem from "../orderItem/CreateOrderItem"
 
 interface Props {
     dish: Dish
     index: number
+    orderId: number
 }
 
-const DishCard = ({ dish, index }: Props) => {
+const DishCard = ({ dish, index, orderId }: Props) => {
   return (
     <motion.div
         initial={{ opacity: 0, x: -20 }}
@@ -18,14 +20,7 @@ const DishCard = ({ dish, index }: Props) => {
         <div className="font-medium text-gray-900">{dish.name}</div>
         <div className="text-sm text-gray-600">${dish.price}</div>
         </div>
-        <motion.button
-        // onClick={() => addItemToOrder(item, categories.find(c => c.id === selectedCategory)?.name || '')}
-        className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        >
-        Agregar
-        </motion.button>
+        <CreateOrderItem orderId={orderId} dish={dish} />
     </motion.div>
   )
 }

@@ -3,9 +3,10 @@ import DishList from "./DishList"
 
 interface Props {
   categoryId: number
+  orderId: number
 }
 
-const DishesMain = ({ categoryId }: Props) => {
+const DishesMain = ({ categoryId, orderId }: Props) => {
 
   return (
     <motion.div
@@ -13,7 +14,7 @@ const DishesMain = ({ categoryId }: Props) => {
         animate={{ opacity: 1, y: 0 }}
         className="mb-6"
       >
-        <DishList categoryId={categoryId} />
+        <DishList categoryId={categoryId} orderId={orderId} />
       </motion.div>
   )
 }

@@ -78,7 +78,7 @@ const Order = ({ handleBackStep, setSelectedCategory, selectedCategory, orderInf
 
         {/* Items from Selected Category */}
         {selectedCategory && (
-        <DishesMain categoryId={selectedCategory} />
+        <DishesMain categoryId={selectedCategory} orderId={orderInfo.id} />
         )}
     </motion.div>
   )
