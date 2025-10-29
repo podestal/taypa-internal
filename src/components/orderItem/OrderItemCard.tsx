@@ -3,6 +3,7 @@ import type { OrderItem } from "../../services/api/orderItemService"
 import { XCircle } from "lucide-react"
 import useAuthStore from "../../store/useAuthStore"
 import useUpdateOrderitem from "../../hooks/api/orderItem/useUpdateOrderitem"
+import useRemoveOrderItem from "../../hooks/api/orderItem/useRemoveOrderItem"
 
 interface Props {
     orderItem: OrderItem
@@ -14,6 +15,7 @@ const OrderItemCard = ({ orderItem, orderId, index }: Props) => {
 
     const access = useAuthStore(state => state.access) || ''
     const updateOrderItem = useUpdateOrderitem({ orderItemId: orderItem.id, orderId })
+    const removeOrderItem = useRemoveOrderItem({ orderItemId: orderItem.id, orderId })
     // const [quantity, setQuantity] = useState(orderItem.quantity)
 
     // const handleIncreaseOrderItemQuantity = () => {
@@ -25,6 +27,12 @@ const OrderItemCard = ({ orderItem, orderId, index }: Props) => {
     //         }
     //     })
     // }
+
+    const handleRemoveOrderItem = () => {
+        removeOrderItem.mutate({
+            access,
+        })
+    }
     
   return (
     <motion.div
@@ -55,7 +63,7 @@ const OrderItemCard = ({ orderItem, orderId, index }: Props) => {
           +
         </button>
         <motion.button
-          // onClick={() => removeItemFromOrder(index)}
+          onClick={handleRemoveOrderItem}
           className="ml-2 text-red-600 hover:text-red-800"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
