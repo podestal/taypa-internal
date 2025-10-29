@@ -1,7 +1,8 @@
 import { AnimatePresence, motion } from "framer-motion"
 import useGetOrderItemByOrder from "../../hooks/api/orderItem/useGetOrderItemByOrder"
 import useAuthStore from "../../store/useAuthStore"
-import { ShoppingCart, XCircle } from "lucide-react"
+import { ShoppingCart } from "lucide-react"
+import OrderItemCard from "./OrderItemCard"
 
 interface Props {
     orderId: number
@@ -22,57 +23,9 @@ const OrderItemList = ({ orderId }: Props) => {
         {orderItems.length > 0 
         ? 
         <div className="space-y-3">
-            <>{console.log(orderItems)}</>
                 <AnimatePresence>
                   {orderItems.map((item, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="p-3 border border-gray-200 rounded-lg bg-gray-50"
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        
-                        <div>
-                          <div className="font-medium text-gray-900">{item.dish}</div>
-                          <div className="text-sm text-gray-600">{item.category}</div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            // onClick={() => updateItemQuantity(index, item.quantity - 1)}
-                            className="w-6 h-6 bg-red-100 text-red-600 rounded-full flex items-center justify-center hover:bg-red-200"
-                          >
-                            -
-                          </button>
-                          <span className="w-8 text-center font-medium">{item.quantity}</span>
-                          <button
-                            // onClick={() => updateItemQuantity(index, item.quantity + 1)}
-                            className="w-6 h-6 bg-green-100 text-green-600 rounded-full flex items-center justify-center hover:bg-green-200"
-                          >
-                            +
-                          </button>
-                          <motion.button
-                            // onClick={() => removeItemFromOrder(index)}
-                            className="ml-2 text-red-600 hover:text-red-800"
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                          >
-                            <XCircle className="w-4 h-4" />
-                          </motion.button>
-                        </div>
-                      </div>
-                      <input
-                        type="text"
-                        value={item.observation}
-                        // onChange={(e) => updateItemObservations(index, e.target.value)}
-                        placeholder="Observaciones (opcional)"
-                        className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                      <div className="text-sm text-gray-600 mt-1">
-                        Subtotal: ${item.price}
-                      </div>
-                    </motion.div>
+                    <OrderItemCard key={item.id} orderItem={item} orderId={orderId} index={index}/>
                   ))}
                 </AnimatePresence>
                 
