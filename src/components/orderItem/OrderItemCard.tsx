@@ -4,6 +4,8 @@ import { XCircle } from "lucide-react"
 import useAuthStore from "../../store/useAuthStore"
 import useUpdateOrderitem from "../../hooks/api/orderItem/useUpdateOrderitem"
 import useRemoveOrderItem from "../../hooks/api/orderItem/useRemoveOrderItem"
+import Modal from "../ui/Modal"
+import { useState } from "react"
 
 interface Props {
     orderItem: OrderItem
@@ -14,6 +16,7 @@ interface Props {
 const OrderItemCard = ({ orderItem, orderId, index }: Props) => {
 
     const access = useAuthStore(state => state.access) || ''
+    const [isOpen, setIsOpen] = useState(false)
     const updateOrderItem = useUpdateOrderitem({ orderItemId: orderItem.id, orderId })
     const removeOrderItem = useRemoveOrderItem({ orderItemId: orderItem.id, orderId })
     // const [quantity, setQuantity] = useState(orderItem.quantity)
@@ -35,6 +38,7 @@ const OrderItemCard = ({ orderItem, orderId, index }: Props) => {
     }
     
   return (
+    <>
     <motion.div
     key={index}
     initial={{ opacity: 0, height: 0 }}
@@ -51,6 +55,7 @@ const OrderItemCard = ({ orderItem, orderId, index }: Props) => {
       <div className="flex items-center gap-2">
         <button
           // onClick={() => updateItemQuantity(index, item.quantity - 1)}
+          onClick={() => setIsOpen(true)}
           className="w-6 h-6 bg-red-100 text-red-600 rounded-full flex items-center justify-center hover:bg-red-200"
         >
           -
@@ -83,6 +88,12 @@ const OrderItemCard = ({ orderItem, orderId, index }: Props) => {
       Subtotal: ${orderItem.price}
     </div>
   </motion.div>
+  <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
+    <div>
+      <h2>Editar Orden</h2>
+    </div>
+  </Modal>
+    </>
   )
 }
 
