@@ -10,11 +10,12 @@ interface Props {
         phone: string
     }) => void
     setShowOptions: (showOptions: boolean) => void
+    setFullName: (fullName: string) => void
 }
 
-const CustomerOptions = ({ customers, byName=false, setCustomerInfo, setShowOptions }: Props) => {
+const CustomerOptions = ({ customers, byName=false, setCustomerInfo, setShowOptions, setFullName }: Props) => {
   return (
-    <div className="flex flex-col gap-2 absolute top-20 left-0 w-full bg-white">
+    <div className="flex flex-col gap-2 absolute top-20 left-0 w-full bg-white z-10">
         {customers.map((customer) => (
             <button 
                 key={customer.id} 
@@ -26,6 +27,7 @@ const CustomerOptions = ({ customers, byName=false, setCustomerInfo, setShowOpti
                         lastName: customer.last_name,
                     })
                     setShowOptions(false)
+                    setFullName('')
                 }}
                 className="w-full cursor-pointer hover:bg-gray-100 transition-colors text-left px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <span className={`${byName ? 'font-bold' : ''}`}>{customer.first_name} </span>

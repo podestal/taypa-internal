@@ -54,12 +54,9 @@ const AddressForm = ({ createAddress, handleNextStep, addressInfo, setAddressInf
     }, [addressInfo.street, addressInfo.reference, street, reference])
 
     useEffect(() => {
-        if (street.trim() && reference.trim()) {
-            setIsAddressInfoComplete(true)
-        } else {
-            setIsAddressInfoComplete(false)
-        }
-    }, [street, reference])
+        setStreet(addressInfo.street)
+        setReference(addressInfo.reference)
+    }, [addressInfo.street, addressInfo.reference])
 
     const handleCreateAddress = () => {
 

@@ -33,6 +33,7 @@ const CustomerForm = ({
     handleNextStep }: Props) => {
 
     const access = useAuthStore(s => s.access) || ''
+    const [fullName, setFullName] = useState('')
     const [customers, setCustomers] = useState<Customer[]>([])
     const [showOptions, setShowOptions] = useState(true)
     const [isCustomerInfoComplete, setIsCustomerInfoComplete] = useState(false)
@@ -45,6 +46,16 @@ const CustomerForm = ({
             setIsCustomerInfoComplete(false)
         }
     }, [customerInfo.firstName, customerInfo.lastName, customerInfo.phone])
+
+
+    useEffect(() => {
+        if (fullName.length > 0) {
+            setShowOptions(true)
+        } else {
+            setShowOptions(false)
+        }
+    }, [fullName])
+    
 
     const handleCreateCustomer = () => {
         if (customerInfo.id > 0) {
@@ -94,9 +105,9 @@ const CustomerForm = ({
             setCustomers([])
             return
         }
-        axios.get(`${import.meta.env.VITE_API_URL}customers/by_first_name/`, {
+        axios.get(`${import.meta.env.VITE_API_URL}customers/by_name/`, {
             params: {
-                first_name: name
+                name
             },
             headers: {
                 'Authorization': `JWT ${access}`
@@ -109,29 +120,66 @@ const CustomerForm = ({
         })
     }
 
-    const handleGetCustomerByLastName = (lastName: string) => {
-        if (lastName.length < 1) {
-            setCustomers([])
-            return
-        }
-        axios.get(`${import.meta.env.VITE_API_URL}customers/by_last_name/`, {
-            params: {
-                last_name: lastName
-            },
-            headers: {
-                'Authorization': `JWT ${access}`
-            }
-        }).then((response) => {
-            console.log(response.data)
-            setCustomers(response.data)
-        }).catch((error) => {
-            console.log(error)
-        })
-    }
+    // const handleGetCustomerByName = (name: string) => {
+    //     if (name.length < 1) {
+    //         setCustomers([])
+    //         return
+    //     }
+    //     axios.get(`${import.meta.env.VITE_API_URL}customers/by_first_name/`, {
+    //         params: {
+    //             first_name: name
+    //         },
+    //         headers: {
+    //             'Authorization': `JWT ${access}`
+    //         }
+    //     }).then((response) => {
+    //         console.log(response.data)
+    //         setCustomers(response.data)
+    //     }).catch((error) => {
+    //         console.log(error)
+    //     })
+    // }
+
+    // const handleGetCustomerByLastName = (lastName: string) => {
+    //     if (lastName.length < 1) {
+    //         setCustomers([])
+    //         return
+    //     }
+    //     axios.get(`${import.meta.env.VITE_API_URL}customers/by_last_name/`, {
+    //         params: {
+    //             last_name: lastName
+    //         },
+    //         headers: {
+    //             'Authorization': `JWT ${access}`
+    //         }
+    //     }).then((response) => {
+    //         console.log(response.data)
+    //         setCustomers(response.data)
+    //     }).catch((error) => {
+    //         console.log(error)
+    //     })
+    // }
       
   return (
                 <div className="mb-6">
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Información del Cliente</h3>
+                    <div className="relative">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Buscar cliente
+                        </label>
+                    <input
+                        type="text"
+                        value={fullName}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            setFullName(e.target.value)
+                            handleGetCustomerByName(e.target.value)
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Nombre"
+                        required
+                    />
+                    {showOptions && customers.length > 0 && <CustomerOptions setShowOptions={setShowOptions} setCustomerInfo={setCustomerInfo} customers={customers} byName={true} setFullName={setFullName} />}
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="relative">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -146,13 +194,13 @@ const CustomerForm = ({
                                 ...customerInfo,
                                 firstName: e.target.value
                             })
-                            handleGetCustomerByName(e.target.value)
+                            // handleGetCustomerByName(e.target.value)
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           placeholder="Nombre"
                           required
                         />
-                        {(customerInfo.firstName.length > 0 && customers.length > 0 && showOptions) && <CustomerOptions setShowOptions={setShowOptions} setCustomerInfo={setCustomerInfo} customers={customers} byName={true} />}
+                        {/* {(customerInfo.firstName.length > 0 && customers.length > 0 && showOptions) && <CustomerOptions setShowOptions={setShowOptions} setCustomerInfo={setCustomerInfo} customers={customers} byName={true} />} */}
                       </div>
 
                       <div className="relative">
@@ -168,13 +216,13 @@ const CustomerForm = ({
                                 ...customerInfo,
                                 lastName: e.target.value
                             })
-                            handleGetCustomerByLastName(e.target.value)
+                            // handleGetCustomerByLastName(e.target.value)
                           }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           placeholder="Apellido"
                           required
                         />
-                        {customerInfo.lastName.length > 0 && customers.length > 0 && showOptions && <CustomerOptions setShowOptions={setShowOptions} setCustomerInfo={setCustomerInfo} customers={customers} byName={false} />}
+                        {/* {customerInfo.lastName.length > 0 && customers.length > 0 && showOptions && <CustomerOptions setShowOptions={setShowOptions} setCustomerInfo={setCustomerInfo} customers={customers} byName={false} />} */}
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
