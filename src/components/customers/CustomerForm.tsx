@@ -7,6 +7,7 @@ import type { UseMutationResult } from "@tanstack/react-query";
 import type { CreateCustomerData } from "../../hooks/api/customer/useCreateCustomer";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import useNotificationStore from "../../store/useNotificationStore";
 
 interface Props {
     handleNextStep: () => void
@@ -35,6 +36,7 @@ const CustomerForm = ({
     const [customers, setCustomers] = useState<Customer[]>([])
     const [showOptions, setShowOptions] = useState(true)
     const [isCustomerInfoComplete, setIsCustomerInfoComplete] = useState(false)
+    const { addNotification } = useNotificationStore()
 
     useEffect(() => {
         if (customerInfo.firstName && customerInfo.lastName && customerInfo.phone) {
@@ -62,10 +64,20 @@ const CustomerForm = ({
                   ...customerInfo,
                   id: res.id
                 })
+                addNotification({
+                    title: 'Cliente creado',
+                    message: 'El cliente ha sido creado correctamente',
+                    type: 'success'
+                })
                 handleNextStep()
             },
             onError: (error) => {
                 console.log(error)
+                addNotification({
+                    title: 'Error al crear el cliente',
+                    message: 'Ha ocurrido un error al crear el cliente',
+                    type: 'error'
+                })
             }
         })
     }

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { ArrowRight } from "lucide-react"
 import useUpdateAddress from "../../hooks/api/address/useUpdateAddress"
+import useNotificationStore from "../../store/useNotificationStore"
 
 
 interface Props {
@@ -35,6 +36,7 @@ interface Props {
 
 const AddressForm = ({ createAddress, handleNextStep, addressInfo, setAddressInfo, customerInfo }: Props) => {
     const access = useAuthStore(s => s.access) || ''
+    const { addNotification } = useNotificationStore()
     const [isAddressInfoComplete, setIsAddressInfoComplete] = useState(false)
     const [street, setStreet] = useState(addressInfo.street)
     const [reference, setReference] = useState(addressInfo.reference)
@@ -43,17 +45,21 @@ const AddressForm = ({ createAddress, handleNextStep, addressInfo, setAddressInf
     const updateAddress = useUpdateAddress({ addressId: addressInfo.id, customerId: customerInfo.id })
 
     useEffect(() => {
+        console.log('addressInfo', addressInfo);
         if (addressInfo.street && addressInfo.reference) {
             setIsAddressInfoComplete(true)
         } else {
             setIsAddressInfoComplete(false)
         }
-    }, [addressInfo.street, addressInfo.reference])
+    }, [addressInfo.street, addressInfo.reference, street, reference])
 
     useEffect(() => {
-        setStreet(addressInfo.street)
-        setReference(addressInfo.reference)
-    }, [addressInfo.street, addressInfo.reference])
+        if (street.trim() && reference.trim()) {
+            setIsAddressInfoComplete(true)
+        } else {
+            setIsAddressInfoComplete(false)
+        }
+    }, [street, reference])
 
     const handleCreateAddress = () => {
 
@@ -74,6 +80,11 @@ const AddressForm = ({ createAddress, handleNextStep, addressInfo, setAddressInf
                 }, {
                     onSuccess: (data) => {
                         console.log(data)
+                        addNotification({
+                            title: 'Dirección actualizada',
+                            message: 'La dirección ha sido actualizada correctamente',
+                            type: 'success'
+                        })
                         setAddressInfo({
                             ...addressInfo,
                             street: data.street,
@@ -83,6 +94,11 @@ const AddressForm = ({ createAddress, handleNextStep, addressInfo, setAddressInf
                     },
                     onError: (error) => {
                         console.log(error)
+                        addNotification({
+                            title: 'Error al actualizar la dirección',
+                            message: 'Ha ocurrido un error al actualizar la dirección',
+                            type: 'error'
+                        })
                     }
                 })
             }
@@ -99,6 +115,11 @@ const AddressForm = ({ createAddress, handleNextStep, addressInfo, setAddressInf
             }, {
                 onSuccess: (data) => {
                     console.log(data)
+                    addNotification({
+                        title: 'Dirección creada',
+                        message: 'La dirección ha sido creada correctamente',
+                        type: 'success'
+                    })
                     setAddressInfo({
                         ...addressInfo,
                         street: data.street,
@@ -109,6 +130,11 @@ const AddressForm = ({ createAddress, handleNextStep, addressInfo, setAddressInf
                 },
                 onError: (error) => {
                     console.log(error)
+                    addNotification({
+                        title: 'Error al crear la dirección',
+                        message: 'Ha ocurrido un error al crear la dirección',
+                        type: 'error'
+                    })
                 }
             })
         }
