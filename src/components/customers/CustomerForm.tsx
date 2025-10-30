@@ -8,30 +8,18 @@ import type { CreateCustomerData } from "../../hooks/api/customer/useCreateCusto
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import useNotificationStore from "../../store/useNotificationStore";
+import useCustomerInfo from "../../store/useCustomerInfo";
 
 interface Props {
     handleNextStep: () => void
-    customerInfo: {
-        id: number;
-        firstName: string;
-        lastName: string;
-        phone: string;
-    }
-    setCustomerInfo: (customerInfo: {
-        id: number;
-        firstName: string;
-        lastName: string;
-        phone: string;
-    }) => void
     createCustomer: UseMutationResult<Customer, Error, CreateCustomerData>
 }
 
 const CustomerForm = ({ 
-    customerInfo, 
-    setCustomerInfo, 
     createCustomer, 
     handleNextStep }: Props) => {
 
+    const { customerInfo, setCustomerInfo } = useCustomerInfo()
     const access = useAuthStore(s => s.access) || ''
     const [fullName, setFullName] = useState('')
     const [customers, setCustomers] = useState<Customer[]>([])
@@ -119,46 +107,6 @@ const CustomerForm = ({
             console.log(error)
         })
     }
-
-    // const handleGetCustomerByName = (name: string) => {
-    //     if (name.length < 1) {
-    //         setCustomers([])
-    //         return
-    //     }
-    //     axios.get(`${import.meta.env.VITE_API_URL}customers/by_first_name/`, {
-    //         params: {
-    //             first_name: name
-    //         },
-    //         headers: {
-    //             'Authorization': `JWT ${access}`
-    //         }
-    //     }).then((response) => {
-    //         console.log(response.data)
-    //         setCustomers(response.data)
-    //     }).catch((error) => {
-    //         console.log(error)
-    //     })
-    // }
-
-    // const handleGetCustomerByLastName = (lastName: string) => {
-    //     if (lastName.length < 1) {
-    //         setCustomers([])
-    //         return
-    //     }
-    //     axios.get(`${import.meta.env.VITE_API_URL}customers/by_last_name/`, {
-    //         params: {
-    //             last_name: lastName
-    //         },
-    //         headers: {
-    //             'Authorization': `JWT ${access}`
-    //         }
-    //     }).then((response) => {
-    //         console.log(response.data)
-    //         setCustomers(response.data)
-    //     }).catch((error) => {
-    //         console.log(error)
-    //     })
-    // }
       
   return (
                 <div className="mb-6">
@@ -178,7 +126,7 @@ const CustomerForm = ({
                         placeholder="Nombre"
                         required
                     />
-                    {showOptions && customers.length > 0 && <CustomerOptions setShowOptions={setShowOptions} setCustomerInfo={setCustomerInfo} customers={customers} byName={true} setFullName={setFullName} />}
+                    {showOptions && customers.length > 0 && <CustomerOptions setShowOptions={setShowOptions} customers={customers} byName={true} setFullName={setFullName} />}
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="relative">

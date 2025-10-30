@@ -7,6 +7,7 @@ import { motion } from "framer-motion"
 import { ArrowRight } from "lucide-react"
 import useUpdateAddress from "../../hooks/api/address/useUpdateAddress"
 import useNotificationStore from "../../store/useNotificationStore"
+import useCustomerInfo from "../../store/useCustomerInfo"
 
 
 interface Props {
@@ -26,15 +27,10 @@ interface Props {
         is_primary: boolean;
         customer: number;
     }) => void
-    customerInfo: {
-        id: number;
-        firstName: string;
-        lastName: string;
-        phone: string;
-    }
 }
 
-const AddressForm = ({ createAddress, handleNextStep, addressInfo, setAddressInfo, customerInfo }: Props) => {
+const AddressForm = ({ createAddress, handleNextStep, addressInfo, setAddressInfo }: Props) => {
+    const customerInfo = useCustomerInfo(state => state.customerInfo)
     const access = useAuthStore(s => s.access) || ''
     const { addNotification } = useNotificationStore()
     const [isAddressInfoComplete, setIsAddressInfoComplete] = useState(false)

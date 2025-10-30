@@ -3,24 +3,10 @@ import useCreateCustomer from "../../hooks/api/customer/useCreateCustomer";
 import CustomerForm from "./CustomerForm"
 
 interface Props {
-    customerInfo: {
-        id: number;
-        firstName: string;
-        lastName: string;
-        phone: string;
-    }
-    setCustomerInfo: (customerInfo: {
-        id: number;
-        firstName: string;
-        lastName: string;
-        phone: string;
-    }) => void
     handleNextStep: () => void
 }
 
 const CreateCustomer = ({ 
-    customerInfo, 
-    setCustomerInfo, 
     handleNextStep, 
 }: Props) => {
     const createCustomer = useCreateCustomer()
@@ -33,8 +19,6 @@ const CreateCustomer = ({
         transition={{ duration: 0.3 }}
     >
         <CustomerForm 
-            customerInfo={customerInfo}
-            setCustomerInfo={setCustomerInfo}
             createCustomer={createCustomer}
             handleNextStep={handleNextStep}
         />

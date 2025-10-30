@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import useCreateAddress from "../../hooks/api/address/useCreateAddress"
 import AddressForm from "./AddressForm"
+import useCustomerInfo from "../../store/useCustomerInfo"
 
 interface Props {
     addressInfo: {
@@ -18,16 +19,11 @@ interface Props {
         customer: number;
     }) => void
     handleNextStep: () => void
-    customerInfo: {
-        id: number;
-        firstName: string;
-        lastName: string;
-        phone: string;
-    }
 }
 
-const CreateAddress = ({ handleNextStep, addressInfo, setAddressInfo, customerInfo }: Props) => {
-
+const CreateAddress = ({ handleNextStep, addressInfo, setAddressInfo }: Props) => {
+    
+    const customerInfo = useCustomerInfo(state => state.customerInfo)
     const createAddress = useCreateAddress({ customerId: customerInfo.id })
     return (
     <motion.div
@@ -42,7 +38,6 @@ const CreateAddress = ({ handleNextStep, addressInfo, setAddressInfo, customerIn
             handleNextStep={handleNextStep}
             addressInfo={addressInfo}
             setAddressInfo={setAddressInfo}
-            customerInfo={customerInfo}
         />
     </motion.div>
     )

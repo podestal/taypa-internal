@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import CreateAddress from "./CreateAddress";
 import { ArrowLeft } from "lucide-react";
 import AddressesList from "./AddressesList";
+import useCustomerInfo from "../../store/useCustomerInfo";
 
 interface Props {
     addressInfo: {
@@ -18,18 +19,14 @@ interface Props {
         is_primary: boolean;
         customer: number;
     }) => void
-    customerInfo: {
-        id: number;
-        firstName: string;
-        lastName: string;
-        phone: string;
-    }
     handleNextStep: () => void
     setOrderStep: (orderStep: 'customer' | 'address' | 'items') => void
 }
 
 
-const AddressesMain = ({ addressInfo, setAddressInfo, customerInfo, handleNextStep, setOrderStep }: Props) => {
+const AddressesMain = ({ addressInfo, setAddressInfo, handleNextStep, setOrderStep }: Props) => {
+
+    const customerInfo = useCustomerInfo(state => state.customerInfo)
 
   return (
     <>

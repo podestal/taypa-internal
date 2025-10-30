@@ -9,6 +9,7 @@ import DishesMain from '../dishes/DishesMain'
 import useCreateOrder from '../../hooks/api/order/useCreateOrder'
 import Order from './Order'
 import OrderItemList from '../orderItem/OrderItemList'
+import useCustomerInfo from '../../store/useCustomerInfo'
 
 const OrdersMain = () => {
   const [orders, setOrders] = useState([
@@ -85,12 +86,7 @@ const OrdersMain = () => {
     createdAt: '',
     updatedAt: '',
   })
-  const [customerInfo, setCustomerInfo] = useState({
-    id: 0,
-    firstName: '',
-    lastName: '',
-    phone: '',
-  })
+  const {customerInfo, setCustomerInfo} = useCustomerInfo()
 
   const [addressInfo, setAddressInfo] = useState({
     id: 0,
@@ -393,8 +389,6 @@ const OrdersMain = () => {
             <AnimatePresence mode="wait">
               {orderStep === 'customer' ? (
                 <CreateCustomer 
-                  customerInfo={customerInfo}
-                  setCustomerInfo={setCustomerInfo}
                   handleNextStep={handleNextStep}
                 />
               ) : orderStep === 'address' ? (
@@ -403,14 +397,12 @@ const OrdersMain = () => {
                   setAddressInfo={setAddressInfo}
                   handleNextStep={handleNextStep}
                   setOrderStep={setOrderStep}
-                  customerInfo={customerInfo}
                 />
               ) : (
                 <Order
                   handleBackStep={handleBackStep}
                   setSelectedCategory={setSelectedCategory}
                   selectedCategory={selectedCategory}
-                  setCustomerInfo={setCustomerInfo}
                   setAddressInfo={setAddressInfo}
                   orderInfo={orderInfo}
                   setOrderInfo={setOrderInfo}

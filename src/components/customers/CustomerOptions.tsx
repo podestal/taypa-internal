@@ -1,19 +1,16 @@
 import type { Customer } from "../../services/api/customerService"
+import useCustomerInfo from "../../store/useCustomerInfo"
 
 interface Props {
     customers: Customer[]
     byName: boolean
-    setCustomerInfo: (customerInfo: {
-        id: number;
-        firstName: string
-        lastName: string
-        phone: string
-    }) => void
     setShowOptions: (showOptions: boolean) => void
     setFullName: (fullName: string) => void
 }
 
-const CustomerOptions = ({ customers, byName=false, setCustomerInfo, setShowOptions, setFullName }: Props) => {
+const CustomerOptions = ({ customers, byName=false, setShowOptions, setFullName }: Props) => {
+    const setCustomerInfo = useCustomerInfo(state => state.setCustomerInfo)
+    
   return (
     <div className="flex flex-col gap-2 absolute top-20 left-0 w-full bg-white z-10">
         {customers.map((customer) => (
