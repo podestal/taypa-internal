@@ -3,31 +3,18 @@ import CreateAddress from "./CreateAddress";
 import { ArrowLeft } from "lucide-react";
 import AddressesList from "./AddressesList";
 import useCustomerInfo from "../../store/useCustomerInfo";
+import useAddressInfo from "../../store/useAddressInfo";
 
 interface Props {
-    addressInfo: {
-        id: number;
-        street: string;
-        reference: string;
-        is_primary: boolean;
-        customer: number;
-    }
-    setAddressInfo: (addressInfo: {
-        id: number;
-        street: string;
-        reference: string;
-        is_primary: boolean;
-        customer: number;
-    }) => void
     handleNextStep: () => void
     setOrderStep: (orderStep: 'customer' | 'address' | 'items') => void
 }
 
 
-const AddressesMain = ({ addressInfo, setAddressInfo, handleNextStep, setOrderStep }: Props) => {
+const AddressesMain = ({ handleNextStep, setOrderStep }: Props) => {
 
     const customerInfo = useCustomerInfo(state => state.customerInfo)
-
+    const setAddressInfo = useAddressInfo(state => state.setAddressInfo)
   return (
     <>
         <motion.button
@@ -50,13 +37,8 @@ const AddressesMain = ({ addressInfo, setAddressInfo, handleNextStep, setOrderSt
         <h3 className="text-lg font-medium text-gray-900 mb-4">Información del domicilio</h3>
         <AddressesList 
             customerId={customerInfo.id} 
-            addressInfo={addressInfo} 
-            setAddressInfo={setAddressInfo} 
         />
         <CreateAddress 
-            addressInfo={addressInfo}
-            setAddressInfo={setAddressInfo}
-            customerInfo={customerInfo}
             handleNextStep={handleNextStep}
         />
     </>

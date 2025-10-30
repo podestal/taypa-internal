@@ -10,6 +10,7 @@ import useCreateOrder from '../../hooks/api/order/useCreateOrder'
 import Order from './Order'
 import OrderItemList from '../orderItem/OrderItemList'
 import useCustomerInfo from '../../store/useCustomerInfo'
+import useAddressInfo from '../../store/useAddressInfo'
 
 const OrdersMain = () => {
   const [orders, setOrders] = useState([
@@ -88,13 +89,7 @@ const OrdersMain = () => {
   })
   const {customerInfo, setCustomerInfo} = useCustomerInfo()
 
-  const [addressInfo, setAddressInfo] = useState({
-    id: 0,
-    street: '',
-    reference: '',
-    is_primary: false,
-    customer: 0,
-  })
+  const { addressInfo, setAddressInfo } = useAddressInfo()
 
   const createOrder = useCreateOrder()
   const [expandedOrders, setExpandedOrders] = useState<Set<number>>(new Set())
@@ -393,8 +388,6 @@ const OrdersMain = () => {
                 />
               ) : orderStep === 'address' ? (
                 <AddressesMain
-                  addressInfo={addressInfo}
-                  setAddressInfo={setAddressInfo}
                   handleNextStep={handleNextStep}
                   setOrderStep={setOrderStep}
                 />
@@ -403,7 +396,6 @@ const OrdersMain = () => {
                   handleBackStep={handleBackStep}
                   setSelectedCategory={setSelectedCategory}
                   selectedCategory={selectedCategory}
-                  setAddressInfo={setAddressInfo}
                   orderInfo={orderInfo}
                   setOrderInfo={setOrderInfo}
                   setOrderStep={setOrderStep}

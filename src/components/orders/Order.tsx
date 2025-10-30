@@ -9,13 +9,6 @@ interface Props {
     handleBackStep: () => void
     setSelectedCategory: Dispatch<SetStateAction<number>>
     selectedCategory: number
-    setAddressInfo: (addressInfo: {
-        id: number;
-        street: string;
-        reference: string;
-        is_primary: boolean;
-        customer: number;
-    }) => void
     orderInfo: {
         id: number;
         orderNumber: string;
@@ -35,7 +28,7 @@ interface Props {
     setOrderStep: (orderStep: 'customer' | 'address' | 'items') => void
 }
 
-const Order = ({ handleBackStep, setSelectedCategory, selectedCategory, orderInfo, setOrderInfo, setAddressInfo, setOrderStep }: Props) => {
+const Order = ({ handleBackStep, setSelectedCategory, selectedCategory, orderInfo, setOrderInfo, setOrderStep }: Props) => {
 
   return (
     <motion.div
@@ -60,7 +53,6 @@ const Order = ({ handleBackStep, setSelectedCategory, selectedCategory, orderInf
                 orderId={orderInfo.id}
                 setOrderStep={setOrderStep}
                 setOrderInfo={setOrderInfo}
-                setAddressInfo={setAddressInfo}
             />
         </div>
 

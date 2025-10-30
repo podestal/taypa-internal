@@ -1,20 +1,15 @@
 import { motion } from "framer-motion";
 import type { Address } from "../../services/api/addressService"
+import useAddressInfo from "../../store/useAddressInfo";
 
 interface Props {
     address: Address
-    isSelected: boolean
-    setAddressInfo: (addressInfo: {
-        id: number;
-        street: string;
-        reference: string;
-        is_primary: boolean;
-        customer: number;
-    }) => void
 }
 
-const AdrressCard = ({ address, isSelected, setAddressInfo }: Props) => {
+const AdrressCard = ({ address }: Props) => {
   
+  const { addressInfo, setAddressInfo } = useAddressInfo()
+  const isSelected = addressInfo.id === address.id
   const handleClick = () => {
     if (isSelected) {
       // Deselect: clear the address info

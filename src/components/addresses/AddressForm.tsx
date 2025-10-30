@@ -8,29 +8,17 @@ import { ArrowRight } from "lucide-react"
 import useUpdateAddress from "../../hooks/api/address/useUpdateAddress"
 import useNotificationStore from "../../store/useNotificationStore"
 import useCustomerInfo from "../../store/useCustomerInfo"
+import useAddressInfo from "../../store/useAddressInfo"
 
 
 interface Props {
     createAddress: UseMutationResult<Address, Error, CreateAddressData>
     handleNextStep: () => void
-    addressInfo: {
-        id: number;
-        street: string;
-        reference: string;
-        is_primary: boolean;
-        customer: number;
-    }
-    setAddressInfo: (addressInfo: {
-        id: number;
-        street: string;
-        reference: string;
-        is_primary: boolean;
-        customer: number;
-    }) => void
 }
 
-const AddressForm = ({ createAddress, handleNextStep, addressInfo, setAddressInfo }: Props) => {
+const AddressForm = ({ createAddress, handleNextStep }: Props) => {
     const customerInfo = useCustomerInfo(state => state.customerInfo)
+    const { addressInfo, setAddressInfo } = useAddressInfo()
     const access = useAuthStore(s => s.access) || ''
     const { addNotification } = useNotificationStore()
     const [isAddressInfoComplete, setIsAddressInfoComplete] = useState(false)
