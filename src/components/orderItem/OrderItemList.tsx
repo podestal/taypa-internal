@@ -1,8 +1,9 @@
-import { AnimatePresence, motion } from "framer-motion"
+import { AnimatePresence } from "framer-motion"
 import useGetOrderItemByOrder from "../../hooks/api/orderItem/useGetOrderItemByOrder"
 import useAuthStore from "../../store/useAuthStore"
 import { ShoppingCart } from "lucide-react"
 import OrderItemCard from "./OrderItemCard"
+import OrderToKitchen from "../orders/OrderToKitchen"
 
 interface Props {
     orderId: number
@@ -36,14 +37,7 @@ const OrderItemList = ({ orderId }: Props) => {
                     S/.{orderItems.reduce((sum, item) => sum + Number(item.price ?? 0), 0).toFixed(2)}
                     </span>
                   </div>
-                  <motion.button
-                    // onClick={createOrderInternal}
-                    className="w-full mt-3 cursor-pointer bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    Mandar a Cocina
-                  </motion.button>
+                  <OrderToKitchen orderId={orderId} />
                 </div>
               </div> 
               : 
