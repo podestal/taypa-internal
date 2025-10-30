@@ -12,6 +12,7 @@ import OrderItemList from '../orderItem/OrderItemList'
 import useCustomerInfo from '../../store/useCustomerInfo'
 import useAddressInfo from '../../store/useAddressInfo'
 import useOrderInfo from '../../store/useOrderInfo'
+import useOrderStep from '../../store/useOrderStep'
 
 const OrdersMain = () => {
   const [orders, setOrders] = useState([
@@ -88,7 +89,7 @@ const OrdersMain = () => {
   const createOrder = useCreateOrder()
   const [expandedOrders, setExpandedOrders] = useState<Set<number>>(new Set())
   const [currentTime, setCurrentTime] = useState(new Date())
-  const [orderStep, setOrderStep] = useState<'customer' | 'address' | 'items'>('customer')
+  const { orderStep, setOrderStep } = useOrderStep()
 
   // timer
   // useEffect(() => {
@@ -383,14 +384,12 @@ const OrdersMain = () => {
               ) : orderStep === 'address' ? (
                 <AddressesMain
                   handleNextStep={handleNextStep}
-                  setOrderStep={setOrderStep}
                 />
               ) : (
                 <Order
                   handleBackStep={handleBackStep}
                   setSelectedCategory={setSelectedCategory}
                   selectedCategory={selectedCategory}
-                  setOrderStep={setOrderStep}
                 />
               )}
             </AnimatePresence>

@@ -9,10 +9,11 @@ interface Props {
     handleBackStep: () => void
     setSelectedCategory: Dispatch<SetStateAction<number>>
     selectedCategory: number
-    setOrderStep: (orderStep: 'customer' | 'address' | 'items') => void
 }
 
-const Order = ({ handleBackStep, setSelectedCategory, selectedCategory, setOrderStep }: Props) => {
+const Order = ({ handleBackStep, setSelectedCategory, selectedCategory }: Props) => {
+
+
 
   return (
     <motion.div
@@ -32,9 +33,7 @@ const Order = ({ handleBackStep, setSelectedCategory, selectedCategory, setOrder
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Editar información del domicilio
             </motion.button>
-            <RemoveOrder 
-                setOrderStep={setOrderStep}
-            />
+            <RemoveOrder />
         </div>
 
         {/* Category Selection */}

@@ -6,15 +6,12 @@ import { useState } from "react"
 import useCustomerInfo from "../../store/useCustomerInfo"
 import useAddressInfo from "../../store/useAddressInfo"
 import useOrderInfo from "../../store/useOrderInfo"
+import useOrderStep from "../../store/useOrderStep"
 
-interface Props {
-    setOrderStep: (orderStep: 'customer' | 'address' | 'items') => void
-}
-
-
-const RemoveOrder = ({ setOrderStep }: Props) => {
+const RemoveOrder = () => {
 
     const setAddressInfo = useAddressInfo(state => state.setAddressInfo)
+    const setOrderStep = useOrderStep(state => state.setOrderStep)
     const { orderInfo, setOrderInfo } = useOrderInfo()
 
     const setCustomerInfo = useCustomerInfo(state => state.setCustomerInfo)

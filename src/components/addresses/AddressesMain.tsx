@@ -4,17 +4,18 @@ import { ArrowLeft } from "lucide-react";
 import AddressesList from "./AddressesList";
 import useCustomerInfo from "../../store/useCustomerInfo";
 import useAddressInfo from "../../store/useAddressInfo";
+import useOrderStep from "../../store/useOrderStep";
 
 interface Props {
     handleNextStep: () => void
-    setOrderStep: (orderStep: 'customer' | 'address' | 'items') => void
 }
 
 
-const AddressesMain = ({ handleNextStep, setOrderStep }: Props) => {
+const AddressesMain = ({ handleNextStep }: Props) => {
 
     const customerInfo = useCustomerInfo(state => state.customerInfo)
     const setAddressInfo = useAddressInfo(state => state.setAddressInfo)
+    const setOrderStep = useOrderStep(state => state.setOrderStep)
   return (
     <>
         <motion.button

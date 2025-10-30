@@ -5,6 +5,7 @@ import useNotificationStore from "../../store/useNotificationStore"
 import useOrderInfo from "../../store/useOrderInfo"
 import useCustomerInfo from "../../store/useCustomerInfo"
 import useAddressInfo from "../../store/useAddressInfo"
+import useOrderStep from "../../store/useOrderStep"
 
 interface Props {
     orderId: number
@@ -17,6 +18,7 @@ const OrderToKitchen = ({ orderId }: Props) => {
     const setOrderInfo = useOrderInfo(state => state.setOrderInfo)
     const setCustomerInfo = useCustomerInfo(state => state.setCustomerInfo)
     const setAddressInfo = useAddressInfo(state => state.setAddressInfo)
+    const setOrderStep = useOrderStep(state => state.setOrderStep)
 
     const handleSendToKitchen = () => {
         console.log('send to kitchen', orderId)
@@ -53,6 +55,7 @@ const OrderToKitchen = ({ orderId }: Props) => {
                     is_primary: false,
                     customer: 0,
                 })
+                setOrderStep('customer')
             },
             onError: () => {
                 addNotification({
