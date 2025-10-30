@@ -194,7 +194,7 @@ const OrdersMain = () => {
   }
 
   const isAddressInfoComplete = () => {
-    return addressInfo.street && addressInfo.reference
+    return addressInfo.street.trim().length > 0
   }
 
   const addItemToOrder = (item: { name: string; price: number }, category: string) => {

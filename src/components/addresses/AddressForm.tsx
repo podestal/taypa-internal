@@ -45,13 +45,14 @@ const AddressForm = ({ createAddress, handleNextStep, addressInfo, setAddressInf
     const updateAddress = useUpdateAddress({ addressId: addressInfo.id, customerId: customerInfo.id })
 
     useEffect(() => {
-        console.log('addressInfo', addressInfo);
-        if (addressInfo.street && addressInfo.reference) {
+        console.log(street);
+        
+        if (addressInfo.street.trim().length > 0 || street.trim().length > 0) {
             setIsAddressInfoComplete(true)
         } else {
             setIsAddressInfoComplete(false)
         }
-    }, [addressInfo.street, addressInfo.reference, street, reference])
+    }, [addressInfo.street, street])
 
     useEffect(() => {
         setStreet(addressInfo.street)
@@ -60,10 +61,10 @@ const AddressForm = ({ createAddress, handleNextStep, addressInfo, setAddressInf
 
     const handleCreateAddress = () => {
 
-
-
+        console.log('addressInfo', addressInfo);
+        
         if (addressInfo.id > 0) {
-            if (street !== addressInfo.street || reference !== addressInfo.reference) {
+            if (street.trim() !== addressInfo.street.trim() || reference.trim() !== addressInfo.reference.trim()) {
                 
                 console.log('updating address');
                 updateAddress.mutate({
