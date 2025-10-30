@@ -5,29 +5,22 @@ import Modal from "../ui/Modal"
 import { useState } from "react"
 import useCustomerInfo from "../../store/useCustomerInfo"
 import useAddressInfo from "../../store/useAddressInfo"
+import useOrderInfo from "../../store/useOrderInfo"
 
 interface Props {
-    orderId: number
     setOrderStep: (orderStep: 'customer' | 'address' | 'items') => void
-    setOrderInfo: (orderInfo: {
-        id: number;
-        orderNumber: string;
-        customer: number;
-        address: number;
-        createdAt: string;
-        updatedAt: string;
-    }) => void
 }
 
 
-const RemoveOrder = ({ orderId, setOrderStep, setOrderInfo }: Props) => {
+const RemoveOrder = ({ setOrderStep }: Props) => {
 
     const setAddressInfo = useAddressInfo(state => state.setAddressInfo)
+    const { orderInfo, setOrderInfo } = useOrderInfo()
 
     const setCustomerInfo = useCustomerInfo(state => state.setCustomerInfo)
     const access = useAuthStore((state) => state.access) || ''
     const [isOpen, setIsOpen] = useState(false)
-    const removeOrder = useRemoveOrder({ orderId })
+    const removeOrder = useRemoveOrder({ orderId: orderInfo.id })
     const handleRemoveOrder = () => {
         removeOrder.mutate({ access }, {
             onSuccess: () => {

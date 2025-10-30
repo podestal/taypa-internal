@@ -6,15 +6,16 @@ import useAuthStore from "../../store/useAuthStore";
 import type { Dish } from "../../services/api/dishService";
 import { motion } from "framer-motion";
 import { Plus, Minus } from "lucide-react";
+import useOrderInfo from '../../store/useOrderInfo';
 
 interface Props {
     createOrderItem: UseMutationResult<OrderItem, Error, CreateOrderItemData>
-    orderId: number
     dish: Dish
 }
 
-const OrderItemForm = ({ createOrderItem, orderId, dish }: Props) => {
+const OrderItemForm = ({ createOrderItem, dish }: Props) => {
     const access = useAuthStore(state => state.access) || ''
+    const { orderInfo } = useOrderInfo()
     const [quantity, setQuantity] = useState(1)
     const [observations, setObservations] = useState('')
 
@@ -22,7 +23,7 @@ const OrderItemForm = ({ createOrderItem, orderId, dish }: Props) => {
         createOrderItem.mutate({
             access: access,
             orderItem: { 
-                order: orderId,
+                order: orderInfo.id,
                 dish: dish.id,
                 price: dish.price * quantity,
                 quantity: quantity,

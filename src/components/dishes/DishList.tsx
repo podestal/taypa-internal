@@ -3,11 +3,10 @@ import useGetDishesByCategory from "../../hooks/api/dish/useGetDishesByCategory"
 import DishCard from "./DishCard"
 
 interface Props {
-    categoryId: number
-    orderId: number
+    categoryId: number  
 }
 
-const DishList = ({ categoryId, orderId }: Props) => {
+const DishList = ({ categoryId }: Props) => {
 
     const access = useAuthStore(state => state.access) || ''
     const { data: dishes, isLoading, isError, error, isSuccess} = useGetDishesByCategory({ access, categoryId })
@@ -18,7 +17,7 @@ const DishList = ({ categoryId, orderId }: Props) => {
   return (
     <div className="grid grid-cols-1 gap-2">
         {dishes?.map((dish, index) => (
-            <DishCard key={dish.id} dish={dish} index={index} orderId={orderId} />
+            <DishCard key={dish.id} dish={dish} index={index} />
         ))}
     </div>
   )

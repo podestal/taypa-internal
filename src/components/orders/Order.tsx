@@ -9,26 +9,10 @@ interface Props {
     handleBackStep: () => void
     setSelectedCategory: Dispatch<SetStateAction<number>>
     selectedCategory: number
-    orderInfo: {
-        id: number;
-        orderNumber: string;
-        customer: number;
-        address: number;
-        createdAt: string;
-        updatedAt: string;
-    }
-    setOrderInfo: (orderInfo: {
-        id: number;
-        orderNumber: string;
-        customer: number;
-        address: number;
-        createdAt: string;
-        updatedAt: string;
-    }) => void
     setOrderStep: (orderStep: 'customer' | 'address' | 'items') => void
 }
 
-const Order = ({ handleBackStep, setSelectedCategory, selectedCategory, orderInfo, setOrderInfo, setOrderStep }: Props) => {
+const Order = ({ handleBackStep, setSelectedCategory, selectedCategory, setOrderStep }: Props) => {
 
   return (
     <motion.div
@@ -39,7 +23,6 @@ const Order = ({ handleBackStep, setSelectedCategory, selectedCategory, orderInf
         transition={{ duration: 0.3 }}
     >
         <div className="flex justify-between items-center mb-6">
-            <>{console.log(orderInfo)}</>
             {/* Back Button */}
             <motion.button
                 onClick={handleBackStep}
@@ -50,9 +33,7 @@ const Order = ({ handleBackStep, setSelectedCategory, selectedCategory, orderInf
                 Editar información del domicilio
             </motion.button>
             <RemoveOrder 
-                orderId={orderInfo.id}
                 setOrderStep={setOrderStep}
-                setOrderInfo={setOrderInfo}
             />
         </div>
 
@@ -64,7 +45,7 @@ const Order = ({ handleBackStep, setSelectedCategory, selectedCategory, orderInf
 
         {/* Items from Selected Category */}
         {selectedCategory && (
-        <DishesMain categoryId={selectedCategory} orderId={orderInfo.id} />
+        <DishesMain categoryId={selectedCategory} />
         )}
     </motion.div>
   )

@@ -5,10 +5,9 @@ import CreateOrderItem from "../orderItem/CreateOrderItem"
 interface Props {
     dish: Dish
     index: number
-    orderId: number
 }
 
-const DishCard = ({ dish, index, orderId }: Props) => {
+const DishCard = ({ dish, index }: Props) => {
   return (
     <motion.div
         initial={{ opacity: 0, x: -20 }}
@@ -16,11 +15,7 @@ const DishCard = ({ dish, index, orderId }: Props) => {
         transition={{ delay: index * 0.05 }}
         className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
     >
-        {/* <div>
-        <div className="font-medium text-gray-900">{dish.name}</div>
-        <div className="text-sm text-gray-600">${dish.price}</div>
-        </div> */}
-        <CreateOrderItem orderId={orderId} dish={dish} />
+        <CreateOrderItem dish={dish} />
     </motion.div>
   )
 }

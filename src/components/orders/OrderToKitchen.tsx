@@ -2,6 +2,9 @@ import { motion } from "framer-motion"
 import useUpdateOrder from "../../hooks/api/order/useUpdateOrder"
 import useAuthStore from "../../store/useAuthStore"
 import useNotificationStore from "../../store/useNotificationStore"
+import useOrderInfo from "../../store/useOrderInfo"
+import useCustomerInfo from "../../store/useCustomerInfo"
+import useAddressInfo from "../../store/useAddressInfo"
 
 interface Props {
     orderId: number
@@ -11,6 +14,9 @@ const OrderToKitchen = ({ orderId }: Props) => {
     const access = useAuthStore(state => state.access) || ''
     const updateOrder = useUpdateOrder({ orderId })
     const addNotification = useNotificationStore(state => state.addNotification)
+    const setOrderInfo = useOrderInfo(state => state.setOrderInfo)
+    const setCustomerInfo = useCustomerInfo(state => state.setCustomerInfo)
+    const setAddressInfo = useAddressInfo(state => state.setAddressInfo)
 
     const handleSendToKitchen = () => {
         console.log('send to kitchen', orderId)
@@ -25,6 +31,27 @@ const OrderToKitchen = ({ orderId }: Props) => {
                     title: 'Orden enviada a cocina',
                     message: 'La orden ha sido enviada a cocina',
                     type: 'success'
+                })
+                setOrderInfo({
+                    id: 0,
+                    orderNumber: '',
+                    customer: 0,
+                    address: 0,
+                    createdAt: '',
+                    updatedAt: '',
+                })
+                setCustomerInfo({
+                    id: 0,
+                    firstName: '',
+                    lastName: '',
+                    phone: '',
+                })
+                setAddressInfo({
+                    id: 0,
+                    street: '',
+                    reference: '',
+                    is_primary: false,
+                    customer: 0,
                 })
             },
             onError: () => {

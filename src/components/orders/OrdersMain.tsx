@@ -11,6 +11,7 @@ import Order from './Order'
 import OrderItemList from '../orderItem/OrderItemList'
 import useCustomerInfo from '../../store/useCustomerInfo'
 import useAddressInfo from '../../store/useAddressInfo'
+import useOrderInfo from '../../store/useOrderInfo'
 
 const OrdersMain = () => {
   const [orders, setOrders] = useState([
@@ -79,14 +80,7 @@ const OrdersMain = () => {
     price: number
     observations: string
   }>>([])
-  const [orderInfo, setOrderInfo] = useState({
-    id: 0,
-    orderNumber: '',
-    customer: 0,
-    address: 0,
-    createdAt: '',
-    updatedAt: '',
-  })
+  const { orderInfo, setOrderInfo } = useOrderInfo()
   const {customerInfo, setCustomerInfo} = useCustomerInfo()
 
   const { addressInfo, setAddressInfo } = useAddressInfo()
@@ -396,8 +390,6 @@ const OrdersMain = () => {
                   handleBackStep={handleBackStep}
                   setSelectedCategory={setSelectedCategory}
                   selectedCategory={selectedCategory}
-                  orderInfo={orderInfo}
-                  setOrderInfo={setOrderInfo}
                   setOrderStep={setOrderStep}
                 />
               )}
