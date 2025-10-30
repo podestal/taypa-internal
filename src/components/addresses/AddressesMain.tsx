@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import CreateAddress from "./CreateAddress";
 import { ArrowLeft } from "lucide-react";
 import AddressesList from "./AddressesList";
-import { useState } from "react";
 
 interface Props {
     addressInfo: {

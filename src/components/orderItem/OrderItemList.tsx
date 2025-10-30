@@ -31,14 +31,14 @@ const OrderItemList = ({ orderId }: Props) => {
                 
                 <div className="mt-4 pt-3 border-t">
                   <div className="flex justify-between items-center">
-                    <span className="text-lg font-semibold">Total:</span>
-                    <span className="text-xl font-bold text-blue-600">
-                      {/* ${currentOrder.reduce((sum, item) => sum + (item.price * item.quantity), 0)} */}
+                    <span className="text-lg font-semibold">Total: </span>
+                    <span className="text-xl font-bold ">
+                    S/.{orderItems.reduce((sum, item) => sum + Number(item.price ?? 0), 0).toFixed(2)}
                     </span>
                   </div>
                   <motion.button
                     // onClick={createOrderInternal}
-                    className="w-full mt-3 bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
+                    className="w-full mt-3 cursor-pointer bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
