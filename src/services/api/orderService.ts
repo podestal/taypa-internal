@@ -16,14 +16,16 @@ export type CreateUpdateOrder = Omit<Order, 'id' | 'created_at' | 'updated_at' |
 
 interface Props {
     byClient?: boolean
+    inKitchen?: boolean
     orderId?: number
 }
 
-const getOrderService = ({ byClient, orderId }: Props) => {
+const getOrderService = ({ byClient, orderId, inKitchen }: Props) => {
     let url = '/orders/'
     if (byClient) url += 'by_client/'
+    if (inKitchen) url += 'in_kitchen/'
     if (orderId) url += `${orderId}/`
-    return new APIClient<Order, CreateUpdateOrder>(url)
+    return new APIClient<Order[], CreateUpdateOrder>(url)
 }
 
 export default getOrderService

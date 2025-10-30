@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Clock, ChefHat, Timer } from 'lucide-react'
+import useAuthStore from '../../store/useAuthStore'
+import useGetOrdersInKitchen from '../../hooks/api/order/useGetOrdersInKitchen'
 
 const KitchenMain = () => {
+  const access = useAuthStore(state => state.access) || ''
+  const { data: ordersInKitchen, isLoading, error, isError, isSuccess } = useGetOrdersInKitchen({ access })
   const [orders, setOrders] = useState([
     {
       id: 1,
@@ -92,6 +96,7 @@ const KitchenMain = () => {
 
   return (
     <div className="h-full bg-gray-50">
+      <>{console.log(ordersInKitchen)}</>
       <div className="p-6">
         <motion.div
           className="flex items-center mb-8"
