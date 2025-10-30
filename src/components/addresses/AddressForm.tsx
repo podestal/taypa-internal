@@ -120,10 +120,13 @@ const AddressForm = ({ createAddress, handleNextStep, addressInfo, setAddressInf
                     })
                     setAddressInfo({
                         ...addressInfo,
+                        id: data.id,
                         street: data.street,
                         reference: data.reference,
                         customer: data.customer
                     })
+                    setStreet(data.street)
+                    setReference(data.reference)
                     handleNextStep()
                 },
                 onError: (error) => {

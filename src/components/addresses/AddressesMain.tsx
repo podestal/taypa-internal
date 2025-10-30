@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import CreateAddress from "./CreateAddress";
 import { ArrowLeft } from "lucide-react";
 import AddressesList from "./AddressesList";
+import { useState } from "react";
 
 interface Props {
     addressInfo: {
@@ -51,7 +52,11 @@ const AddressesMain = ({ addressInfo, setAddressInfo, customerInfo, handleNextSt
             Editar información del cliente
         </motion.button>
         <h3 className="text-lg font-medium text-gray-900 mb-4">Información del domicilio</h3>
-        <AddressesList customerId={customerInfo.id} addressInfo={addressInfo} setAddressInfo={setAddressInfo} />
+        <AddressesList 
+            customerId={customerInfo.id} 
+            addressInfo={addressInfo} 
+            setAddressInfo={setAddressInfo} 
+        />
         <CreateAddress 
             addressInfo={addressInfo}
             setAddressInfo={setAddressInfo}
