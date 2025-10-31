@@ -3,6 +3,8 @@ import { type OrderInKitchen } from "../../services/api/orderService"
 import { useEffect, useState } from "react"
 import KitchenOrderTimer from "./KitchenOrderTimer"
 import KitchenOrderItemCard from "./KitchenOrderItemCard"
+import getTimeElapsed from "../../utils/getTimeElapsed"
+import getTimeColor from "../../utils/getTimeColor"
 
 interface Props {
     order: OrderInKitchen
@@ -20,19 +22,6 @@ const KitchenOrderCard = ({ order, index }: Props) => {
         return () => clearInterval(timer)
       }, [])
 
-    const getTimeElapsed = (orderTime: Date) => {
-        const orderDate = new Date(orderTime)
-        const elapsed = Math.floor((currentTime.getTime() - orderDate.getTime()) / 1000) // seconds
-        return elapsed
-      }
-
-    const getTimeColor = (seconds: number) => {
-        const minutes = Math.floor(seconds / 60)
-        if (minutes < 5) return 'text-green-600 bg-green-100'
-        if (minutes < 10) return 'text-yellow-600 bg-yellow-100'
-        return 'text-red-600 bg-red-100'
-      }
-
   return (
     <motion.div
     key={order.id}
@@ -40,11 +29,11 @@ const KitchenOrderCard = ({ order, index }: Props) => {
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -20 }}
     transition={{ delay: index * 0.1 }}
-    className={`rounded-xl shadow-lg p-6 border-l-4 ${getTimeColor(getTimeElapsed(order.updated_at))}`}
+    className={`rounded-xl shadow-lg p-6 border-l-4 ${getTimeColor(getTimeElapsed(currentTime, order.updated_at))}`}
   >
     <KitchenOrderTimer 
         orderNumber={order.order_number.split('-')[1]} 
-        timeElapsed={getTimeElapsed(order.updated_at)} 
+        timeElapsed={getTimeElapsed(currentTime, order.updated_at)} 
         updated_at={order.updated_at} 
         getTimeColor={getTimeColor} 
     />
