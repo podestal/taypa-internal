@@ -113,7 +113,7 @@ const KitchenMain = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <AnimatePresence>
             {ordersInKitchen?.map((order, index) => {
-              const timeElapsed = getTimeElapsed(order.created_at)
+              const timeElapsed = getTimeElapsed(order.updated_at)
               return (
                 <motion.div
                   key={order.id}
@@ -128,7 +128,7 @@ const KitchenMain = () => {
                     <div>
                       <h3 className="text-xl font-bold text-gray-900">Orden #{order.order_number.split('-')[1]}</h3>
                       <div className="text-sm text-gray-600">
-                        {new Date(order.created_at).toLocaleTimeString('es-MX', { 
+                        {new Date(order.updated_at).toLocaleTimeString('es-MX', { 
                           hour: '2-digit', 
                           minute: '2-digit' 
                         })}
