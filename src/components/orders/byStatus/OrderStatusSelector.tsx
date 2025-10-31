@@ -1,7 +1,10 @@
 import { motion } from "framer-motion"
 import { CheckCircle, ChefHat, Package, Truck } from "lucide-react"
-import { useState } from "react"
 
+interface Props {
+    selectedOrderStatus: string
+    setSelectedOrderStatus: (status: string) => void
+}
 
 const orderStatusTabs = [
     { id: 'IK' as const, label: 'En Cocina', icon: <ChefHat className="w-4 h-4" />, color: 'orange' },
@@ -10,9 +13,8 @@ const orderStatusTabs = [
     { id: 'DO' as const, label: 'Entregadas', icon: <CheckCircle className="w-4 h-4" />, color: 'green' }
   ]
 
-const OrderStatusSelector = () => {
+const OrderStatusSelector = ({ selectedOrderStatus, setSelectedOrderStatus }: Props) => {
 
-    const [selectedOrderStatus, setSelectedOrderStatus] = useState<string>('IK')
   return (
     <div className="flex flex-wrap gap-2 mb-6">
         {orderStatusTabs.map((tab) => {

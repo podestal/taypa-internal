@@ -12,14 +12,23 @@ export interface Order {
     status: string
 }
 
-export type CreateUpdateOrder = Omit<Order, 'id' | 'created_at' | 'updated_at' | 'order_number'>
-
-
 export interface CategoryOrderItem {
     id: number
     dish: string
     quantity: number
     observation: string
+}
+
+export type CreateUpdateOrder = Omit<Order, 'id' | 'created_at' | 'updated_at' | 'order_number'>
+
+export type OrderByStatus = Omit<Order, 'customer' | 'address'> & {
+    customer_name: string
+    address_info: string
+    categories: CategoryOrderItem[]
+}
+
+export const getOrderByStatusService = () => {
+    return new APIClient<OrderByStatus[]>('/orders/by_status/')
 }
 
 export interface OrderInKitchen extends Order {

@@ -13,7 +13,11 @@ import useCustomerInfo from '../../store/useCustomerInfo'
 import useAddressInfo from '../../store/useAddressInfo'
 import useOrderInfo from '../../store/useOrderInfo'
 import useOrderStep from '../../store/useOrderStep'
-import OrderStatusSelector from './OrderStatusSelector'
+import OrderStatusSelector from './byStatus/OrderStatusSelector'
+import getTimeElapsed from '../../utils/getTimeElapsed'
+import getTimeColor from '../../utils/getTimeColor'
+import formatTimer from '../../utils/formatTimer'
+import OrderByStatusMain from './byStatus/OrderByStatusMain'
 
 const OrdersMain = () => {
   const [orders, setOrders] = useState([
@@ -101,24 +105,7 @@ const OrdersMain = () => {
   //   return () => clearInterval(timer)
   // }, [])
 
-  const getTimeElapsed = (orderTime: string) => {
-    const orderDate = new Date(orderTime)
-    const elapsed = Math.floor((currentTime.getTime() - orderDate.getTime()) / 1000) // seconds
-    return elapsed
-  }
 
-  const formatTimer = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60)
-    const remainingSeconds = seconds % 60
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
-  }
-
-  const getTimeColor = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60)
-    if (minutes < 5) return 'text-green-600 bg-green-100'
-    if (minutes < 10) return 'text-yellow-600 bg-yellow-100'
-    return 'text-red-600 bg-red-100'
-  }
 
   const toggleOrderExpansion = (orderId: number) => {
     setExpandedOrders(prev => {
@@ -287,11 +274,11 @@ const OrdersMain = () => {
             </div>
             
             {/* Status Tabs */}
-            <OrderStatusSelector />
-            
+            <OrderByStatusMain />
+{/*             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
               {orders.filter(order => order.status === selectedOrderStatus).map((order, index) => {
-                const timeElapsed = getTimeElapsed(order.orderTime)
+                const timeElapsed = getTimeElapsed(currentTime, order.orderTime)
                 const isExpanded = expandedOrders.has(order.id)
                 return (
                   <motion.div
@@ -361,7 +348,7 @@ const OrdersMain = () => {
                   </motion.div>
                 )
               })}
-            </div>
+            </div> */}
           </div>
         </motion.div>
 
