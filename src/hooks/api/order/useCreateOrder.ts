@@ -12,12 +12,11 @@ const useCreateOrder = (): UseMutationResult<Order, Error, CreateOrderData> => {
         mutationFn: (data: CreateOrderData) => orderService.post(data.order, data.access),
         onSuccess: res => {
             console.log('res', res);
-            
         },
         onError: error => {
             console.log('error', error);
         }
-    })
+    })  
 }
 
 export default useCreateOrder

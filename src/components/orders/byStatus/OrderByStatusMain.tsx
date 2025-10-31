@@ -13,7 +13,9 @@ const OrderByStatusMain = () => {
             selectedOrderStatus={selectedOrderStatus} 
             setSelectedOrderStatus={setSelectedOrderStatus}     
         />
-        <OrderByStatusList />
+        <OrderByStatusList 
+            status={selectedOrderStatus}
+        />
     </>
   )
 }
