@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Clock, CheckCircle, XCircle, User, Calendar, ShoppingCart, ChefHat, Coffee, Pizza, IceCream, ChevronDown, ChevronUp, ArrowRight, ArrowLeft } from 'lucide-react'
+import { Plus, Clock, CheckCircle, XCircle, User, Calendar, ShoppingCart, ChefHat, Coffee, Pizza, IceCream, ChevronDown, ChevronUp, ArrowRight, ArrowLeft, Package, Truck } from 'lucide-react'
 import CreateCustomer from '../customers/CreateCustomer'
 import CreateAddress from '../addresses/CreateAddress'
 import AddressesMain from '../addresses/AddressesMain'
@@ -89,6 +89,7 @@ const OrdersMain = () => {
   const createOrder = useCreateOrder()
   const [expandedOrders, setExpandedOrders] = useState<Set<number>>(new Set())
   const [currentTime, setCurrentTime] = useState(new Date())
+  const [selectedOrderStatus, setSelectedOrderStatus] = useState<'preparing' | 'ready' | 'in_transit' | 'delivered'>('preparing')
   const { orderStep, setOrderStep } = useOrderStep()
 
   // timer
@@ -129,6 +130,13 @@ const OrdersMain = () => {
       return newSet
     })
   }
+
+  const orderStatusTabs = [
+    { id: 'preparing' as const, label: 'En Cocina', icon: <ChefHat className="w-4 h-4" />, color: 'orange' },
+    { id: 'ready' as const, label: 'Preparadas', icon: <Package className="w-4 h-4" />, color: 'blue' },
+    { id: 'in_transit' as const, label: 'En Tránsito', icon: <Truck className="w-4 h-4" />, color: 'purple' },
+    { id: 'delivered' as const, label: 'Entregadas', icon: <CheckCircle className="w-4 h-4" />, color: 'green' }
+  ]
 
   const handleNextStep = () => {
     if (orderStep === 'customer') {
@@ -277,13 +285,48 @@ const OrdersMain = () => {
           transition={{ duration: 0.5, delay: 0.1 }}
         >
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center mb-6">
-              <ChefHat className="w-6 h-6 text-orange-600 mr-2" />
-              <h2 className="text-xl font-semibold text-gray-900">Órdenes en Cocina</h2>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <ChefHat className="w-6 h-6 text-orange-600 mr-2" />
+                <h2 className="text-xl font-semibold text-gray-900">Órdenes</h2>
+              </div>
+            </div>
+            
+            {/* Status Tabs */}
+            <div className="flex flex-wrap gap-2 mb-6">
+              {orderStatusTabs.map((tab) => {
+                const isActive = selectedOrderStatus === tab.id
+                const colorClasses = {
+                  orange: isActive ? 'bg-orange-600 text-white border-orange-600' : 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100',
+                  blue: isActive ? 'bg-blue-600 text-white border-blue-600' : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
+                  purple: isActive ? 'bg-purple-600 text-white border-purple-600' : 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100',
+                  green: isActive ? 'bg-green-600 text-white border-green-600' : 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'
+                }
+                
+                return (
+                  <motion.button
+                    key={tab.id}
+                    onClick={() => setSelectedOrderStatus(tab.id)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 font-medium transition-all ${
+                      colorClasses[tab.color as keyof typeof colorClasses]
+                    }`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {tab.icon}
+                    <span>{tab.label}</span>
+                    <span className={`ml-1 px-2 py-0.5 rounded-full text-xs ${
+                      isActive ? 'bg-white/20' : 'bg-white/60'
+                    }`}>
+                      {orders.filter(order => order.status === tab.id).length}
+                    </span>
+                  </motion.button>
+                )
+              })}
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-              {orders.filter(order => order.status === 'preparing').map((order, index) => {
+              {orders.filter(order => order.status === selectedOrderStatus).map((order, index) => {
                 const timeElapsed = getTimeElapsed(order.orderTime)
                 const isExpanded = expandedOrders.has(order.id)
                 return (
