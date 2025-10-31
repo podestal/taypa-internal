@@ -4,6 +4,8 @@ import { Clock, ChefHat, Timer } from 'lucide-react'
 import useAuthStore from '../../store/useAuthStore'
 import useGetOrdersInKitchen from '../../hooks/api/order/useGetOrdersInKitchen'
 
+
+
 const KitchenMain = () => {
   const access = useAuthStore(state => state.access) || ''
   const { data: ordersInKitchen, isLoading, error, isError, isSuccess } = useGetOrdersInKitchen({ access })
@@ -96,7 +98,6 @@ const KitchenMain = () => {
 
   return (
     <div className="h-full bg-gray-50">
-      <>{console.log(ordersInKitchen)}</>
       <div className="p-6">
         <motion.div
           className="flex items-center mb-8"
@@ -111,8 +112,8 @@ const KitchenMain = () => {
         {/* Orders Grid - 3 columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <AnimatePresence>
-            {sortedOrders.map((order, index) => {
-              const timeElapsed = getTimeElapsed(order.orderTime)
+            {ordersInKitchen?.map((order, index) => {
+              const timeElapsed = getTimeElapsed(order.created_at)
               return (
                 <motion.div
                   key={order.id}
@@ -125,9 +126,9 @@ const KitchenMain = () => {
                   {/* Order Header with Timer */}
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="text-xl font-bold text-gray-900">Orden #{order.id}</h3>
+                      <h3 className="text-xl font-bold text-gray-900">Orden #{order.order_number.split('-')[1]}</h3>
                       <div className="text-sm text-gray-600">
-                        {new Date(order.orderTime).toLocaleTimeString('es-MX', { 
+                        {new Date(order.created_at).toLocaleTimeString('es-MX', { 
                           hour: '2-digit', 
                           minute: '2-digit' 
                         })}
@@ -139,16 +140,43 @@ const KitchenMain = () => {
                   </div>
 
                   {/* Kitchen Notes */}
-                  {order.kitchenNotes && (
+                  {/* {order.kitchenNotes && (
                     <div className="bg-orange-100 border border-orange-300 rounded-lg p-3 mb-4">
                       <div className="text-sm font-medium text-orange-800">
                         📝 {order.kitchenNotes}
                       </div>
                     </div>
-                  )}
+                  )} */}
+                  {/* Order Items by Category */}
+                  <div className="space-y-3">
+                    {Object.entries(order.categories).map(([categoryName, items]) => (
+                      <div key={categoryName} className="bg-gray-50 rounded-lg p-3">
+                        <h4 className="font-semibold text-gray-900 mb-2">{categoryName}</h4>
+                        <div className="space-y-2">
+                          {items.map((item) => (
+                            <div key={item.id} className="pl-2 border-l-2 border-blue-300">
+                              <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                  <div className="font-medium text-gray-900">{item.dish}</div>
+                                  {item.observation && (
+                                    <div className="text-sm text-orange-600 italic mt-1">
+                                      ⚠️ {item.observation}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="text-right">
+                                  <div className="text-lg font-bold text-blue-600">x{item.quantity}</div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
 
                   {/* Order Items */}
-                  <div className="space-y-3">
+                  {/* <div className="space-y-3">
                     {order.items.map((item, itemIndex) => (
                       <div key={itemIndex} className="bg-gray-50 rounded-lg p-3">
                         <div className="flex justify-between items-start mb-2">
@@ -168,7 +196,7 @@ const KitchenMain = () => {
                         )}
                       </div>
                     ))}
-                  </div>
+                  </div> */}
 
                 </motion.div>
               )
