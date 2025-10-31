@@ -6,8 +6,8 @@ export interface Order {
     order_number: string
     customer: number
     address: number
-    created_at: string
-    updated_at: string
+    created_at: Date
+    updated_at: Date
     order_type: string
     status: string
 }
