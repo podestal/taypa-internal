@@ -1,6 +1,7 @@
 import { CheckCircle, Package, Truck } from "lucide-react"
 import useAuthStore from "../../../store/useAuthStore"
 import useUpdateOrder from "../../../hooks/api/order/useUpdateOrder"
+import useNotificationStore from "../../../store/useNotificationStore"
 
 interface Props {
     orderId: number
@@ -11,11 +12,27 @@ const UpdateOrderStatus = ({ orderId, orderStatus }: Props) => {
 
     const access = useAuthStore((state) => state.access) || ''
     const updateOrder = useUpdateOrder({ orderId })
+    const addNotification = useNotificationStore((state) => state.addNotification)
 
     const handleUpdateOrder = () => {
         const newStatus = orderStatus === 'IK' ? 'PA' : orderStatus === 'PA' ? 'IT' : orderStatus === 'IT' ? 'DO' : ''
         console.log(newStatus)
-        updateOrder.mutate({ access, order: { status: newStatus}})
+        updateOrder.mutate({ access, order: { status: newStatus}}, {
+            onSuccess: () => {
+                addNotification({
+                    title: 'Orden actualizada',
+                    message: 'La orden ha sido actualizada correctamente',
+                    type: 'success'
+                })
+            },
+            onError: () => {
+                addNotification({
+                    title: 'Error al actualizar la orden',
+                    message: 'Ha ocurrido un error al actualizar la orden',
+                    type: 'error'
+                })
+            }
+        })
     }
   return (
     <div 
