@@ -17,6 +17,7 @@ export interface CategoryOrderItem {
     dish: string
     quantity: number
     observation: string
+    price?: number
 }
 
 export type CreateUpdateOrder = Omit<Order, 'id' | 'created_at' | 'updated_at' | 'order_number'>
@@ -24,7 +25,7 @@ export type CreateUpdateOrder = Omit<Order, 'id' | 'created_at' | 'updated_at' |
 export type OrderByStatus = Omit<Order, 'customer' | 'address'> & {
     customer_name: string
     address_info: string
-    categories: CategoryOrderItem[]
+    categories: Record<string, CategoryOrderItem[]>
 }
 
 export const getOrderByStatusService = () => {
