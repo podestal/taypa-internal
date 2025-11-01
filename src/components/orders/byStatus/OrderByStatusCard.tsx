@@ -23,7 +23,7 @@ const OrderByStatusCard = ({ order, index }: Props) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.1 }}
-        className={`bg-gray-50 rounded-lg p-4 border-l-4 ${getTimeColor(timeElapsed)}`}
+        className={`bg-gray-50 rounded-lg p-4 border-l-4 border-blue-600`}
     >
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-bold text-lg text-gray-900">#{order.order_number.split('-')[1]}</h3>
@@ -44,7 +44,7 @@ const OrderByStatusCard = ({ order, index }: Props) => {
                     </div> */}
                     
                     <div className="flex justify-between items-center mt-4 mb-2">
-                        <UpdateOrderStatus orderId={order.id} />
+                        <UpdateOrderStatus orderId={order.id} orderStatus={order.status} />
                         <motion.button
                             onClick={() => setIsExpanded(!isExpanded)}
                             className="w-full flex items-center justify-end text-blue-600 hover:text-blue-800 text-sm font-medium"

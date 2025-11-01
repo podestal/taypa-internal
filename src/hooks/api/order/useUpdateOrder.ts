@@ -18,6 +18,9 @@ const useUpdateOrder = ({ orderId }: Props): UseMutationResult<Order, Error, Upd
         onSuccess: res => {
             console.log('Order updated successfully:', res)
             queryClient.invalidateQueries({ queryKey: ['orders by status', 'IK'] })
+            queryClient.invalidateQueries({ queryKey: ['orders by status', 'PA'] })
+            queryClient.invalidateQueries({ queryKey: ['orders by status', 'IT'] })
+            queryClient.invalidateQueries({ queryKey: ['orders by status', 'DA'] })
         },
         onError: (error) => {
             console.error('Error updating order:', error)
