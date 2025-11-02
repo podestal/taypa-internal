@@ -178,7 +178,6 @@ const OrdersMain = () => {
       createdAt: '',
       updatedAt: '',
     })
-    setOrderStep('items')
     
     // Create order immediately without customer/address
     createOrder.mutate({
@@ -195,9 +194,11 @@ const OrdersMain = () => {
           orderNumber: data.order_number,
           customer: 0,
           address: 0,
-          createdAt: data.created_at.toISOString(),
-          updatedAt: data.updated_at.toISOString(),
+          createdAt: data.created_at,
+          updatedAt: data.updated_at,
         })
+        setOrderStep('items')
+
       },
       onError: (error) => {
         console.log('error', error);
