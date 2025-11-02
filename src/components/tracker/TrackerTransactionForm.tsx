@@ -1,56 +1,55 @@
 import { useState } from "react"
 import type { Category, Transaction } from "./TrackerMain"
-import { motion } from "framer-motion"
 import { Calendar, DollarSign, Tag, FileText } from "lucide-react"
 
 interface Props {
   transactions: Transaction[]
   setTransactions: (transactions: Transaction[]) => void
-  showForm: boolean
-  setShowForm: (showForm: boolean) => void
-  setTransactionType: (transactionType: 'e' | 'i' | 'n') => void
+  onClose: () => void
   categories: Category[]
-  transactionType: 'e' | 'i' | 'n'
+  transactionType: 'e' | 'i'
 }
-const TrackerTransactionForm = ({ transactions, setTransactions, showForm, setShowForm, setTransactionType, categories, transactionType }: Props) => {
 
-    const [formData, setFormData] = useState({
+const TrackerTransactionForm = ({ transactions, setTransactions, onClose, categories, transactionType }: Props) => {
+  const [formData, setFormData] = useState({
+    fecha: new Date().toISOString().split('T')[0],
+    monto: '',
+    categoria: 0,
+    observaciones: ''
+  })
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const newTransaction: Transaction = {
+      id: Date.now().toString(),
+      fecha: formData.fecha,
+      monto: transactionType === 'e' ? -parseFloat(formData.monto) : parseFloat(formData.monto),
+      categoria: formData.categoria,
+      observaciones: formData.observaciones
+    }
+    
+    setTransactions([newTransaction, ...transactions])
+    setFormData({ 
       fecha: new Date().toISOString().split('T')[0],
-      monto: '',
-      categoria: 0,
-      observaciones: ''
+      monto: '', 
+      categoria: 0, 
+      observaciones: '' 
     })
-  
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault()
-      const newTransaction: Transaction = {
-        id: Date.now().toString(),
-        fecha: formData.fecha,
-        monto: transactionType === 'e' ? -parseFloat(formData.monto) : parseFloat(formData.monto),
-        categoria: formData.categoria,
-        observaciones: formData.observaciones
-      }
-      
-      setTransactions([newTransaction, ...transactions])
-      setFormData({ ...formData, monto: '', categoria: 0, observaciones: '' })
-    }
-  
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-      setFormData({
-        ...formData,
-        [e.target.name]: e.target.name === 'categoria' ? parseInt(e.target.value) : e.target.value
-      })
-    }
+    onClose()
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.name === 'categoria' ? parseInt(e.target.value) : e.target.value
+    })
+  }
+
   return (
-    <>
-    {showForm && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="mt-4 bg-white rounded-xl shadow-lg p-4 sm:p-6 border w-full"
-          >
-            <h2 className="text-lg sm:text-xl font-semibold mb-4 text-gray-800">Nueva Transacción</h2>
+    <div className="w-full">
+      <h2 className="text-xl font-semibold mb-4 text-gray-800">
+        {transactionType === 'e' ? 'Nuevo Gasto' : 'Nuevo Ingreso'}
+      </h2>
             <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -122,28 +121,27 @@ const TrackerTransactionForm = ({ transactions, setTransactions, showForm, setSh
                 />
               </div>
 
-              <div className="sm:col-span-2 flex flex-col sm:flex-row gap-2 sm:gap-3 justify-end">
+              <div className="sm:col-span-2 flex flex-col sm:flex-row gap-2 sm:gap-3 justify-end mt-4">
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowForm(false)
-                    setTransactionType('n')
-                  }}
+                  onClick={onClose}
                   className="px-4 py-2 cursor-pointer text-sm sm:text-base text-gray-600 hover:text-gray-800 transition-colors rounded-lg border border-gray-300 hover:bg-gray-50"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-4 sm:px-6 py-2 cursor-pointer bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors text-sm sm:text-base"
+                  className={`px-4 sm:px-6 py-2 cursor-pointer text-white rounded-lg font-medium transition-colors text-sm sm:text-base ${
+                    transactionType === 'e' 
+                      ? 'bg-red-600 hover:bg-red-700' 
+                      : 'bg-green-600 hover:bg-green-700'
+                  }`}
                 >
                   Agregar
                 </button>
               </div>
             </form>
-          </motion.div>
-        )}
-    </>
+    </div>
   )
 }
 

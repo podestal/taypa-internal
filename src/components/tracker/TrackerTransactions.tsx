@@ -11,61 +11,33 @@ interface Props {
   categories: Category[]
 }
 const TrackerTransactions = ({ transactions, setTransactions, categories }: Props) => {
+    const [showExpenseModal, setShowExpenseModal] = useState(false)
+    const [showIncomeModal, setShowIncomeModal] = useState(false)
 
-    const [transactionType, setTransactionType] = useState<'e' | 'i' | 'n'>('n')
-    const [showForm, setShowForm] = useState(false)
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }} 
-      animate={{ opacity: 1, y: 0 }} 
-      transition={{ delay: 0.2 }} 
-      className="w-full flex justify-center"
-    >
-      {transactionType === 'e' && (
-        <div className="w-full max-w-sm sm:max-w-md">
-          <TrackerAddExpense 
-            categories={categories} 
-            transactions={transactions} 
-            setTransactions={setTransactions} 
-            setTransactionType={setTransactionType} 
-            showForm={showForm} 
-            setShowForm={setShowForm} 
-          />
-        </div>
-      )}
-      {transactionType === 'i' && (
-        <div className="w-full max-w-sm sm:max-w-md">
-          <TrackerAddIncome 
-            categories={categories} 
-            transactions={transactions} 
-            setTransactions={setTransactions} 
-            setTransactionType={setTransactionType} 
-            showForm={showForm} 
-            setShowForm={setShowForm} 
-          />
-        </div>
-      )}
-      {transactionType === 'n' && (
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 lg:gap-10 w-full max-w-2xl">
-          <TrackerAddExpense 
-            categories={categories} 
-            transactions={transactions} 
-            setTransactions={setTransactions} 
-            setTransactionType={setTransactionType} 
-            showForm={showForm} 
-            setShowForm={setShowForm} 
-          />
-          <TrackerAddIncome 
-            categories={categories} 
-            transactions={transactions} 
-            setTransactions={setTransactions} 
-            setTransactionType={setTransactionType} 
-            showForm={showForm} 
-            setShowForm={setShowForm} 
-          />
-        </div>
-      )}
-    </motion.div>
+    <>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ delay: 0.2 }} 
+        className="w-full flex justify-center gap-4"
+      >
+        <TrackerAddExpense 
+          categories={categories} 
+          transactions={transactions} 
+          setTransactions={setTransactions}
+          showModal={showExpenseModal}
+          setShowModal={setShowExpenseModal}
+        />
+        <TrackerAddIncome 
+          categories={categories} 
+          transactions={transactions} 
+          setTransactions={setTransactions}
+          showModal={showIncomeModal}
+          setShowModal={setShowIncomeModal}
+        />
+      </motion.div>
+    </>
   )
 }
 

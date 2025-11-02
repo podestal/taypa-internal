@@ -2,39 +2,43 @@ import { motion } from "framer-motion"
 import { Plus } from "lucide-react"
 import TrackerTransactionForm from "./TrackerTransactionForm"
 import type { Category, Transaction } from "./TrackerMain"
+import Modal from "../ui/Modal"
 
 interface Props {
-    transactions: Transaction[]
-    setTransactions: (transactions: Transaction[]) => void
-    setTransactionType: (transactionType: 'e' | 'i' | 'n') => void
-    showForm: boolean
-    setShowForm: (showForm: boolean) => void
-    categories: Category[]
+  transactions: Transaction[]
+  setTransactions: (transactions: Transaction[]) => void
+  showModal: boolean
+  setShowModal: (show: boolean) => void
+  categories: Category[]
 }
 
-
-const TrackerAddIncome = ({ transactions, setTransactions, setTransactionType, showForm, setShowForm, categories }: Props) => {
-
+const TrackerAddIncome = ({ transactions, setTransactions, showModal, setShowModal, categories }: Props) => {
   return (
-    <div className="flex flex-col gap-2 w-full">
-    <motion.button
+    <>
+      <motion.button
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        onClick={() => {
-            setShowForm(true)
-            setTransactionType('i')
-        }}
-        className="bg-green-600 hover:bg-green-700 flex items-center justify-center gap-2 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-medium shadow-lg transition-colors text-sm sm:text-base cursor-pointer w-full"
-    >
-        <Plus size={16} className="sm:w-5 sm:h-5" />
-            <span className="text-sm sm:text-base">Agregar Ingreso</span>
-        </motion.button>
-    {showForm && (
-        <TrackerTransactionForm categories={categories} transactionType='i' setTransactionType={setTransactionType} transactions={transactions} setTransactions={setTransactions} showForm={showForm} setShowForm={setShowForm} />
-    )}
-    </div>
-    
+        onClick={() => setShowModal(true)}
+        className="bg-green-600 hover:bg-green-700 flex items-center justify-center gap-1.5 text-white px-3 py-1.5 rounded-lg text-sm font-medium shadow-md transition-colors cursor-pointer"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <Plus size={16} />
+        <span className="hidden sm:inline">Agregar Ingreso</span>
+        <span className="sm:hidden">Ingreso</span>
+      </motion.button>
+
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} width="max-w-lg">
+        <TrackerTransactionForm 
+          transactions={transactions} 
+          setTransactions={setTransactions}
+          categories={categories} 
+          transactionType="i"
+          onClose={() => setShowModal(false)}
+        />
+      </Modal>
+    </>
   )
 }
 

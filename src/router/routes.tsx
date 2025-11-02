@@ -2,11 +2,11 @@ import { createBrowserRouter } from "react-router-dom";
 import MainPage from "../components/pages/MainPage";
 import OrdersMain from "../components/orders/OrdersMain";
 import TrackerMain from "../components/tracker/TrackerMain";
-import DishesMain from "../components/dishes/DishesMain";
 import SalesMain from "../components/sales/SalesMain";
 import InventoryMain from "../components/inventory/InventoryMain";
 import CategoriesMain from "../components/categories/CategoriesMain";
 import KitchenMain from "../components/kitchen/KitchenMain";
+import DishesMain from "../components/dishes/DishesMain";
 
 const routes = createBrowserRouter([
     {
@@ -24,7 +24,7 @@ const routes = createBrowserRouter([
             },
             {
                 path: "dishes",
-                element: <DishesMain />
+                element: <DishesMain categoryId={1}/>
             },
             {
                 path: "sales",

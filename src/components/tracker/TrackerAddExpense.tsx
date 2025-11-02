@@ -1,38 +1,45 @@
 import { motion } from "framer-motion"
 import { Minus } from "lucide-react"
-import type { Category, Transaction } from "./TrackerMain";
-import TrackerTransactionForm from "./TrackerTransactionForm";
+import type { Category, Transaction } from "./TrackerMain"
+import TrackerTransactionForm from "./TrackerTransactionForm"
+import Modal from "../ui/Modal"
 
 interface Props {
   transactions: Transaction[]
   setTransactions: (transactions: Transaction[]) => void
-  setTransactionType: (transactionType: 'e' | 'i' | 'n') => void
-  showForm: boolean
-  setShowForm: (showForm: boolean) => void
+  showModal: boolean
+  setShowModal: (show: boolean) => void
   categories: Category[]
 }
 
-const TrackerAddExpense = ({ transactions, setTransactions, setTransactionType, showForm, setShowForm, categories }: Props) => {
+const TrackerAddExpense = ({ transactions, setTransactions, showModal, setShowModal, categories }: Props) => {
   return (
-    <div className="flex flex-col gap-2 w-full">
-        <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            onClick={() => {
-                setShowForm(true)
-                setTransactionType('e')
-            }}
-            className="bg-red-600 hover:bg-red-700 flex items-center justify-center gap-2 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-medium shadow-lg transition-colors text-sm sm:text-base cursor-pointer w-full"
-            >
-            <Minus size={16} className="sm:w-5 sm:h-5" />
-            <span className="text-sm sm:text-base">Agregar Gasto</span>
-    </motion.button>
-    {showForm && (
-        <TrackerTransactionForm setTransactionType={setTransactionType} transactions={transactions} setTransactions={setTransactions} showForm={showForm} setShowForm={setShowForm} categories={categories} transactionType='e' />
-    )}
-    </div>
-  );
-};
+    <>
+      <motion.button
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        onClick={() => setShowModal(true)}
+        className="bg-red-600 hover:bg-red-700 flex items-center justify-center gap-1.5 text-white px-3 py-1.5 rounded-lg text-sm font-medium shadow-md transition-colors cursor-pointer"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <Minus size={16} />
+        <span className="hidden sm:inline">Agregar Gasto</span>
+        <span className="sm:hidden">Gasto</span>
+      </motion.button>
 
-export default TrackerAddExpense;
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} width="max-w-lg">
+        <TrackerTransactionForm 
+          transactions={transactions} 
+          setTransactions={setTransactions}
+          categories={categories} 
+          transactionType="e"
+          onClose={() => setShowModal(false)}
+        />
+      </Modal>
+    </>
+  )
+}
+
+export default TrackerAddExpense
