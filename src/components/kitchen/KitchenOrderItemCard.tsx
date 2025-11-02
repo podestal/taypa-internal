@@ -10,7 +10,7 @@ const KitchenOrderItemCard = ({ categoryName, items }: Props) => {
     <div key={categoryName} className="bg-gray-50 rounded-lg p-3">
         <h4 className="font-semibold text-gray-900 mb-2">{categoryName}</h4>
         <div className="space-y-2">
-        {/* {items.map((item) => (
+        {items.map((item) => (
             <div key={item.id} className="pl-2 border-l-2 border-blue-300">
             <div className="flex justify-between items-start">
                 <div className="flex-1">
@@ -26,7 +26,7 @@ const KitchenOrderItemCard = ({ categoryName, items }: Props) => {
                 </div>
             </div>
             </div>
-        ))} */}
+        ))}
         </div>
     </div>
   )

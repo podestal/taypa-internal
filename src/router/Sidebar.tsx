@@ -11,7 +11,7 @@ const Sidebar = () => {
 
   const navigationItems = [
     {
-        name: 'Ordenes',
+        name: 'Pedidos',
         path: '/orders',
         icon: <Bike />
     },

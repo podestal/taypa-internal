@@ -1,11 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Clock, CheckCircle, XCircle, User, Calendar, ShoppingCart, ChefHat, Coffee, Pizza, IceCream, ChevronDown, ChevronUp, ArrowRight, ArrowLeft, Package, Truck } from 'lucide-react'
+import { User, ShoppingCart } from 'lucide-react'
 import CreateCustomer from '../customers/CreateCustomer'
-import CreateAddress from '../addresses/CreateAddress'
 import AddressesMain from '../addresses/AddressesMain'
-import CategoriesMain from '../categories/CategoriesMain'
-import DishesMain from '../dishes/DishesMain'
 import useCreateOrder from '../../hooks/api/order/useCreateOrder'
 import Order from './Order'
 import OrderItemList from '../orderItem/OrderItemList'
@@ -13,10 +10,6 @@ import useCustomerInfo from '../../store/useCustomerInfo'
 import useAddressInfo from '../../store/useAddressInfo'
 import useOrderInfo from '../../store/useOrderInfo'
 import useOrderStep from '../../store/useOrderStep'
-import OrderStatusSelector from './byStatus/OrderStatusSelector'
-import getTimeElapsed from '../../utils/getTimeElapsed'
-import getTimeColor from '../../utils/getTimeColor'
-import formatTimer from '../../utils/formatTimer'
 import OrderByStatusMain from './byStatus/OrderByStatusMain'
 
 const OrdersMain = () => {
@@ -96,6 +89,7 @@ const OrdersMain = () => {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [selectedOrderStatus, setSelectedOrderStatus] = useState<'preparing' | 'ready' | 'in_transit' | 'delivered'>('preparing')
   const { orderStep, setOrderStep } = useOrderStep()
+  const [orderMode, setOrderMode] = useState<'withCustomer' | 'withoutCustomer'>('withCustomer')
 
   // timer
   // useEffect(() => {
@@ -120,38 +114,48 @@ const OrdersMain = () => {
   }
 
   const handleNextStep = () => {
-    if (orderStep === 'customer') {
-      if (isCustomerInfoComplete()) {
-        setOrderStep('address')
-      }
-    } else if (orderStep === 'address') {
-      if (isAddressInfoComplete()) {
+    if (orderMode === 'withoutCustomer') {
+      // Skip customer and address, go directly to items
+      if (orderInfo.id === 0) {
+        handleStartNewOrderWithoutCustomer()
+      } else {
         setOrderStep('items')
+      }
+    } else {
+      // Normal flow with customer
+      if (orderStep === 'customer') {
+        if (isCustomerInfoComplete()) {
+          setOrderStep('address')
+        }
+      } else if (orderStep === 'address') {
+        if (isAddressInfoComplete()) {
+          setOrderStep('items')
 
-        orderInfo.id === 0 && createOrder.mutate({
-          access: 'access',
-          order: {
-            customer: customerInfo.id,
-            address: addressInfo.id,
-            created_by: 1,
-            order_type: 'D',
-            status: 'IP',
-          }
-        }, {
-          onSuccess: (data) => {
-            setOrderInfo({
-              id: data.id,
-              orderNumber: data.order_number,
-              customer: data.customer,
-              address: data.address,
-              createdAt: data.created_at,
-              updatedAt: data.updated_at,
-            })
-          },
-          onError: (error) => {
-            console.log('error', error);
-          }
-        })
+          orderInfo.id === 0 && createOrder.mutate({
+            access: 'access',
+            order: {
+              customer: customerInfo.id,
+              address: addressInfo.id,
+              created_by: 1,
+              order_type: 'D',
+              status: 'IP',
+            }
+          }, {
+            onSuccess: (data) => {
+              setOrderInfo({
+                id: data.id,
+                orderNumber: data.order_number,
+                customer: data.customer,
+                address: data.address,
+                createdAt: data.created_at,
+                updatedAt: data.updated_at,
+              })
+            },
+            onError: (error) => {
+              console.log('error', error);
+            }
+          })
+        }
       }
     }
   }
@@ -162,6 +166,43 @@ const OrdersMain = () => {
     } else if (orderStep === 'items') {
       setOrderStep('address')
     }
+  }
+
+  const handleStartNewOrderWithoutCustomer = () => {
+    // Reset order info and go directly to items
+    setOrderInfo({
+      id: 0,
+      orderNumber: '',
+      customer: 0,
+      address: 0,
+      createdAt: '',
+      updatedAt: '',
+    })
+    setOrderStep('items')
+    
+    // Create order immediately without customer/address
+    createOrder.mutate({
+      access: 'access',
+      order: {
+        created_by: 1,
+        order_type: 'D',
+        status: 'IP',
+      }
+    }, {
+      onSuccess: (data) => {
+        setOrderInfo({
+          id: data.id,
+          orderNumber: data.order_number,
+          customer: 0,
+          address: 0,
+          createdAt: data.created_at.toISOString(),
+          updatedAt: data.updated_at.toISOString(),
+        })
+      },
+      onError: (error) => {
+        console.log('error', error);
+      }
+    })
   }
 
   const isCustomerInfoComplete = () => {
@@ -247,16 +288,20 @@ const OrdersMain = () => {
 
   return (
     <div className="h-full bg-gray-50">
-      <>{console.log('customer Simple log', 6)}</>
       <div className="p-6">
-        <motion.h1 
-          className="text-3xl font-bold text-gray-900 mb-8"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          Gestión de Órdenes
-        </motion.h1>
+        {/* Mode Selector Buttons */}
+        <div className="flex items-center justify-between mb-6">
+          <motion.h1 
+            className="text-3xl font-bold text-gray-900"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            Gestión de Órdenes
+          </motion.h1>
+          
+
+        </div>
 
         {/* Kitchen Orders Display - Top */}
         <OrderByStatusMain />
@@ -272,28 +317,121 @@ const OrdersMain = () => {
             <div className="flex items-center mb-6">
               <ShoppingCart className="w-6 h-6 text-blue-600 mr-2" />
               <h2 className="text-xl font-semibold text-gray-900">Crear Orden</h2>
-              <div className="ml-auto flex items-center space-x-2">
-                <div className={`w-3 h-3 rounded-full ${orderStep === 'customer' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
-                <div className={`w-3 h-3 rounded-full ${orderStep === 'address' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
-                <div className={`w-3 h-3 rounded-full ${orderStep === 'items' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
-              </div>
+              {orderMode === 'withCustomer' && (
+                <div className="ml-auto flex items-center space-x-2">
+                  <div className={`w-3 h-3 rounded-full ${orderStep === 'customer' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                  <div className={`w-3 h-3 rounded-full ${orderStep === 'address' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                  <div className={`w-3 h-3 rounded-full ${orderStep === 'items' ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                </div>
+              )}
             </div>
-
+            <div className="flex gap-3 my-4">
+              <motion.button
+                onClick={() => {
+                  setOrderMode('withCustomer')
+                  setOrderStep('customer')
+                  // Reset states
+                  setOrderInfo({
+                    id: 0,
+                    orderNumber: '',
+                    customer: 0,
+                    address: 0,
+                    createdAt: '',
+                    updatedAt: '',
+                  })
+                }}
+                className={`px-4 py-2 cursor-pointer rounded-lg font-medium transition-all flex items-center gap-2 ${
+                  orderMode === 'withCustomer'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <User className="w-4 h-4" />
+                <span>Con Cliente Info</span>
+              </motion.button>
+              
+              <motion.button
+                onClick={() => {
+                  setOrderMode('withoutCustomer')
+                  setOrderStep('items')
+                  // Reset states
+                  setOrderInfo({
+                    id: 0,
+                    orderNumber: '',
+                    customer: 0,
+                    address: 0,
+                    createdAt: '',
+                    updatedAt: '',
+                  })
+                }}
+                className={`px-4 py-2 cursor-pointer rounded-lg font-medium transition-all flex items-center gap-2 ${
+                  orderMode === 'withoutCustomer'
+                    ? 'bg-orange-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <ShoppingCart className="w-4 h-4" />
+                <span>Sin Cliente Info</span>
+              </motion.button>
+            </div>
             <AnimatePresence mode="wait">
-              {orderStep === 'customer' ? (
-                <CreateCustomer 
-                  handleNextStep={handleNextStep}
-                />
-              ) : orderStep === 'address' ? (
-                <AddressesMain
-                  handleNextStep={handleNextStep}
-                />
+              {orderMode === 'withoutCustomer' ? (
+                // Sin Cliente Info - Just show button to start new order
+                orderInfo.id === 0 ? (
+                  <motion.div
+                    key="start-order"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="flex flex-col items-center justify-center py-12"
+                  >
+                    <ShoppingCart className="w-16 h-16 text-gray-400 mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      Nueva Orden Sin Cliente
+                    </h3>
+                    <p className="text-gray-600 text-center mb-6 max-w-md">
+                      Crea una orden directamente sin información del cliente. Podrás agregar artículos de inmediato.
+                    </p>
+                    <motion.button
+                      onClick={handleStartNewOrderWithoutCustomer}
+                      className="px-6 py-3 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 transition-colors"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      Iniciar Nueva Orden
+                    </motion.button>
+                    
+                  </motion.div>
+                  
+                ) : (
+                  // Show order items selection when order is created
+                  <Order
+                    handleBackStep={handleBackStep}
+                    setSelectedCategory={setSelectedCategory}
+                    selectedCategory={selectedCategory}
+                  />
+                )
               ) : (
-                <Order
-                  handleBackStep={handleBackStep}
-                  setSelectedCategory={setSelectedCategory}
-                  selectedCategory={selectedCategory}
-                />
+                // Con Cliente Info - Normal flow
+                orderStep === 'customer' ? (
+                  <CreateCustomer 
+                    handleNextStep={handleNextStep}
+                  />
+                ) : orderStep === 'address' ? (
+                  <AddressesMain
+                    handleNextStep={handleNextStep}
+                  />
+                ) : (
+                  <Order
+                    handleBackStep={handleBackStep}
+                    setSelectedCategory={setSelectedCategory}
+                    selectedCategory={selectedCategory}
+                  />
+                )
               )}
             </AnimatePresence>
 

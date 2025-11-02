@@ -36,7 +36,7 @@ const UpdateOrderStatus = ({ orderId, orderStatus }: Props) => {
     }
   return (
     <div 
-        onClick={handleUpdateOrder}
+        onDoubleClick={handleUpdateOrder}
         className="cursor-pointer bg-green-100 rounded-full p-1 hover:bg-green-200 transition-colors duration-300">
         {orderStatus === 'IK' && <Package className="w-6 h-6 text-green-600" /> }
         {orderStatus === 'PA' && <Truck className="w-6 h-6 text-green-600" /> }
