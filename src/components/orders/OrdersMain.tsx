@@ -89,7 +89,7 @@ const OrdersMain = () => {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [selectedOrderStatus, setSelectedOrderStatus] = useState<'preparing' | 'ready' | 'in_transit' | 'delivered'>('preparing')
   const { orderStep, setOrderStep } = useOrderStep()
-  const [orderMode, setOrderMode] = useState<'withCustomer' | 'withoutCustomer'>('withCustomer')
+  const [orderMode, setOrderMode] = useState<'withCustomer' | 'withoutCustomer'>('withoutCustomer')
 
   // timer
   // useEffect(() => {
@@ -414,6 +414,7 @@ const OrdersMain = () => {
                     handleBackStep={handleBackStep}
                     setSelectedCategory={setSelectedCategory}
                     selectedCategory={selectedCategory}
+                    orderMode={orderMode}
                   />
                 )
               ) : (

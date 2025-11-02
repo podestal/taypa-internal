@@ -9,9 +9,10 @@ interface Props {
     handleBackStep: () => void
     setSelectedCategory: Dispatch<SetStateAction<number>>
     selectedCategory: number
+    orderMode: 'withCustomer' | 'withoutCustomer'
 }
 
-const Order = ({ handleBackStep, setSelectedCategory, selectedCategory }: Props) => {
+const Order = ({ handleBackStep, setSelectedCategory, selectedCategory, orderMode }: Props) => {
 
 
 
@@ -25,26 +26,26 @@ const Order = ({ handleBackStep, setSelectedCategory, selectedCategory }: Props)
     >
         <div className="flex justify-between items-center mb-6">
             {/* Back Button */}
-            <motion.button
+            {orderMode === 'withCustomer' && <motion.button
                 onClick={handleBackStep}
                 className="mb-6 cursor-pointer flex items-center text-blue-600 hover:text-blue-800 font-medium"
                 whileHover={{ scale: 1.02 }}
             >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Editar información del domicilio
-            </motion.button>
+            </motion.button>}
             <RemoveOrder />
         </div>
 
         {/* Category Selection */}
         <CategoriesMain 
-        setSelectedCategory={setSelectedCategory}
-        selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            selectedCategory={selectedCategory}
         />
 
         {/* Items from Selected Category */}
         {selectedCategory && (
-        <DishesMain categoryId={selectedCategory} />
+            <DishesMain categoryId={selectedCategory} />
         )}
     </motion.div>
   )

@@ -7,12 +7,14 @@ import useCustomerInfo from "../../store/useCustomerInfo"
 import useAddressInfo from "../../store/useAddressInfo"
 import useOrderInfo from "../../store/useOrderInfo"
 import useOrderStep from "../../store/useOrderStep"
+import useNotificationStore from "../../store/useNotificationStore"
 
 const RemoveOrder = () => {
 
     const setAddressInfo = useAddressInfo(state => state.setAddressInfo)
     const setOrderStep = useOrderStep(state => state.setOrderStep)
     const { orderInfo, setOrderInfo } = useOrderInfo()
+    const addNotification = useNotificationStore(state => state.addNotification)
 
     const setCustomerInfo = useCustomerInfo(state => state.setCustomerInfo)
     const access = useAuthStore((state) => state.access) || ''
@@ -43,9 +45,19 @@ const RemoveOrder = () => {
                     is_primary: false,
                     customer: 0,
                 })
+                addNotification({
+                    title: 'Orden cancelada',
+                    message: 'La orden ha sido cancelada correctamente',
+                    type: 'success',
+                })
             },
             onError: (error) => {
                 console.error(error)
+                addNotification({
+                    title: 'Error',
+                    message: 'Error al cancelar la orden',
+                    type: 'error',
+                })
             }
         })
     }

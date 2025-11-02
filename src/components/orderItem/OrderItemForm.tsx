@@ -7,6 +7,7 @@ import type { Dish } from "../../services/api/dishService";
 import { motion } from "framer-motion";
 import { Plus, Minus } from "lucide-react";
 import useOrderInfo from '../../store/useOrderInfo';
+import useNotificationStore from '../../store/useNotificationStore';
 
 interface Props {
     createOrderItem: UseMutationResult<OrderItem, Error, CreateOrderItemData>
@@ -18,6 +19,7 @@ const OrderItemForm = ({ createOrderItem, dish }: Props) => {
     const { orderInfo } = useOrderInfo()
     const [quantity, setQuantity] = useState(1)
     const [observations, setObservations] = useState('')
+    const addNotification = useNotificationStore(state => state.addNotification)
 
     const handleCreateOrderItem = () => {
         createOrderItem.mutate({
@@ -36,9 +38,19 @@ const OrderItemForm = ({ createOrderItem, dish }: Props) => {
                 // Reset form
                 setQuantity(1)
                 setObservations('')
+                addNotification({
+                    title: 'Item agregado',
+                    message: 'El item ha sido agregado correctamente',
+                    type: 'success',
+                })
             },
             onError: (error) => {
                 console.error('error', error);
+                addNotification({
+                    title: 'Error',
+                    message: 'Error al agregar el item',
+                    type: 'error',
+                })
             }
         })
     }
