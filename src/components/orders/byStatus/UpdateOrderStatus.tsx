@@ -37,10 +37,10 @@ const UpdateOrderStatus = ({ orderId, orderStatus }: Props) => {
   return (
     <div 
         onDoubleClick={handleUpdateOrder}
-        className="cursor-pointer bg-green-100 rounded-full p-1 hover:bg-green-200 transition-colors duration-300">
-        {orderStatus === 'IK' && <Package className="w-6 h-6 text-green-600" /> }
-        {orderStatus === 'PA' && <Truck className="w-6 h-6 text-green-600" /> }
-        {orderStatus === 'IT' && <CheckCircle className="w-6 h-6 text-green-600" /> }
+        className="cursor-pointer  flex items-center justify-start gap-6 rounded-full p-1 ">
+        {orderStatus === 'IK' && <Package className="w-6 h-6 bg-green-100 rounded-full text-green-600 hover:bg-green-200 transition-colors duration-300" /> }
+        {orderStatus === 'PA' && <Truck className="w-6 h-6 bg-green-100 rounded-full text-green-600 hover:bg-green-200 transition-colors duration-300" /> }
+        {(orderStatus === 'IT' || orderStatus === 'PA') && <CheckCircle className="w-6 h-6 bg-green-100 rounded-full text-green-600 hover:bg-green-200 transition-colors duration-300" /> }
     </div>
   )
 }

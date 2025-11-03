@@ -1,5 +1,5 @@
 
-import { AudioWaveform, Bike, ChartBar, ChefHat, Hamburger, PackageSearch, Tags, X } from 'lucide-react'
+import { AudioWaveform, Bike, ChartBar, ChefHat, Coins, Hamburger, PackageSearch, Tags, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -44,6 +44,11 @@ const Sidebar = () => {
         name: 'Cocina',
         path: '/kitchen',
         icon: <ChefHat />
+    },
+    {
+        name: 'Impuestos',
+        path: '/taxes',
+        icon: <Coins />
     }
   ]
 
