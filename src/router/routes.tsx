@@ -4,48 +4,55 @@ import OrdersMain from "../components/orders/OrdersMain";
 import TrackerMain from "../components/tracker/TrackerMain";
 import SalesMain from "../components/sales/SalesMain";
 import InventoryMain from "../components/inventory/InventoryMain";
-import CategoriesMain from "../components/categories/CategoriesMain";
+// import CategoriesMainWrapper from "../components/categories/CategoriesMainWrapper";
 import KitchenMain from "../components/kitchen/KitchenMain";
 import DishesMain from "../components/dishes/DishesMain";
 import LoginPage from "../components/auth/LoginPage";
+import PrivateRoutes from "../components/auth/PrivateRoutes";
 
 const routes = createBrowserRouter([
     {
+        path: "/login",
+        element: <LoginPage />,
+    },
+    {
         path: "/",
-        element: <MainPage />,
+        element: <PrivateRoutes />,
         errorElement: <div>Error</div>,
         children: [
             {
-                path: "orders",
-                element: <OrdersMain />
-            },
-            {
-                path: "tracker",
-                element: <TrackerMain />
-            },
-            {
-                path: "dishes",
-                element: <DishesMain categoryId={1}/>
-            },
-            {
-                path: "sales",
-                element: <SalesMain />
-            },
-            {
-                path: "inventory",
-                element: <InventoryMain />
-            },
-            {
-                path: "categories",
-                element: <CategoriesMain />
-            },
-            {
-                path: "kitchen",
-                element: <KitchenMain />
-            },
-            {
-                path: "login",
-                element: <LoginPage />
+                path: "",
+                element: <MainPage />,
+                children: [
+                    {
+                        path: "orders",
+                        element: <OrdersMain />
+                    },
+                    {
+                        path: "tracker",
+                        element: <TrackerMain />
+                    },
+                    {
+                        path: "dishes",
+                        element: <DishesMain categoryId={1}/>
+                    },
+                    {
+                        path: "sales",
+                        element: <SalesMain />
+                    },
+                    {
+                        path: "inventory",
+                        element: <InventoryMain />
+                    },
+                    // {
+                    //     path: "categories",
+                    //     element: <CategoriesMainWrapper />
+                    // },
+                    {
+                        path: "kitchen",
+                        element: <KitchenMain />
+                    }
+                ]
             }
         ]
     }

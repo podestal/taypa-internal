@@ -3,6 +3,7 @@ import { AudioWaveform, Bike, ChartBar, ChefHat, Coins, Hamburger, PackageSearch
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import Logout from '../components/auth/Logout'
 
 const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -180,7 +181,8 @@ const Sidebar = () => {
             </nav>
 
             {/* Footer */}
-            <div className="p-4 border-t border-gray-700">
+            <div className="p-4 border-t border-gray-700 space-y-3">
+              <Logout isCollapsed={false} />
               <div className="text-xs text-gray-400 text-center">
                 Taypa v1.0
               </div>
@@ -258,9 +260,10 @@ const Sidebar = () => {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-700">
+      <div className="p-4 border-t border-gray-700 space-y-3">
+        <Logout isCollapsed={isCollapsed} />
         {!isCollapsed && (
-          <div className="text-xs text-gray-400 text-center">
+          <div className="text-xs text-gray-400 text-center pt-2">
             Taypa v1.0
           </div>
         )}

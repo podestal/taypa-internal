@@ -1,16 +1,29 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Mail, Lock, LogIn } from 'lucide-react'
+import useGetAccess from '../../hooks/auth/useGetAccess'
+import { useNavigate } from 'react-router-dom'
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [isFocused, setIsFocused] = useState({ email: false, password: false })
+  const [isFocused, setIsFocused] = useState({ username: false, password: false })
+
+  const getAccess = useGetAccess()
+  const navigate = useNavigate()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // Handle login logic here
-    console.log('Login attempt:', { email, password })
+    console.log('Login attempt:', { username, password })
+    getAccess.mutate({ username, password }, {
+        onSuccess: () => {
+            navigate('/orders')
+        },
+        onError: () => {
+            console.log('Error')
+        }
+    })
   }
 
   return (
@@ -86,16 +99,16 @@ const LoginPage = () => {
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className={`w-5 h-5 transition-colors ${
-                    isFocused.email ? 'text-blue-600' : 'text-gray-400'
+                    isFocused.username ? 'text-blue-600' : 'text-gray-400'
                   }`} />
                 </div>
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onFocus={() => setIsFocused({ ...isFocused, email: true })}
-                  onBlur={() => setIsFocused({ ...isFocused, email: false })}
-                  placeholder="tu.correo@ejemplo.com"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  onFocus={() => setIsFocused({ ...isFocused, username: true })}
+                  onBlur={() => setIsFocused({ ...isFocused, username: false })}
+                  placeholder="Ingresa tu nombre de usuario"
                   required
                   className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
                 />
