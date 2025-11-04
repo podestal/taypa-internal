@@ -7,7 +7,6 @@ const useGetAccess = (): UseMutationResult<AccessResponse, Error, AccessRequest>
     return useMutation({
         mutationFn: (data: AccessRequest) => accessService.post(data),
         onSuccess: (data) => {
-            console.log("Access data", data)
             setTokens(data.access, data.refresh)
         },
         onError: (error) => {

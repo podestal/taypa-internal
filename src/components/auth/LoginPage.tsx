@@ -1,33 +1,97 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Mail, Lock, LogIn } from 'lucide-react'
+import { Lock, LogIn, Loader2, User } from 'lucide-react'
 import useGetAccess from '../../hooks/auth/useGetAccess'
 import { useNavigate } from 'react-router-dom'
+import useNotificationStore from '../../store/useNotificationStore'
+import NotificationCard from '../ui/NotificationCard'
 
 const LoginPage = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [isFocused, setIsFocused] = useState({ username: false, password: false })
+  const [errors, setErrors] = useState({ username: '', password: '' })
 
   const getAccess = useGetAccess()
   const navigate = useNavigate()
+  const addNotification = useNotificationStore((state) => state.addNotification)
+  const [loading, setLoading] = useState(false)
+
+  const validateForm = (): boolean => {
+    const newErrors = { username: '', password: '' }
+    let isValid = true
+
+    // Validate username
+    if (!username.trim()) {
+      newErrors.username = 'El nombre de usuario es requerido'
+      isValid = false
+    }
+
+    // Validate password
+    if (!password.trim()) {
+      newErrors.password = 'La contraseña es requerida'
+      isValid = false
+    }
+
+    setErrors(newErrors)
+    return isValid
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle login logic here
-    console.log('Login attempt:', { username, password })
+    
+    // Validate form before submission
+    if (!validateForm()) {
+      addNotification({
+        title: 'Error de validación',
+        message: 'Por favor completa todos los campos requeridos',
+        type: 'error'
+      })
+      return
+    }
+
+    setLoading(true)
     getAccess.mutate({ username, password }, {
         onSuccess: () => {
             navigate('/orders')
+            addNotification({
+                title: 'Éxito',
+                message: 'Bienvenido de nuevo',
+                type: 'success'
+            })
         },
         onError: () => {
-            console.log('Error')
+            addNotification({
+                title: 'Error',
+                message: 'Credenciales incorrectas',
+                type: 'error'
+            })            
+        },
+        onSettled: () => {
+            setLoading(false)
         }
     })
   }
 
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUsername(e.target.value)
+    // Clear error when user starts typing
+    if (errors.username) {
+      setErrors({ ...errors, username: '' })
+    }
+  }
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value)
+    // Clear error when user starts typing
+    if (errors.password) {
+      setErrors({ ...errors, password: '' })
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-red-50 p-4 relative overflow-hidden">
+      <NotificationCard />
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
@@ -87,32 +151,45 @@ const LoginPage = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Input */}
+            {/* Username Input */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
             >
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Correo Electrónico
+                Nombre de Usuario
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className={`w-5 h-5 transition-colors ${
-                    isFocused.username ? 'text-blue-600' : 'text-gray-400'
+                  <User className={`w-5 h-5 transition-colors ${
+                    isFocused.username ? 'text-blue-600' : errors.username ? 'text-red-500' : 'text-gray-400'
                   }`} />
                 </div>
                 <input
                   type="text"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={handleUsernameChange}
                   onFocus={() => setIsFocused({ ...isFocused, username: true })}
                   onBlur={() => setIsFocused({ ...isFocused, username: false })}
                   placeholder="Ingresa tu nombre de usuario"
-                  required
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+                  className={`w-full pl-10 pr-4 py-3 bg-gray-50 border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
+                    errors.username
+                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                      : 'border-gray-300 focus:ring-blue-600 focus:border-transparent'
+                  }`}
                 />
               </div>
+              {errors.username && (
+                <motion.p
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-1 text-sm text-red-600 flex items-center gap-1"
+                >
+                  <span className="text-red-500">•</span>
+                  {errors.username}
+                </motion.p>
+              )}
             </motion.div>
 
             {/* Password Input */}
@@ -127,20 +204,33 @@ const LoginPage = () => {
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className={`w-5 h-5 transition-colors ${
-                    isFocused.password ? 'text-blue-600' : 'text-gray-400'
+                    isFocused.password ? 'text-blue-600' : errors.password ? 'text-red-500' : 'text-gray-400'
                   }`} />
                 </div>
                 <input
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={handlePasswordChange}
                   onFocus={() => setIsFocused({ ...isFocused, password: true })}
                   onBlur={() => setIsFocused({ ...isFocused, password: false })}
                   placeholder="Ingresa tu contraseña"
-                  required
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+                  className={`w-full pl-10 pr-4 py-3 bg-gray-50 border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition-all ${
+                    errors.password
+                      ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
+                      : 'border-gray-300 focus:ring-blue-600 focus:border-transparent'
+                  }`}
                 />
               </div>
+              {errors.password && (
+                <motion.p
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-1 text-sm text-red-600 flex items-center gap-1"
+                >
+                  <span className="text-red-500">•</span>
+                  {errors.password}
+                </motion.p>
+              )}
             </motion.div>
 
             {/* Remember Me & Forgot Password */}
@@ -173,10 +263,16 @@ const LoginPage = () => {
               transition={{ delay: 0.7 }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
-            >
-              <span>Iniciar Sesión</span>
-              <LogIn className="w-5 h-5" />
+              className="w-full cursor-pointer bg-blue-600 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
+                >
+                {loading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    <span>Iniciar Sesión</span>
+                    <LogIn className="w-5 h-5" />
+                  </>
+                )}
             </motion.button>
           </form>
 
