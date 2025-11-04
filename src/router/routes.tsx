@@ -7,6 +7,7 @@ import InventoryMain from "../components/inventory/InventoryMain";
 import CategoriesMain from "../components/categories/CategoriesMain";
 import KitchenMain from "../components/kitchen/KitchenMain";
 import DishesMain from "../components/dishes/DishesMain";
+import LoginPage from "../components/auth/LoginPage";
 
 const routes = createBrowserRouter([
     {
@@ -41,6 +42,10 @@ const routes = createBrowserRouter([
             {
                 path: "kitchen",
                 element: <KitchenMain />
+            },
+            {
+                path: "login",
+                element: <LoginPage />
             }
         ]
     }
