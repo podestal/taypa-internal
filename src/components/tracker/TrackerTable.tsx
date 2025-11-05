@@ -1,23 +1,30 @@
 import { motion } from 'framer-motion'
 import type { Category, Transaction } from './TrackerMain'
 import { DollarSign } from 'lucide-react'
+import useAuthStore from '../../store/useAuthStore'
+import useGetTransactionsByCurrentDay from '../../hooks/api/transaction/useGetTransactionsByCurrentDay'
+import moment from 'moment'
 
 interface Props {
   transactions: Transaction[]
   categories: Category[]
 }
 
-const TrackerTable = ({ transactions, categories }: Props) => {
+const TrackerTable = ({ categories }: Props) => {
+
+  const access = useAuthStore((state) => state.access) || ''
+  const { data: transactionsPage, isLoading, error, isError, isSuccess } = useGetTransactionsByCurrentDay({ access })
+
+  if (isLoading) return <div>Cargando...</div>
+  if (error) return <div>Error: {error.message}</div>
+
+  // const transactions = data?.results || []
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-ES', {
       style: 'currency',
       currency: 'PEN'
     }).format(amount)
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES')
   }
 
   return (
@@ -33,7 +40,7 @@ const TrackerTable = ({ transactions, categories }: Props) => {
       
       {/* Mobile Card View */}
       <div className="block sm:hidden">
-        {transactions.map((transaction, index) => (
+        {transactionsPage?.results.map((transaction, index) => (
           <motion.div
             key={transaction.id}
             initial={{ opacity: 0, y: 20 }}
@@ -44,17 +51,17 @@ const TrackerTable = ({ transactions, categories }: Props) => {
             <div className="flex justify-between items-start mb-2">
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-900">
-                  {categories.find(cat => cat.id === transaction.categoria)?.name}
+                  {transaction.category}
                 </p>
-                <p className="text-xs text-gray-500">{formatDate(transaction.fecha)}</p>
+                <p className="text-xs text-gray-500">{moment(transaction.transaction_date).format('DD/MM/YYYY')}</p>
               </div>
               <span className={`text-sm font-bold ${
-                transaction.monto >= 0 ? 'text-green-600' : 'text-red-600'
+                transaction.transaction_type === 'I' ? 'text-green-600' : 'text-red-600'
               }`}>
-                {formatCurrency(transaction.monto)}
+                {formatCurrency(transaction.amount)}
               </span>
             </div>
-            <p className="text-sm text-gray-600 line-clamp-2">{transaction.observaciones}</p>
+            <p className="text-sm text-gray-600 line-clamp-2">{transaction.description}</p>
           </motion.div>
         ))}
       </div>
@@ -79,7 +86,7 @@ const TrackerTable = ({ transactions, categories }: Props) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {transactions.map((transaction, index) => (
+            {transactionsPage?.results.map((transaction, index) => (
               <motion.tr
                 key={transaction.id}
                 initial={{ opacity: 0, x: -20 }}
@@ -88,24 +95,24 @@ const TrackerTable = ({ transactions, categories }: Props) => {
                 className="hover:bg-gray-50 transition-colors"
               >
                 <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {formatDate(transaction.fecha)}
+                  {moment(transaction.transaction_date).format('DD/MM/YYYY')}
                 </td>
                 <td className={`px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium ${
-                  transaction.monto >= 0 ? 'text-green-600' : 'text-red-600'
+                  transaction.transaction_type === 'I' ? 'text-green-600' : 'text-red-600'
                 }`}>
-                  {formatCurrency(transaction.monto)}
+                  {formatCurrency(transaction.amount)}
                 </td>
                 <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                    categories.find(cat => cat.id === transaction.categoria)?.type === 'income'
+                    categories.find(cat => cat.id === transaction.category)?.type === 'income'
                       ? 'bg-green-100 text-green-800'
                       : 'bg-red-100 text-red-800'
                   }`}>
-                    {categories.find(cat => cat.id === transaction.categoria)?.name}
+                    {transaction.category}
                   </span>
                 </td>
                 <td className="px-4 lg:px-6 py-4 text-sm text-gray-900 max-w-xs lg:max-w-sm truncate">
-                  {transaction.observaciones}
+                  {transaction.description}
                 </td>
               </motion.tr>
             ))}
@@ -113,7 +120,7 @@ const TrackerTable = ({ transactions, categories }: Props) => {
         </table>
       </div>
 
-      {transactions.length === 0 && (
+      {transactionsPage?.results.length === 0 && (
         <div className="text-center py-12">
           <div className="text-gray-400 mb-2">
             <DollarSign size={48} className="mx-auto" />

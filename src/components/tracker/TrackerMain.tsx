@@ -703,10 +703,10 @@ const TrackerMain = () => {
                 </>
               ) : (
                 <>
-                  Analizando <span className="font-semibold text-gray-900">{filteredAndSortedTransactions.length}</span> transacciones
+                  {/* Analizando <span className="font-semibold text-gray-900">{filteredAndSortedTransactions.length}</span> transacciones
                   {filteredAndSortedTransactions.length !== transactions.length && (
                     <span className="ml-2">(filtradas de {transactions.length} totales)</span>
-                  )}
+                  )} */}
                 </>
               )}
             </p>
