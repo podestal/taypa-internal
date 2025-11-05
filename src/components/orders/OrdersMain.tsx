@@ -11,6 +11,7 @@ import useAddressInfo from '../../store/useAddressInfo'
 import useOrderInfo from '../../store/useOrderInfo'
 import useOrderStep from '../../store/useOrderStep'
 import OrderByStatusMain from './byStatus/OrderByStatusMain'
+import useAuthStore from '../../store/useAuthStore'
 
 const OrdersMain = () => {
   const [orders, setOrders] = useState([
@@ -83,6 +84,7 @@ const OrdersMain = () => {
   const {customerInfo, setCustomerInfo} = useCustomerInfo()
 
   const { addressInfo, setAddressInfo } = useAddressInfo()
+  const access = useAuthStore((state) => state.access) || ''
 
   const createOrder = useCreateOrder()
   const [expandedOrders, setExpandedOrders] = useState<Set<number>>(new Set())
@@ -132,7 +134,7 @@ const OrdersMain = () => {
           setOrderStep('items')
 
           orderInfo.id === 0 && createOrder.mutate({
-            access: 'access',
+            access,
             order: {
               customer: customerInfo.id,
               address: addressInfo.id,
@@ -181,7 +183,7 @@ const OrdersMain = () => {
     
     // Create order immediately without customer/address
     createOrder.mutate({
-      access: 'access',
+      access,
       order: {
         created_by: 1,
         order_type: 'D',

@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom"
-import Sidebar from "../../router/Sidebar"
-import NotificationCard from "../ui/NotificationCard"
+import Sidebar from "../router/Sidebar"
+import NotificationCard from "../components/ui/NotificationCard"
 
 const MainPage = () => {
   return (

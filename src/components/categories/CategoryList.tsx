@@ -13,7 +13,9 @@ const CategoryList = ({ categories, setSelectedCategory, selectedCategory }: Pro
     <div className="mb-6">
         <h3 className="text-lg font-medium text-gray-900 mb-3">Seleccionar Categoría</h3>
         <div className="grid grid-cols-2 gap-3">
-            {categories.map((category, idx) => (
+            {categories
+            .filter((category) => category.is_menu_category)
+            .map((category, idx) => (
                 <CategoryCard key={category.id} category={category} setSelectedCategory={setSelectedCategory} selectedCategory={selectedCategory} idx={idx} />
             ))}
         </div>
