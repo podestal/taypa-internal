@@ -1,8 +1,11 @@
 import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, ArrowUpDown, ArrowUp, ArrowDown, TrendingUp, TrendingDown, Table, BarChart3, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Table, BarChart3, ChevronLeft, ChevronRight } from 'lucide-react'
 import TrackerTable from './TrackerTable'
 import TrackerTransactions from './TrackerTransactions'
+import TrackerDateFilters from './TrackerDateFilters'
+import TrackerTypeFilters from './TrackerTypeFilters'
+import TrackerSorter from './TrackerSorter'
 
 // Transaction interface
 export interface Transaction {
@@ -296,8 +299,8 @@ const TrackerMain = () => {
   const [sortBy, setSortBy] = useState<SortBy>('date')
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
   const [showDatePicker, setShowDatePicker] = useState(false)
-  const [customStartDate, setCustomStartDate] = useState('')
-  const [customEndDate, setCustomEndDate] = useState('')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
   const [typeFilter, setTypeFilter] = useState<'all' | 'I' | 'E'>('all')
   const [activeTab, setActiveTab] = useState<'table' | 'charts'>('table')
   const [currentPage, setCurrentPage] = useState(1)
@@ -346,9 +349,9 @@ const TrackerMain = () => {
     // Apply date filter
     if (dateFilter === 'all') {
       // No filter
-    } else if (customStartDate && customEndDate && dateFilter === 'custom') {
-      const start = new Date(customStartDate)
-      const end = new Date(customEndDate)
+    } else if (startDate && endDate && dateFilter === 'custom') {
+      const start = new Date(startDate)
+      const end = new Date(endDate)
       end.setHours(23, 59, 59, 999)
       filtered = filtered.filter(t => {
         const tDate = new Date(t.fecha)
@@ -397,7 +400,7 @@ const TrackerMain = () => {
     })
 
     return filtered
-  }, [transactions, dateFilter, sortBy, sortOrder, customStartDate, customEndDate, typeFilter])
+  }, [transactions, dateFilter, sortBy, sortOrder, startDate, endDate, typeFilter])
 
   const handleSort = (field: SortBy) => {
     if (sortBy === field) {
@@ -488,15 +491,7 @@ const TrackerMain = () => {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1)
-  }, [dateFilter, typeFilter, sortBy, customStartDate, customEndDate])
-
-  const dateFilterButtons = [
-    { id: 'today' as DateFilter, label: 'Hoy' },
-    { id: 'last7days' as DateFilter, label: 'Últimos 7 días' },
-    { id: 'thisWeek' as DateFilter, label: 'Esta Semana' },
-    { id: 'thisMonth' as DateFilter, label: 'Este Mes' },
-    { id: 'all' as DateFilter, label: 'Todos' },
-  ]
+  }, [dateFilter, typeFilter, sortBy, startDate, endDate])
 
   return (
     <div className="min-h-screen bg-gray-50 p-3 sm:p-4 md:p-6">
@@ -522,176 +517,34 @@ const TrackerMain = () => {
           className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6"
         >
           {/* Date Filter Buttons */}
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              Filtrar por Fecha
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {dateFilterButtons.map((filter) => (
-                <motion.button
-                  key={filter.id}
-                  onClick={() => {
-                    setDateFilter(filter.id)
-                    setShowDatePicker(false)
-                  }}
-                  className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-                    dateFilter === filter.id
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {filter.label}
-                </motion.button>
-              ))}
-              
-              {/* Custom Date Range Button */}
-              <motion.button
-                onClick={() => {
-                  setDateFilter('custom')
-                  setShowDatePicker(!showDatePicker)
-                }}
-                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2 ${
-                  dateFilter === 'custom'
-                    ? 'bg-purple-600 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Calendar className="w-4 h-4" />
-                Rango Personalizado
-              </motion.button>
-            </div>
-
-            {/* Custom Date Range Picker */}
-            <AnimatePresence>
-              {showDatePicker && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200"
-                >
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Fecha Inicio
-                    </label>
-                    <input
-                      type="date"
-                      value={customStartDate}
-                      onChange={(e) => setCustomStartDate(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Fecha Fin
-                    </label>
-                    <input
-                      type="date"
-                      value={customEndDate}
-                      onChange={(e) => setCustomEndDate(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-                <motion.button
-                  onClick={() => {
-                    if (customStartDate && customEndDate) {
-                      setShowDatePicker(false)
-                    }
-                  }}
-                  className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Aplicar Rango
-                </motion.button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
+          <TrackerDateFilters
+            dateFilter={dateFilter}
+            setDateFilter={setDateFilter}
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
+          />
           {/* Type Filter */}
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-              Filtrar por Tipo
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { id: 'all' as const, label: 'Todos', icon: <ArrowUpDown className="w-4 h-4" />, color: 'gray' },
-                { id: 'income' as const, label: 'Ingresos', icon: <TrendingUp className="w-4 h-4" />, color: 'green' },
-                { id: 'expense' as const, label: 'Gastos', icon: <TrendingDown className="w-4 h-4" />, color: 'red' }
-              ].map((filter) => {
-                const isActive = typeFilter === filter.id
-                const colorClasses = {
-                  gray: isActive ? 'bg-gray-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200',
-                  green: isActive ? 'bg-green-600 text-white' : 'bg-green-50 text-green-700 hover:bg-green-100',
-                  red: isActive ? 'bg-red-600 text-white' : 'bg-red-50 text-red-700 hover:bg-red-100'
-                }
-                return (
-                  <motion.button
-                    key={filter.id}
-                    onClick={() => setTypeFilter(filter.id)}
-                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2 ${
-                      colorClasses[filter.color as keyof typeof colorClasses]
-                    }`}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {filter.icon}
-                    <span>{filter.label}</span>
-                  </motion.button>
-                )
-              })}
-            </div>
-          </div>
+          <TrackerTypeFilters
+            typeFilter={typeFilter}
+            setTypeFilter={setTypeFilter}
+          />
 
           {/* Sorting Options */}
-          <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-              <ArrowUpDown className="w-4 h-4" />
-              Ordenar por
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { id: 'fecha' as SortBy, label: 'Fecha' },
-                { id: 'monto' as SortBy, label: 'Monto' },
-                { id: 'categoria' as SortBy, label: 'Categoría' }
-              ].map((option) => {
-                const isActive = sortBy === option.id
-                return (
-                  <motion.button
-                    key={option.id}
-                    onClick={() => handleSort(option.id)}
-                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2 ${
-                      isActive
-                        ? 'bg-green-600 text-white shadow-md'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {option.label}
-                    {isActive && (
-                      sortOrder === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />
-                    )}
-                  </motion.button>
-                )
-              })}
-            </div>
-          </div>
+          <TrackerSorter
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
+          />
 
           {/* Results Count */}
           <div className="mt-4 pt-4 border-t border-gray-200">
             <p className="text-sm text-gray-600">
               {activeTab === 'table' ? (
                 <>
-                  Mostrando <span className="font-semibold text-gray-900">
+                  {/* Mostrando <span className="font-semibold text-gray-900">
                     {filteredAndSortedTransactions.length > 0 
                       ? `${(currentPage - 1) * itemsPerPage + 1}-${Math.min(currentPage * itemsPerPage, filteredAndSortedTransactions.length)}`
                       : '0'
@@ -699,7 +552,7 @@ const TrackerMain = () => {
                   </span> de <span className="font-semibold text-gray-900">{filteredAndSortedTransactions.length}</span> transacciones
                   {filteredAndSortedTransactions.length !== transactions.length && (
                     <span className="ml-2">(filtradas de {transactions.length} totales)</span>
-                  )}
+                  )} */}
                 </>
               ) : (
                 <>
@@ -772,70 +625,7 @@ const TrackerMain = () => {
                 />
                 
                 {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
-                    <p className="text-sm text-gray-600">
-                      Página <span className="font-semibold">{currentPage}</span> de <span className="font-semibold">{totalPages}</span>
-                    </p>
-                    <div className="flex gap-2">
-                      <motion.button
-                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                        disabled={currentPage === 1}
-                        className={`p-2 rounded-lg border transition-all ${
-                          currentPage === 1
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'
-                        }`}
-                        whileHover={currentPage !== 1 ? { scale: 1.1 } : {}}
-                        whileTap={currentPage !== 1 ? { scale: 0.9 } : {}}
-                      >
-                        <ChevronLeft className="w-5 h-5" />
-                      </motion.button>
-                      <div className="flex gap-1">
-                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                          let pageNum: number
-                          if (totalPages <= 5) {
-                            pageNum = i + 1
-                          } else if (currentPage <= 3) {
-                            pageNum = i + 1
-                          } else if (currentPage >= totalPages - 2) {
-                            pageNum = totalPages - 4 + i
-                          } else {
-                            pageNum = currentPage - 2 + i
-                          }
-                          return (
-                            <motion.button
-                              key={pageNum}
-                              onClick={() => setCurrentPage(pageNum)}
-                              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                                currentPage === pageNum
-                                  ? 'bg-blue-600 text-white'
-                                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-                              }`}
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                            >
-                              {pageNum}
-                            </motion.button>
-                          )
-                        })}
-                      </div>
-                      <motion.button
-                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                        disabled={currentPage === totalPages}
-                        className={`p-2 rounded-lg border transition-all ${
-                          currentPage === totalPages
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'
-                        }`}
-                        whileHover={currentPage !== totalPages ? { scale: 1.1 } : {}}
-                        whileTap={currentPage !== totalPages ? { scale: 0.9 } : {}}
-                      >
-                        <ChevronRight className="w-5 h-5" />
-                      </motion.button>
-                    </div>
-                  </div>
-                )}
+
               </motion.div>
             ) : (
               <motion.div
