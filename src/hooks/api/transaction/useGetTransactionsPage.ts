@@ -3,13 +3,23 @@ import getTransactionService, { type TransactionPaginated } from "../../../servi
 
 interface Props {
     access: string
+    dateFilter: 'today' | 'last7days' | 'thisWeek' | 'thisMonth' | 'custom' | 'all'
+    typeFilter: 'all' | 'I' | 'E'
+    sortBy: 'date' | 'amount'
+    page: number
 }
 
-const useGetTransactionsPage = ({ access }: Props): UseQueryResult<TransactionPaginated, Error> => {
+const useGetTransactionsPage = ({ access, dateFilter = 'today', typeFilter = 'E', sortBy = 'date', page = 1 }: Props): UseQueryResult<TransactionPaginated, Error> => {
     const transactionService = getTransactionService()
+    const params: Record<string, string> = {
+        date_filter: dateFilter,
+        transaction_type: typeFilter,
+        sort_by: sortBy,
+        page: page.toString(),
+    }
     return useQuery<TransactionPaginated, Error>({
-        queryKey: ['transactions-page'],
-        queryFn: () => transactionService.get(access),
+        queryKey: ['transactions-page', dateFilter, typeFilter, sortBy, page],
+        queryFn: () => transactionService.get(access, params),
     })
 }
 

@@ -4,16 +4,22 @@ import { DollarSign } from 'lucide-react'
 import useAuthStore from '../../store/useAuthStore'
 import useGetTransactionsPage from '../../hooks/api/transaction/useGetTransactionsPage'
 import moment from 'moment'
+import Paginator from '../ui/Paginator'
 
 interface Props {
   transactions: Transaction[]
   categories: Category[]
+  dateFilter: 'today' | 'last7days' | 'thisWeek' | 'thisMonth' | 'custom' | 'all'
+  typeFilter: 'all' | 'I' | 'E'
+  sortBy: 'date' | 'amount'
+  page: number
+  setPage: React.Dispatch<React.SetStateAction<number>>
 }
 
-const TrackerTable = ({ categories }: Props) => {
+const TrackerTable = ({ categories, dateFilter, typeFilter, sortBy, page, setPage }: Props) => {
 
   const access = useAuthStore((state) => state.access) || ''
-  const { data: transactionsPage, isLoading, error, isError, isSuccess } = useGetTransactionsPage({ access })
+  const { data: transactionsPage, isLoading, error, isError, isSuccess } = useGetTransactionsPage({ access, dateFilter, typeFilter, sortBy, page })
 
   if (isLoading) return <div>Cargando...</div>
   if (error) return <div>Error: {error.message}</div>
@@ -128,6 +134,7 @@ const TrackerTable = ({ categories }: Props) => {
           <p className="text-gray-500 text-sm sm:text-base">No hay transacciones registradas</p>
         </div>
       )}
+      <Paginator page={page} setPage={setPage} itemsCount={transactionsPage?.count || 0} itemsPerPage={10} />
     </motion.div>
   )
 }

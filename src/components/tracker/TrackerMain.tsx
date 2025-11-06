@@ -287,18 +287,18 @@ const categories: Category[] = [
 ]
 
 type DateFilter = 'today' | 'last7days' | 'thisWeek' | 'thisMonth' | 'custom' | 'all'
-type SortBy = 'fecha' | 'monto' | 'categoria'
+type SortBy = 'date' | 'amount'
 type SortOrder = 'asc' | 'desc'
 
 const TrackerMain = () => {
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions)
   const [dateFilter, setDateFilter] = useState<DateFilter>('today')
-  const [sortBy, setSortBy] = useState<SortBy>('fecha')
+  const [sortBy, setSortBy] = useState<SortBy>('date')
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [customStartDate, setCustomStartDate] = useState('')
   const [customEndDate, setCustomEndDate] = useState('')
-  const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all')
+  const [typeFilter, setTypeFilter] = useState<'all' | 'I' | 'E'>('all')
   const [activeTab, setActiveTab] = useState<'table' | 'charts'>('table')
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
@@ -761,7 +761,15 @@ const TrackerMain = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
               >
-                <TrackerTable transactions={paginatedTransactions} categories={categories} />
+                <TrackerTable 
+                  transactions={paginatedTransactions} 
+                  categories={categories} 
+                  dateFilter={dateFilter} 
+                  typeFilter={typeFilter as 'all' | 'I' | 'E'}
+                  sortBy={sortBy}
+                  page={currentPage}
+                  setPage={setCurrentPage}
+                />
                 
                 {/* Pagination */}
                 {totalPages > 1 && (
