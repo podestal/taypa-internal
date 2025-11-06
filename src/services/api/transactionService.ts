@@ -24,15 +24,8 @@ export type CreateTransaction = Omit<Transaction, 'id' | 'created_at' | 'updated
 
 export type UpdateTransaction = Partial<Omit<Transaction, 'id' | 'created_at' | 'updated_at' | 'created_by'>>
 
-interface Props {
-    byCurrentDay?: boolean
-}
-
-const getTransactionService = ({ byCurrentDay }: Props) => {
+const getTransactionService = () => {
     let url = '/transactions/'
-    if (byCurrentDay) {
-        url += 'by_current_day/'
-    }
     return new APIClient<TransactionPaginated>(url)
 }
 

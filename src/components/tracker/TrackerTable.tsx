@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import type { Category, Transaction } from './TrackerMain'
 import { DollarSign } from 'lucide-react'
 import useAuthStore from '../../store/useAuthStore'
-import useGetTransactionsByCurrentDay from '../../hooks/api/transaction/useGetTransactionsByCurrentDay'
+import useGetTransactionsPage from '../../hooks/api/transaction/useGetTransactionsPage'
 import moment from 'moment'
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 const TrackerTable = ({ categories }: Props) => {
 
   const access = useAuthStore((state) => state.access) || ''
-  const { data: transactionsPage, isLoading, error, isError, isSuccess } = useGetTransactionsByCurrentDay({ access })
+  const { data: transactionsPage, isLoading, error, isError, isSuccess } = useGetTransactionsPage({ access })
 
   if (isLoading) return <div>Cargando...</div>
   if (error) return <div>Error: {error.message}</div>

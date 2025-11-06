@@ -292,7 +292,7 @@ type SortOrder = 'asc' | 'desc'
 
 const TrackerMain = () => {
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions)
-  const [dateFilter, setDateFilter] = useState<DateFilter>('all')
+  const [dateFilter, setDateFilter] = useState<DateFilter>('today')
   const [sortBy, setSortBy] = useState<SortBy>('fecha')
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
   const [showDatePicker, setShowDatePicker] = useState(false)
