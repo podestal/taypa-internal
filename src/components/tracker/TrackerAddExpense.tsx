@@ -3,6 +3,7 @@ import { Minus } from "lucide-react"
 import type { Category, Transaction } from "./TrackerMain"
 import TrackerTransactionForm from "./TrackerTransactionForm"
 import Modal from "../ui/Modal"
+import useCreateTransaction from "../../hooks/api/transaction/useCreateTransaction"
 
 interface Props {
   transactions: Transaction[]
@@ -13,6 +14,8 @@ interface Props {
 }
 
 const TrackerAddExpense = ({ transactions, setTransactions, showModal, setShowModal, categories }: Props) => {
+
+  const createTransaction = useCreateTransaction()
   return (
     <>
       <motion.button
@@ -36,6 +39,7 @@ const TrackerAddExpense = ({ transactions, setTransactions, showModal, setShowMo
           categories={categories} 
           transactionType="e"
           onClose={() => setShowModal(false)}
+          createTransaction={createTransaction}
         />
       </Modal>
     </>

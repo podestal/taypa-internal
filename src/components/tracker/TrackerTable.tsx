@@ -7,7 +7,6 @@ import moment from 'moment'
 import Paginator from '../ui/Paginator'
 
 interface Props {
-  transactions: Transaction[]
   categories: Category[]
   dateFilter: 'today' | 'last7days' | 'thisWeek' | 'thisMonth' | 'custom' | 'all'
   typeFilter: 'all' | 'I' | 'E'

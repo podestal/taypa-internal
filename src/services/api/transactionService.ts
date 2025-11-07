@@ -1,5 +1,7 @@
 import APIClient from "./apiClient"
 
+const baseUrl = '/transactions/'
+
 export interface Transaction {
     id: number
     transaction_type: string
@@ -20,13 +22,19 @@ export interface TransactionPaginated {
     results: Transaction[]
 }
 
-export type CreateTransaction = Omit<Transaction, 'id' | 'created_at' | 'updated_at' | 'created_by'>
+export type CreateTransaction = Omit<Transaction, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'transaction_date'> & {
+    transaction_date: string
+}
+
+export const createTransactionService = () => {
+    
+    return new APIClient<Transaction, CreateTransaction>(baseUrl)
+}
 
 export type UpdateTransaction = Partial<Omit<Transaction, 'id' | 'created_at' | 'updated_at' | 'created_by'>>
 
 const getTransactionService = () => {
-    let url = '/transactions/'
-    return new APIClient<TransactionPaginated>(url)
+    return new APIClient<TransactionPaginated>(baseUrl)
 }
 
 export default getTransactionService

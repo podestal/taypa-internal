@@ -1,6 +1,10 @@
 import { useState } from "react"
 import type { Category, Transaction } from "./TrackerMain"
 import { Calendar, DollarSign, Tag, FileText } from "lucide-react"
+import type { UseMutationResult } from "@tanstack/react-query"
+import type { CreateTransactionData } from "../../hooks/api/transaction/useCreateTransaction"
+import useAuthStore from "../../store/useAuthStore"
+import moment from "moment"
 
 interface Props {
   transactions: Transaction[]
@@ -8,9 +12,11 @@ interface Props {
   onClose: () => void
   categories: Category[]
   transactionType: 'e' | 'i'
+  createTransaction: UseMutationResult<Transaction, Error, CreateTransactionData>
 }
 
-const TrackerTransactionForm = ({ transactions, setTransactions, onClose, categories, transactionType }: Props) => {
+const TrackerTransactionForm = ({ transactions, setTransactions, onClose, categories, transactionType, createTransaction }: Props) => {
+  const access = useAuthStore(state => state.access) || ''
   const [formData, setFormData] = useState({
     fecha: new Date().toISOString().split('T')[0],
     monto: '',
@@ -20,22 +26,31 @@ const TrackerTransactionForm = ({ transactions, setTransactions, onClose, catego
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const newTransaction: Transaction = {
-      id: Date.now().toString(),
-      fecha: formData.fecha,
-      monto: transactionType === 'e' ? -parseFloat(formData.monto) : parseFloat(formData.monto),
-      categoria: formData.categoria,
-      observaciones: formData.observaciones
-    }
-    
-    setTransactions([newTransaction, ...transactions])
-    setFormData({ 
-      fecha: new Date().toISOString().split('T')[0],
-      monto: '', 
-      categoria: 0, 
-      observaciones: '' 
+    createTransaction.mutate({
+      access: access,
+      transaction: {
+        transaction_date: moment(formData.fecha).format('YYYY-MM-DD'),
+        amount: parseFloat(formData.monto),
+        category: formData.categoria,
+        transaction_type: "E",
+        account: 1,
+        description: formData.observaciones
+      }
+    }, {
+      onSuccess: () => {
+        setFormData({ 
+          fecha: new Date().toISOString().split('T')[0],
+          monto: '', 
+          categoria: 0, 
+          observaciones: '' 
+        })
+        onClose()
+      },
+      onError: (error) => {
+        console.error(error);
+      }
     })
-    onClose()
+
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {

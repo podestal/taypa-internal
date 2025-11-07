@@ -45,7 +45,7 @@ const TrackerDateFilters = ({
             setDateFilter(filter.id)
             setShowDatePicker(false)
           }}
-          className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+          className={`px-4 py-2 rounded-lg font-medium text-sm transition-all cursor-pointer ${
             dateFilter === filter.id
               ? 'bg-blue-600 text-white shadow-md'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
