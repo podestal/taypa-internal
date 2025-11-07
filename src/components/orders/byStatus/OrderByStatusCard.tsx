@@ -48,7 +48,7 @@ const OrderByStatusCard = ({ order, index }: Props) => {
         </div>
         
         <div className="flex justify-between items-center mt-4 mb-2">
-            <UpdateOrderStatus orderId={order.id} orderStatus={order.status} />
+            <UpdateOrderStatus orderId={order.id} orderStatus={order.status} orderType={order.order_type} />
             <motion.button
                 onClick={() => setShowMore(true)}
                 className="w-full flex items-center justify-end cursor-pointer text-blue-600 hover:text-blue-800 text-sm font-medium"

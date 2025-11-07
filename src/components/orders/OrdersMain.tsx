@@ -87,33 +87,8 @@ const OrdersMain = () => {
   const access = useAuthStore((state) => state.access) || ''
 
   const createOrder = useCreateOrder()
-  const [expandedOrders, setExpandedOrders] = useState<Set<number>>(new Set())
-  const [currentTime, setCurrentTime] = useState(new Date())
-  const [selectedOrderStatus, setSelectedOrderStatus] = useState<'preparing' | 'ready' | 'in_transit' | 'delivered'>('preparing')
   const { orderStep, setOrderStep } = useOrderStep()
   const [orderMode, setOrderMode] = useState<'withCustomer' | 'withoutCustomer'>('withoutCustomer')
-
-  // timer
-  // useEffect(() => {
-  //   const timer = setInterval(() => {
-  //     setCurrentTime(new Date())
-  //   }, 1000)
-  //   return () => clearInterval(timer)
-  // }, [])
-
-
-
-  const toggleOrderExpansion = (orderId: number) => {
-    setExpandedOrders(prev => {
-      const newSet = new Set(prev)
-      if (newSet.has(orderId)) {
-        newSet.delete(orderId)
-      } else {
-        newSet.add(orderId)
-      }
-      return newSet
-    })
-  }
 
   const handleNextStep = () => {
     if (orderMode === 'withoutCustomer') {
@@ -186,7 +161,7 @@ const OrdersMain = () => {
       access,
       order: {
         created_by: 1,
-        order_type: 'D',
+        order_type: 'G',
         status: 'IP',
       }
     }, {
