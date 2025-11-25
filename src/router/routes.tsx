@@ -9,6 +9,7 @@ import KitchenMain from "../components/kitchen/KitchenMain";
 import DishesMain from "../components/dishes/DishesMain";
 import LoginPage from "../components/auth/LoginPage";
 import PrivateRoutes from "../components/auth/PrivateRoutes";
+import TaxesMain from "../components/taxes/TaxesMain";
 
 const routes = createBrowserRouter([
     {
@@ -51,6 +52,10 @@ const routes = createBrowserRouter([
                     {
                         path: "kitchen",
                         element: <KitchenMain />
+                    },
+                    {
+                        path: "taxes",
+                        element: <TaxesMain />
                     }
                 ]
             }
