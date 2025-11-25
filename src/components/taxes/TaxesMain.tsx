@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FileText, Receipt, ShoppingCart, Plus, CheckCircle2, XCircle, RefreshCw, Coins } from 'lucide-react'
 import moment from 'moment'
+import useGetAllDocuments from '../../hooks/sunat/useGetAllDocuments'
 
 // Types
 interface SunatDocument {
@@ -109,6 +110,8 @@ const mockOrders: OrderForTaxes[] = [
 ]
 
 const TaxesMain = () => {
+
+    const { data: docs } = useGetAllDocuments()
   const [activeTab, setActiveTab] = useState<TabType>('orders')
   const [selectedOrders, setSelectedOrders] = useState<number[]>([])
   const [documentType, setDocumentType] = useState<'boleta' | 'factura'>('boleta')
@@ -467,6 +470,7 @@ const TaxesMain = () => {
 
   return (
     <div className="h-full bg-gray-50 p-6">
+                <>{console.log('documents', docs)}</>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <motion.div
