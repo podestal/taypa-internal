@@ -1,6 +1,31 @@
 import type { Document } from '../services/sunat/documentService'
 
 /**
+ * SunatDocument interface for UI display
+ * Mapped from Django API Document response
+ */
+export interface SunatDocument {
+  id: string
+  numero: string
+  serie: string
+  fecha_emision: string
+  cliente_ruc?: string
+  cliente_nombre: string
+  cliente_direccion: string
+  total: number
+  estado: 'enviado' | 'aceptado' | 'rechazado' | 'pendiente' | 'excepcion'
+  tipo_documento: 'boleta' | 'factura'
+  orden_id?: number | string
+  // Additional fields from API
+  xml: string | null
+  cdr: string | null
+  issueTime: number | null
+  responseTime: number | null
+  production: boolean
+  faults: any[] | null
+}
+
+/**
  * Parse fileName to extract document information
  * Format: "RUC-TYPE-SERIE-NUMERO"
  * Example: "20482674828-03-B001-00000001"
@@ -42,7 +67,7 @@ export const getDocumentTypeLabel = (type: string): string => {
 export const extractAmountFromXml = async (xmlUrl: string): Promise<number | null> => {
   try {
     const response = await fetch(xmlUrl)
-    const blob = await response.blob()
+    await response.blob()
     
     // The XML is inside a ZIP file, so we'd need to:
     // 1. Unzip the file
@@ -61,7 +86,7 @@ export const extractAmountFromXml = async (xmlUrl: string): Promise<number | nul
 /**
  * Convert Document from Django API to SunatDocument for UI
  */
-export const mapDocumentToSunatDocument = (doc: Document) => {
+export const mapDocumentToSunatDocument = (doc: Document): SunatDocument => {
   const tipo_documento = getDocumentTypeName(doc.document_type)
   
   // Convert amount from string to number

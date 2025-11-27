@@ -1,10 +1,9 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Receipt, ShoppingCart, Plus, CheckCircle2, XCircle, RefreshCw, Coins, FileText } from 'lucide-react'
 import moment from 'moment'
-import useGetAllDocuments from '../../hooks/sunat/useGetAllDocuments'
-import { mapDocumentToSunatDocument } from '../../utils/sunatHelpers'
-import SunatDocumentsList from './SunatDocumentsList'
+import BoletasTab from './BoletasTab'
+import FacturasTab from './FacturasTab'
 
 interface OrderForTaxes {
   id: number
@@ -56,7 +55,6 @@ const mockOrders: OrderForTaxes[] = [
 ]
 
 const TaxesMain = () => {
-  const { data: docs, isLoading: isLoadingDocs } = useGetAllDocuments({ documentType: '01' })
   const [activeTab, setActiveTab] = useState<TabType>('orders')
   const [selectedOrders, setSelectedOrders] = useState<number[]>([])
   const [documentType, setDocumentType] = useState<'boleta' | 'factura'>('boleta')
@@ -67,21 +65,6 @@ const TaxesMain = () => {
     lastSync: '2024-01-17T08:00:00',
     environment: 'sandbox' as 'production' | 'sandbox'
   })
-
-  // Map API documents to UI format
-  const mappedDocuments = useMemo(() => {
-    if (!docs) return []
-    return docs.results.map(mapDocumentToSunatDocument)
-  }, [docs])
-
-  // Filter boletas and facturas
-  const boletas = useMemo(() => {
-    return mappedDocuments.filter(doc => doc.tipo_documento === 'boleta')
-  }, [mappedDocuments])
- 
-  const facturas = useMemo(() => {
-    return mappedDocuments.filter(doc => doc.tipo_documento === 'factura')
-  }, [mappedDocuments])
 
   // Mock orders data (in real app, this would come from API)
   const [orders] = useState<OrderForTaxes[]>(mockOrders)
@@ -424,35 +407,11 @@ const TaxesMain = () => {
           <div className="p-6">
             <AnimatePresence mode="wait">
               {activeTab === 'boletas' && (
-                <motion.div
-                  key="boletas"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <SunatDocumentsList 
-                    documents={boletas} 
-                    type="boletas" 
-                    isLoading={isLoadingDocs}
-                  />
-                </motion.div>
+                <BoletasTab key="boletas" />
               )}
 
               {activeTab === 'facturas' && (
-                <motion.div
-                  key="facturas"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <SunatDocumentsList 
-                    documents={facturas} 
-                    type="facturas" 
-                    isLoading={isLoadingDocs}
-                  />
-                </motion.div>
+                <FacturasTab key="facturas" />
               )}
 
               {activeTab === 'orders' && (

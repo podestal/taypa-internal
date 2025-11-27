@@ -1,26 +1,7 @@
 import { FileText } from 'lucide-react'
 import SunatDocumentItem from './SunatDocumentItem'
+import { type SunatDocument } from '../../utils/sunatHelpers'
 
-export interface SunatDocument {
-  id: string
-  numero: string
-  serie: string
-  fecha_emision: string
-  cliente_ruc?: string
-  cliente_nombre: string
-  cliente_direccion?: string
-  total: number
-  estado: 'enviado' | 'aceptado' | 'rechazado' | 'pendiente' | 'excepcion'
-  tipo_documento: 'boleta' | 'factura'
-  orden_id?: number
-  // Additional fields from API
-  xml?: string
-  cdr?: string
-  issueTime?: number
-  responseTime?: number
-  production?: boolean
-  faults?: any[]
-}
 
 interface Props {
   documents: SunatDocument[]
