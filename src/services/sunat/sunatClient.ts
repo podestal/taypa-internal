@@ -1,36 +1,48 @@
 import axios from "axios"
 
-const URL = import.meta.env.VITE_SUNAT_URL
+const URL = import.meta.env.VITE_TAXES_URL
 
 const axiosInstance = axios.create({
     baseURL: URL,
 })
 
-class SunatClient<ResponseType> {
-    endpoint: string
-    personaId?: string
-    personaToken?: string
+class SunatClient<ResponseType, RequestType = ResponseType> {
 
-    constructor( endpoint: string, personaId?: string, personaToken?: string) {
+    endpoint: string
+    
+    constructor( endpoint: string) {
         this.endpoint = endpoint
-        this.personaId = personaId
-        this.personaToken = personaToken
     }
     
-    get = () => {
+    get = (access?: string, params?: Record<string, string>) => {
+
         const config: any = {}
-        
-        // Add query parameters if provided
-        if (this.personaId && this.personaToken) {
-            config.params = {
-                personaId: this.personaId,
-                personaToken: this.personaToken
-            }
+        if (params) {
+            config.params = params
         }
-        
+        if (access) {
+            config.headers = { ...config.headers, Authorization: `JWT ${access}` };
+        }
+    
         return axiosInstance
             .get<ResponseType>(this.endpoint, config)
             .then(res => res.data);
+    }    
+
+    post = (data: RequestType, access?: string, params?: Record<string, string>) => {
+
+        const config: any = {}
+        if (access) {
+            config.headers = { Authorization: `JWT ${access}` }
+        }
+
+        if (params) {
+            config.params = params
+        }
+
+        return axiosInstance
+            .post<ResponseType>(this.endpoint, data, config)
+            .then(res => res.data)   
     }
 }
 

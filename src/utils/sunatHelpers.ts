@@ -59,29 +59,50 @@ export const extractAmountFromXml = async (xmlUrl: string): Promise<number | nul
 }
 
 /**
- * Convert Document from API to SunatDocument for UI
+ * Convert Document from Django API to SunatDocument for UI
  */
 export const mapDocumentToSunatDocument = (doc: Document) => {
-  const parsed = parseFileName(doc.fileName)
-  const tipo_documento = getDocumentTypeName(doc.type)
+  const tipo_documento = getDocumentTypeName(doc.document_type)
+  
+  // Convert amount from string to number
+  const total = doc.amount ? parseFloat(doc.amount) : 0
+  
+  // Map status - use sunat_status if available, otherwise use internal status
+  let estado: 'enviado' | 'aceptado' | 'rechazado' | 'pendiente' | 'excepcion' = 'pendiente'
+  if (doc.sunat_status) {
+    const sunatStatus = doc.sunat_status.toUpperCase()
+    if (sunatStatus === 'ACEPTADO') estado = 'aceptado'
+    else if (sunatStatus === 'RECHAZADO') estado = 'rechazado'
+    else if (sunatStatus === 'EXCEPCION') estado = 'excepcion'
+  } else {
+    // Use internal status
+    const internalStatus = doc.status.toLowerCase()
+    if (internalStatus === 'accepted') estado = 'aceptado'
+    else if (internalStatus === 'rejected') estado = 'rechazado'
+    else if (internalStatus === 'exception') estado = 'excepcion'
+    else if (internalStatus === 'processing') estado = 'enviado'
+    else estado = 'pendiente'
+  }
   
   return {
     id: doc.id,
-    numero: parsed?.numero || '',
-    serie: parsed?.serie || '',
-    fecha_emision: new Date(doc.issueTime * 1000).toISOString(),
-    cliente_ruc: parsed?.ruc,
-    cliente_nombre: '', // Not available in API response
-    cliente_direccion: '', // Not available in API response
-    total: 0, // Need to get from XML or store when creating
-    estado: doc.status.toLowerCase() as 'enviado' | 'aceptado' | 'rechazado' | 'pendiente',
+    numero: doc.numero,
+    serie: doc.serie,
+    fecha_emision: doc.sunat_issue_time 
+      ? new Date(doc.sunat_issue_time * 1000).toISOString()
+      : doc.created_at,
+    cliente_ruc: undefined, // Not in Django response, would need to add to model
+    cliente_nombre: '', // Not in Django response, would need to add to model
+    cliente_direccion: '', // Not in Django response, would need to add to model
+    total,
+    estado,
     tipo_documento,
-    orden_id: undefined, // Would need to be stored when creating
+    orden_id: undefined, // Would need to be in Django response
     // Additional fields from API
-    xml: doc.xml,
-    cdr: doc.cdr,
-    issueTime: doc.issueTime,
-    responseTime: doc.responseTime,
+    xml: doc.xml_url,
+    cdr: doc.cdr_url,
+    issueTime: doc.sunat_issue_time,
+    responseTime: doc.sunat_response_time,
     production: doc.production,
     faults: doc.faults
   }

@@ -1,22 +1,46 @@
 import SunatClient from "./sunatClient"
 
-
+/**
+ * SUNAT Document Response Interface
+ * Based on Django API response (SunatDocument model serialized)
+ */
 export interface Document {
-    fileName: string
-    id: string
-    issueTime: number
-    status: string
-    type: string
-    production?: boolean
-    isPurchase?: boolean
-    responseTime?: number
-    xml?: string
-    cdr?: string
-    faults?: any[]
-    personaId?: string
+    // Django model fields
+    id: string                          // Django UUID (e.g., "292bb50f-979e-4c56-b983-3cad3f43b256")
+    document_type: string                // "03" = Boleta, "01" = Factura
+    serie: string                       // Serie (e.g., "B001")
+    numero: string                      // Número (e.g., "00000003")
+    
+    // SUNAT response data
+    sunat_id: string | null             // SUNAT document ID (e.g., "675c6aac40264100151a3d26")
+    sunat_status: string | null          // SUNAT status: "ACEPTADO", "EXCEPCION", "RECHAZADO"
+    status: string                      // Internal status: "pending", "processing", "accepted", "rejected", "exception", "failed"
+    
+    // SUNAT URLs
+    xml_url: string | null               // URL to download XML ZIP file
+    cdr_url: string | null              // URL to download CDR ZIP file
+    
+    // SUNAT timestamps
+    sunat_issue_time: number | null      // Unix timestamp of issue
+    sunat_response_time: number | null   // Unix timestamp of SUNAT response
+    
+    // Environment flags
+    production: boolean                  // false = sandbox, true = production
+    is_purchase: boolean                // false = sale, true = purchase
+    
+    // Errors
+    faults: any[] | null                // Array of fault/error objects or null
+    error_message: string | null         // Internal error message
+    
+    // Financial
+    amount: string | null                // Total amount (as string from DecimalField)
+    
+    // Files
+    pdf_file: string | null              // URL to PDF file in Cloudflare R2
+    
+    // Timestamps
+    created_at: string                   // ISO datetime string
+    updated_at: string                   // ISO datetime string
 }
 
-const personaId = import.meta.env.VITE_PERSONAL_ID
-const personaToken = import.meta.env.VITE_PERSONAL_TOKEN
-
-export default new SunatClient<Document[]>('getAll', personaId, personaToken)
+export const getDocumentsService = new SunatClient<Document[]>('/documents/')
