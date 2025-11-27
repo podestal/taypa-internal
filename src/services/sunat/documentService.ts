@@ -44,3 +44,23 @@ export interface Document {
 }
 
 export const getDocumentsService = new SunatClient<Document[]>('/documents/')
+
+export interface DocumentsPage {
+    count: number
+    next: string | null
+    previous: string | null
+    results: Document[]
+}
+
+interface GetAllDocumentsServiceProps {
+    documentType: string
+}
+
+export const getAllDocumentsService = ({ documentType }: GetAllDocumentsServiceProps) => {
+
+    let url = '/documents/'
+    if (documentType === '01') url += 'get-invoices/'
+    else if (documentType === '03') url += 'get-tickets/'
+
+    return new SunatClient<DocumentsPage>(url)
+}

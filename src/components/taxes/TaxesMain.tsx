@@ -56,7 +56,7 @@ const mockOrders: OrderForTaxes[] = [
 ]
 
 const TaxesMain = () => {
-  const { data: docs, isLoading: isLoadingDocs } = useGetAllDocuments()
+  const { data: docs, isLoading: isLoadingDocs } = useGetAllDocuments({ documentType: '01' })
   const [activeTab, setActiveTab] = useState<TabType>('orders')
   const [selectedOrders, setSelectedOrders] = useState<number[]>([])
   const [documentType, setDocumentType] = useState<'boleta' | 'factura'>('boleta')
@@ -71,14 +71,14 @@ const TaxesMain = () => {
   // Map API documents to UI format
   const mappedDocuments = useMemo(() => {
     if (!docs) return []
-    return docs.map(mapDocumentToSunatDocument)
+    return docs.results.map(mapDocumentToSunatDocument)
   }, [docs])
 
   // Filter boletas and facturas
   const boletas = useMemo(() => {
     return mappedDocuments.filter(doc => doc.tipo_documento === 'boleta')
   }, [mappedDocuments])
-
+ 
   const facturas = useMemo(() => {
     return mappedDocuments.filter(doc => doc.tipo_documento === 'factura')
   }, [mappedDocuments])
