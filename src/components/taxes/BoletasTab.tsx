@@ -1,11 +1,15 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { mapDocumentToSunatDocument } from '../../utils/sunatHelpers'
 import SunatDocumentsList from './SunatDocumentsList'
 import useGetAllDocuments from '../../hooks/sunat/useGetAllDocuments'
+import Paginator from '../ui/Paginator'
+import useAuthStore from '../../store/useAuthStore'
 
 const BoletasTab = () => {
-  const { data: boletasData, isLoading, error } = useGetAllDocuments({ documentType: '03' })
+  const access = useAuthStore(state => state.access) || ''
+  const [page, setPage] = useState(1)
+  const { data: boletasData, isLoading, error, refetch } = useGetAllDocuments({ access, documentType: '03', page })
 
   // Map API documents to UI format
   const boletas = useMemo(() => {
@@ -34,6 +38,15 @@ const BoletasTab = () => {
         type="boletas" 
         isLoading={isLoading}
       />
+      {boletasData && (
+        <Paginator
+          page={page}
+          setPage={setPage}
+          itemsCount={boletasData.count}
+          itemsPerPage={10}
+          refetch={refetch}
+        />
+      )}
     </motion.div>
   )
 }

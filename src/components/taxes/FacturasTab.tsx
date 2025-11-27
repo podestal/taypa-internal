@@ -1,11 +1,15 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import SunatDocumentsList from './SunatDocumentsList'
 import useGetAllDocuments from '../../hooks/sunat/useGetAllDocuments'
 import { mapDocumentToSunatDocument } from '../../utils/sunatHelpers'
+import Paginator from '../ui/Paginator'
+import useAuthStore from '../../store/useAuthStore'
 
 const FacturasTab = () => {
-  const { data: facturasData, isLoading, error } = useGetAllDocuments({ documentType: '01' })
+  const [page, setPage] = useState(1)
+  const access = useAuthStore(state => state.access) || ''
+  const { data: facturasData, isLoading, error, refetch } = useGetAllDocuments({ access, documentType: '01', page })
 
   // Map API documents to UI format
   const facturas = useMemo(() => {
@@ -34,6 +38,15 @@ const FacturasTab = () => {
         type="facturas" 
         isLoading={isLoading}
       />
+      {facturasData && (
+        <Paginator
+          page={page}
+          setPage={setPage}
+          itemsCount={facturasData.count}
+          itemsPerPage={10}
+          refetch={refetch}
+        />
+      )}
     </motion.div>
   )
 }
