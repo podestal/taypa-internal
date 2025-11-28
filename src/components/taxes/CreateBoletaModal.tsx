@@ -8,19 +8,13 @@ import useAuthStore from '../../store/useAuthStore'
 interface CreateBoletaModalProps {
   isOpen: boolean
   onClose: () => void
-  orders: OrderForBilling[]
+  order: OrderForBilling
   onSuccess?: () => void
 }
 
-const CreateBoletaModal = ({ isOpen, onClose, orders, onSuccess }: CreateBoletaModalProps) => {
+const CreateBoletaModal = ({ isOpen, onClose, order, onSuccess }: CreateBoletaModalProps) => {
   const access = useAuthStore(state => state.access) || ''
   const createTicket = useCreateTicket({ access })
-
-  // Aggregate all order items
-  const allOrderItems = orders.flatMap(order => order.order_items)
-  
-  // Calculate totals
-  const totalAmount = orders.reduce((sum, order) => sum + order.total_amount, 0)
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-PE', {
@@ -32,7 +26,8 @@ const CreateBoletaModal = ({ isOpen, onClose, orders, onSuccess }: CreateBoletaM
   const handleSubmit = async () => {
     try {
       await createTicket.mutateAsync({
-        order_items: allOrderItems
+        order_items: order.order_items,
+        order_id: order.id
       })
       onSuccess?.()
       onClose()
@@ -64,7 +59,7 @@ const CreateBoletaModal = ({ isOpen, onClose, orders, onSuccess }: CreateBoletaM
             <div className="flex items-center space-x-3">
               <Receipt className="w-6 h-6 text-blue-600" />
               <h3 className="text-2xl font-bold text-gray-900">
-                Crear {orders.length > 1 ? 'Boletas' : 'Boleta'}
+                Crear Boleta
               </h3>
             </div>
             <button
@@ -75,64 +70,57 @@ const CreateBoletaModal = ({ isOpen, onClose, orders, onSuccess }: CreateBoletaM
             </button>
           </div>
 
-          {/* Orders Summary */}
-          <div className="space-y-4 mb-6">
-            {orders.map((order) => (
-              <div key={order.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-900">
-                      Orden #{order.order_number}
-                    </h4>
-                    <p className="text-sm text-gray-500">
-                      {moment(order.created_at).format('DD/MM/YYYY HH:mm')}
-                    </p>
-                    {order.customer_name && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        Cliente: {order.customer_name}
-                      </p>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xl font-bold text-gray-900">
-                      {formatCurrency(order.total_amount)}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Order Items */}
-                <div className="mt-3 pt-3 border-t border-gray-200">
-                  <h5 className="text-sm font-medium text-gray-700 mb-2">Items:</h5>
-                  <div className="space-y-1">
-                    {order.order_items.map((item, idx) => (
-                      <div key={idx} className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">
-                          {item.quantity}x {item.name}
-                        </span>
-                        <span className="text-gray-900 font-medium">
-                          {formatCurrency(item.cost * item.quantity)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+          {/* Order Summary */}
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 mb-6">
+            <div className="flex items-start justify-between mb-3">
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900">
+                  Orden #{order.order_number}
+                </h4>
+                <p className="text-sm text-gray-500">
+                  {moment(order.created_at).format('DD/MM/YYYY HH:mm')}
+                </p>
+                {order.customer_name && (
+                  <p className="text-sm text-gray-600 mt-1">
+                    Cliente: {order.customer_name}
+                  </p>
+                )}
               </div>
-            ))}
+              <div className="text-right">
+                <p className="text-xl font-bold text-gray-900">
+                  {formatCurrency(order.total_amount)}
+                </p>
+              </div>
+            </div>
+
+            {/* Order Items */}
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <h5 className="text-sm font-medium text-gray-700 mb-2">Items:</h5>
+              <div className="space-y-1">
+                {order.order_items.map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">
+                      {item.quantity}x {item.name}
+                    </span>
+                    <span className="text-gray-900 font-medium">
+                      {formatCurrency(item.cost * item.quantity)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Total Summary */}
           <div className="bg-blue-50 rounded-lg p-4 border-2 border-blue-200 mb-6">
             <div className="flex items-center justify-between">
               <span className="text-lg font-semibold text-gray-900">
-                Total General:
+                Total:
               </span>
               <span className="text-2xl font-bold text-blue-600">
-                {formatCurrency(totalAmount)}
+                {formatCurrency(order.total_amount)}
               </span>
             </div>
-            <p className="text-sm text-gray-600 mt-1">
-              {orders.length} {orders.length === 1 ? 'orden' : 'órdenes'} seleccionada{orders.length > 1 ? 's' : ''}
-            </p>
           </div>
 
           {/* Actions */}
@@ -152,7 +140,7 @@ const CreateBoletaModal = ({ isOpen, onClose, orders, onSuccess }: CreateBoletaM
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              {createTicket.isPending ? 'Creando...' : `Crear ${orders.length > 1 ? 'Boletas' : 'Boleta'}`}
+              {createTicket.isPending ? 'Creando...' : 'Crear Boleta'}
             </motion.button>
           </div>
         </motion.div>

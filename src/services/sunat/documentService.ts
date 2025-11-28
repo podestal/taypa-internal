@@ -76,12 +76,14 @@ export interface OrderItem {
 
 export interface CreateTicketRequest {
     order_items: OrderItem[]
+    order_id?: number
 }
 
 export interface CreateInvoiceRequest {
     order_items: OrderItem[]
     ruc: string
     address: string
+    order_id?: number
 }
 
 export const createTicketService = () => {

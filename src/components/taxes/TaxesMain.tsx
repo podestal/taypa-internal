@@ -10,28 +10,11 @@ type TabType = 'boletas' | 'facturas' | 'orders'
 
 const TaxesMain = () => {
   const [activeTab, setActiveTab] = useState<TabType>('orders')
-  const [selectedOrders, setSelectedOrders] = useState<number[]>([])
   const [connectionStatus] = useState({
     connected: true,
     lastSync: '2024-01-17T08:00:00',
     environment: 'sandbox' as 'production' | 'sandbox'
   })
-
-  const handleToggleOrder = (orderId: number) => {
-    setSelectedOrders(prev =>
-      prev.includes(orderId)
-        ? prev.filter(id => id !== orderId)
-        : [...prev, orderId]
-    )
-  }
-
-  const handleSelectOrders = (orderIds: number[]) => {
-    setSelectedOrders(orderIds)
-  }
-
-  const handleDeselectAll = () => {
-    setSelectedOrders([])
-  }
 
 
   return (
@@ -107,13 +90,7 @@ const TaxesMain = () => {
               )}
 
               {activeTab === 'orders' && (
-                <OrdersTab
-                  key="orders"
-                  selectedOrders={selectedOrders}
-                  onToggleOrder={handleToggleOrder}
-                  onSelectOrders={handleSelectOrders}
-                  onDeselectAll={handleDeselectAll}
-                />
+                <OrdersTab key="orders" />
               )}
             </AnimatePresence>
           </div>

@@ -60,7 +60,7 @@ export interface OrderForBilling {
     order_items: OrderItemForBilling[]
     total_amount: number
     has_document: boolean
-    document: any | null
+    document: string | null
 }
 
 export interface OrdersForBillingPage {

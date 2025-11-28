@@ -61,7 +61,8 @@ const CreateFacturaModal = ({ isOpen, onClose, order, onSuccess }: CreateFactura
       await createInvoice.mutateAsync({
         order_items: order.order_items,
         ruc: formData.ruc.trim(),
-        address: formData.address.trim()
+        address: formData.address.trim(),
+        order_id: order.id
       })
       onSuccess?.()
       onClose()

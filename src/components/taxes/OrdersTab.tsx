@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { ShoppingCart, CheckCircle2, X, Receipt, FileText } from 'lucide-react'
+import { ShoppingCart, X, Receipt, FileText } from 'lucide-react'
 import moment from 'moment'
 import useGetOrdersForBilling, { type OrdersForBillingFilters } from '../../hooks/api/order/useGetOrdersForBilling'
 import useAuthStore from '../../store/useAuthStore'
@@ -53,9 +53,8 @@ const ORDER_TYPE_LABELS: Record<string, string> = {
 
 const mapOrderForBillingToOrderForTaxes = (order: OrderForBilling): OrderForTaxes => {
   let document_type: 'boleta' | 'factura' | undefined = undefined
-  if (order.document) {
-    document_type = order.document.document_type === '03' ? 'boleta' : 'factura'
-  }
+  // document is string | null, so we check if it exists
+  // The document_type is determined from has_document flag and will be set elsewhere if needed
 
   return {
     id: order.id,
@@ -73,23 +72,15 @@ const mapOrderForBillingToOrderForTaxes = (order: OrderForBilling): OrderForTaxe
 }
 
 interface OrdersTabProps {
-  selectedOrders: number[]
-  onToggleOrder: (orderId: number) => void
-  onSelectOrders: (orderIds: number[]) => void
-  onDeselectAll: () => void
 }
 
-const OrdersTab = ({
-  selectedOrders,
-  onToggleOrder,
-  onSelectOrders,
-  onDeselectAll
-}: OrdersTabProps) => {
+const OrdersTab = ({}: OrdersTabProps) => {
   const access = useAuthStore(state => state.access) || ''
   const [page, setPage] = useState(1)
   const [dateRangeTab, setDateRangeTab] = useState<DateRangeTab>('all')
   const [showBoletaModal, setShowBoletaModal] = useState(false)
   const [showFacturaModal, setShowFacturaModal] = useState(false)
+  const [selectedOrder, setSelectedOrder] = useState<OrderForBilling | null>(null)
   const [filters, setFilters] = useState<OrdersForBillingFilters>({
     status: '',
     date: '',
@@ -177,21 +168,11 @@ const OrdersTab = ({
     return ordersData.results.map(mapOrderForBillingToOrderForTaxes)
   }, [ordersData])
 
-  // Get full OrderForBilling objects for selected orders
-  const selectedOrdersData = useMemo(() => {
-    if (!ordersData?.results) return []
-    return ordersData.results.filter(order => selectedOrders.includes(order.id))
-  }, [ordersData, selectedOrders])
-
-  // Calculate total sum of selected orders
-  const selectedTotal = useMemo(() => {
-    return selectedOrdersData.reduce((sum, order) => sum + order.total_amount, 0)
-  }, [selectedOrdersData])
-
-  const availableOrders = orders.filter(o => !o.has_document)
-  const allSelected = availableOrders.length > 0 && selectedOrders.length === availableOrders.length
-  const canCreateFactura = selectedOrders.length === 1
-  const canCreateBoleta = selectedOrders.length > 0
+  // Get full OrderForBilling object for selected order
+  const selectedOrderData = useMemo(() => {
+    if (!ordersData?.results || !selectedOrder) return null
+    return ordersData.results.find(order => order.id === selectedOrder.id) || null
+  }, [ordersData, selectedOrder])
 
   const handleFilterChange = (key: keyof OrdersForBillingFilters, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }))
@@ -359,69 +340,13 @@ const OrdersTab = ({
         </div>
       )}
 
-      {/* Selection Controls */}
-      {!isLoading && !error && orders.length > 0 && (
-      <div className="bg-white rounded-lg p-4">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center space-x-4 flex-wrap">
-            <span className="text-sm font-medium text-gray-700">
-              {selectedOrders.length} de {availableOrders.length} órdenes seleccionadas
-            </span>
-            {selectedOrders.length > 0 && (
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">Total:</span>
-                <span className="text-lg font-bold text-blue-600">
-                  {formatCurrency(selectedTotal)}
-                </span>
-              </div>
-            )}
-          </div>
-          <div className="flex items-center space-x-2 flex-wrap">
-            <motion.button
-              onClick={allSelected ? onDeselectAll : () => onSelectOrders(availableOrders.map(o => o.id))}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-                allSelected
-                  ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                  : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-              }`}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {allSelected ? 'Deseleccionar Todas' : 'Seleccionar Todas'}
-            </motion.button>
-            {selectedOrders.length > 0 && (
-              <>
-                <motion.button
-                  onClick={() => setShowBoletaModal(true)}
-                  disabled={!canCreateBoleta}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  whileHover={canCreateBoleta ? { scale: 1.02 } : {}}
-                  whileTap={canCreateBoleta ? { scale: 0.98 } : {}}
-                >
-                  <Receipt className="w-4 h-4" />
-                  <span>Crear {selectedOrders.length > 1 ? 'Boletas' : 'Boleta'}</span>
-                </motion.button>
-                <motion.button
-                  onClick={() => setShowFacturaModal(true)}
-                  disabled={!canCreateFactura}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  whileHover={canCreateFactura ? { scale: 1.02 } : {}}
-                  whileTap={canCreateFactura ? { scale: 0.98 } : {}}
-                >
-                  <FileText className="w-4 h-4" />
-                  <span>Crear Factura</span>
-                </motion.button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-      )}
 
       {/* Orders List */}
       {!isLoading && !error && orders.length > 0 && orders.map((order, index) => {
-        const isSelected = selectedOrders.includes(order.id)
-        const hasDocument = order.has_document
+        // Get full order data to check document
+        const fullOrder = ordersData?.results?.find(o => o.id === order.id)
+        const hasDocument = fullOrder?.has_document || (fullOrder?.document !== null && fullOrder?.document !== undefined && fullOrder?.document !== '')
+        const isDisabled = hasDocument
 
         return (
           <motion.div
@@ -429,37 +354,11 @@ const OrdersTab = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
-            className={`bg-white rounded-lg shadow-md p-6 cursor-pointer transition-all ${
-              isSelected
-                ? 'ring-2 ring-blue-600 border-blue-600'
-                : 'hover:shadow-lg'
-            } ${hasDocument ? 'opacity-75' : ''}`}
-            onClick={() => !hasDocument && onToggleOrder(order.id)}
+            className={`bg-white rounded-lg shadow-md p-6 transition-all ${
+              isDisabled ? 'opacity-60' : 'hover:shadow-lg'
+            }`}
           >
             <div className="flex items-start space-x-4">
-              {/* Checkbox */}
-              <div className="flex-shrink-0 pt-1">
-                {hasDocument ? (
-                  <div className="w-6 h-6 rounded border-2 border-gray-300 bg-gray-100 flex items-center justify-center">
-                    <CheckCircle2 className="w-4 h-4 text-gray-400" />
-                  </div>
-                ) : (
-                  <motion.div
-                    className={`w-6 h-6 rounded border-2 flex items-center justify-center ${
-                      isSelected
-                        ? 'bg-blue-600 border-blue-600'
-                        : 'border-gray-300'
-                    }`}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    {isSelected && (
-                      <CheckCircle2 className="w-4 h-4 text-white" />
-                    )}
-                  </motion.div>
-                )}
-              </div>
-
               {/* Order Info */}
               <div className="flex-1">
                 <div className="flex items-start justify-between mb-3">
@@ -527,6 +426,40 @@ const OrdersTab = ({
                     </div>
                   </div>
                 </div>
+
+                {/* Action Buttons */}
+                <div className="mt-4 pt-4 border-t border-gray-200 flex items-center space-x-3">
+                  <motion.button
+                    onClick={() => {
+                      if (fullOrder) {
+                        setSelectedOrder(fullOrder)
+                        setShowBoletaModal(true)
+                      }
+                    }}
+                    disabled={isDisabled}
+                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    whileHover={!isDisabled ? { scale: 1.02 } : {}}
+                    whileTap={!isDisabled ? { scale: 0.98 } : {}}
+                  >
+                    <Receipt className="w-4 h-4" />
+                    <span>Crear Boleta</span>
+                  </motion.button>
+                  <motion.button
+                    onClick={() => {
+                      if (fullOrder) {
+                        setSelectedOrder(fullOrder)
+                        setShowFacturaModal(true)
+                      }
+                    }}
+                    disabled={isDisabled}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    whileHover={!isDisabled ? { scale: 1.02 } : {}}
+                    whileTap={!isDisabled ? { scale: 0.98 } : {}}
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>Crear Factura</span>
+                  </motion.button>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -545,26 +478,34 @@ const OrdersTab = ({
       )}
 
       {/* Modals */}
-      <CreateBoletaModal
-        isOpen={showBoletaModal}
-        onClose={() => setShowBoletaModal(false)}
-        orders={selectedOrdersData}
-        onSuccess={() => {
-          onDeselectAll()
-          refetch()
-        }}
-      />
+      {selectedOrderData && (
+        <>
+          <CreateBoletaModal
+            isOpen={showBoletaModal}
+            onClose={() => {
+              setShowBoletaModal(false)
+              setSelectedOrder(null)
+            }}
+            order={selectedOrderData}
+            onSuccess={() => {
+              setSelectedOrder(null)
+              refetch()
+            }}
+          />
 
-      {selectedOrdersData.length === 1 && (
-        <CreateFacturaModal
-          isOpen={showFacturaModal}
-          onClose={() => setShowFacturaModal(false)}
-          order={selectedOrdersData[0]}
-          onSuccess={() => {
-            onDeselectAll()
-            refetch()
-          }}
-        />
+          <CreateFacturaModal
+            isOpen={showFacturaModal}
+            onClose={() => {
+              setShowFacturaModal(false)
+              setSelectedOrder(null)
+            }}
+            order={selectedOrderData}
+            onSuccess={() => {
+              setSelectedOrder(null)
+              refetch()
+            }}
+          />
+        </>
       )}
     </div>
   )
