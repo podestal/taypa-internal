@@ -66,3 +66,28 @@ export const getAllDocumentsService = ({ documentType }: GetAllDocumentsServiceP
 
     return new SunatClient<DocumentsPage>(url)
 }
+
+export interface OrderItem {
+    id: string
+    name: string
+    quantity: number
+    cost: number
+}
+
+export interface CreateTicketRequest {
+    order_items: OrderItem[]
+}
+
+export interface CreateInvoiceRequest {
+    order_items: OrderItem[]
+    ruc: string
+    address: string
+}
+
+export const createTicketService = () => {
+    return new SunatClient<any, CreateTicketRequest>('/documents/create-ticket/')
+}
+
+export const createInvoiceService = () => {
+    return new SunatClient<any, CreateInvoiceRequest>('/documents/create-invoice/')
+}

@@ -1,11 +1,13 @@
 import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { ShoppingCart, Plus, CheckCircle2, X } from 'lucide-react'
+import { ShoppingCart, CheckCircle2, X, Receipt, FileText } from 'lucide-react'
 import moment from 'moment'
 import useGetOrdersForBilling, { type OrdersForBillingFilters } from '../../hooks/api/order/useGetOrdersForBilling'
 import useAuthStore from '../../store/useAuthStore'
 import { type OrderForBilling } from '../../services/api/orderService'
 import Paginator from '../ui/Paginator'
+import CreateBoletaModal from './CreateBoletaModal'
+import CreateFacturaModal from './CreateFacturaModal'
 
 type DateRangeTab = 'today' | 'last7days' | 'thisWeek' | 'thisMonth' | 'all'
 
@@ -75,19 +77,19 @@ interface OrdersTabProps {
   onToggleOrder: (orderId: number) => void
   onSelectOrders: (orderIds: number[]) => void
   onDeselectAll: () => void
-  onCreateDocuments: () => void
 }
 
 const OrdersTab = ({
   selectedOrders,
   onToggleOrder,
   onSelectOrders,
-  onDeselectAll,
-  onCreateDocuments
+  onDeselectAll
 }: OrdersTabProps) => {
   const access = useAuthStore(state => state.access) || ''
   const [page, setPage] = useState(1)
   const [dateRangeTab, setDateRangeTab] = useState<DateRangeTab>('all')
+  const [showBoletaModal, setShowBoletaModal] = useState(false)
+  const [showFacturaModal, setShowFacturaModal] = useState(false)
   const [filters, setFilters] = useState<OrdersForBillingFilters>({
     status: '',
     date: '',
@@ -175,8 +177,21 @@ const OrdersTab = ({
     return ordersData.results.map(mapOrderForBillingToOrderForTaxes)
   }, [ordersData])
 
+  // Get full OrderForBilling objects for selected orders
+  const selectedOrdersData = useMemo(() => {
+    if (!ordersData?.results) return []
+    return ordersData.results.filter(order => selectedOrders.includes(order.id))
+  }, [ordersData, selectedOrders])
+
+  // Calculate total sum of selected orders
+  const selectedTotal = useMemo(() => {
+    return selectedOrdersData.reduce((sum, order) => sum + order.total_amount, 0)
+  }, [selectedOrdersData])
+
   const availableOrders = orders.filter(o => !o.has_document)
   const allSelected = availableOrders.length > 0 && selectedOrders.length === availableOrders.length
+  const canCreateFactura = selectedOrders.length === 1
+  const canCreateBoleta = selectedOrders.length > 0
 
   const handleFilterChange = (key: keyof OrdersForBillingFilters, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }))
@@ -346,36 +361,59 @@ const OrdersTab = ({
 
       {/* Selection Controls */}
       {!isLoading && !error && orders.length > 0 && (
-      <div className="bg-white rounded-lg p-4 flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <span className="text-sm font-medium text-gray-700">
-            {selectedOrders.length} de {availableOrders.length} órdenes seleccionadas
-          </span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <motion.button
-            onClick={allSelected ? onDeselectAll : () => onSelectOrders(availableOrders.map(o => o.id))}
-            className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-              allSelected
-                ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-            }`}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {allSelected ? 'Deseleccionar Todas' : 'Seleccionar Todas'}
-          </motion.button>
-          {selectedOrders.length > 0 && (
+      <div className="bg-white rounded-lg p-4">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center space-x-4 flex-wrap">
+            <span className="text-sm font-medium text-gray-700">
+              {selectedOrders.length} de {availableOrders.length} órdenes seleccionadas
+            </span>
+            {selectedOrders.length > 0 && (
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600">Total:</span>
+                <span className="text-lg font-bold text-blue-600">
+                  {formatCurrency(selectedTotal)}
+                </span>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center space-x-2 flex-wrap">
             <motion.button
-              onClick={onCreateDocuments}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center space-x-2"
+              onClick={allSelected ? onDeselectAll : () => onSelectOrders(availableOrders.map(o => o.id))}
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                allSelected
+                  ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                  : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+              }`}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Plus className="w-4 h-4" />
-              <span>Crear Documentos</span>
+              {allSelected ? 'Deseleccionar Todas' : 'Seleccionar Todas'}
             </motion.button>
-          )}
+            {selectedOrders.length > 0 && (
+              <>
+                <motion.button
+                  onClick={() => setShowBoletaModal(true)}
+                  disabled={!canCreateBoleta}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  whileHover={canCreateBoleta ? { scale: 1.02 } : {}}
+                  whileTap={canCreateBoleta ? { scale: 0.98 } : {}}
+                >
+                  <Receipt className="w-4 h-4" />
+                  <span>Crear {selectedOrders.length > 1 ? 'Boletas' : 'Boleta'}</span>
+                </motion.button>
+                <motion.button
+                  onClick={() => setShowFacturaModal(true)}
+                  disabled={!canCreateFactura}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  whileHover={canCreateFactura ? { scale: 1.02 } : {}}
+                  whileTap={canCreateFactura ? { scale: 0.98 } : {}}
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>Crear Factura</span>
+                </motion.button>
+              </>
+            )}
+          </div>
         </div>
       </div>
       )}
@@ -503,6 +541,29 @@ const OrdersTab = ({
           itemsCount={ordersData.count}
           itemsPerPage={10}
           refetch={refetch}
+        />
+      )}
+
+      {/* Modals */}
+      <CreateBoletaModal
+        isOpen={showBoletaModal}
+        onClose={() => setShowBoletaModal(false)}
+        orders={selectedOrdersData}
+        onSuccess={() => {
+          onDeselectAll()
+          refetch()
+        }}
+      />
+
+      {selectedOrdersData.length === 1 && (
+        <CreateFacturaModal
+          isOpen={showFacturaModal}
+          onClose={() => setShowFacturaModal(false)}
+          order={selectedOrdersData[0]}
+          onSuccess={() => {
+            onDeselectAll()
+            refetch()
+          }}
         />
       )}
     </div>

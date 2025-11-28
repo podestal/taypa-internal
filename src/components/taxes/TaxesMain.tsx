@@ -11,8 +11,6 @@ type TabType = 'boletas' | 'facturas' | 'orders'
 const TaxesMain = () => {
   const [activeTab, setActiveTab] = useState<TabType>('orders')
   const [selectedOrders, setSelectedOrders] = useState<number[]>([])
-  const [documentType, setDocumentType] = useState<'boleta' | 'factura'>('boleta')
-  const [showCreateModal, setShowCreateModal] = useState(false)
   const [connectionStatus] = useState({
     connected: true,
     lastSync: '2024-01-17T08:00:00',
@@ -35,18 +33,6 @@ const TaxesMain = () => {
     setSelectedOrders([])
   }
 
-  const handleCreateDocuments = () => {
-    if (selectedOrders.length === 0) return
-    setShowCreateModal(true)
-  }
-
-  const confirmCreateDocuments = () => {
-    // In real app, this would call the API
-    console.log(`Creating ${documentType}s for orders:`, selectedOrders)
-    setShowCreateModal(false)
-    setSelectedOrders([])
-    // Show success message
-  }
 
   return (
     <div className="h-full bg-gray-50 p-6">
@@ -127,97 +113,12 @@ const TaxesMain = () => {
                   onToggleOrder={handleToggleOrder}
                   onSelectOrders={handleSelectOrders}
                   onDeselectAll={handleDeselectAll}
-                  onCreateDocuments={handleCreateDocuments}
                 />
               )}
             </AnimatePresence>
           </div>
         </motion.div>
       </div>
-
-      {/* Create Document Modal */}
-      <AnimatePresence>
-        {showCreateModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-            onClick={() => setShowCreateModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                Crear Documentos SUNAT
-              </h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Tipo de Documento
-                  </label>
-                  <div className="flex space-x-4">
-                    <motion.button
-                      onClick={() => setDocumentType('boleta')}
-                      className={`flex-1 px-4 py-3 rounded-lg font-medium transition-colors ${
-                        documentType === 'boleta'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      Boleta
-                    </motion.button>
-                    <motion.button
-                      onClick={() => setDocumentType('factura')}
-                      className={`flex-1 px-4 py-3 rounded-lg font-medium transition-colors ${
-                        documentType === 'factura'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      Factura
-                    </motion.button>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-600 mb-2">
-                    Se crearán <span className="font-semibold">{selectedOrders.length}</span> {documentType === 'boleta' ? 'boletas' : 'facturas'} para las órdenes seleccionadas.
-                  </p>
-                </div>
-
-                <div className="flex space-x-3">
-                  <motion.button
-                    onClick={() => setShowCreateModal(false)}
-                    className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    Cancelar
-                  </motion.button>
-                  <motion.button
-                    onClick={confirmCreateDocuments}
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    Crear
-                  </motion.button>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }
