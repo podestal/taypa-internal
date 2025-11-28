@@ -124,10 +124,10 @@ const CreateBoletaModal = ({ isOpen, onClose, order, onSuccess }: CreateBoletaMo
           </div>
 
           {/* Actions */}
-          <div className="flex space-x-3">
+          <div className="flex space-x-3 justify-end">
             <motion.button
               onClick={onClose}
-              className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+              className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -136,7 +136,7 @@ const CreateBoletaModal = ({ isOpen, onClose, order, onSuccess }: CreateBoletaMo
             <motion.button
               onClick={handleSubmit}
               disabled={createTicket.isPending}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >

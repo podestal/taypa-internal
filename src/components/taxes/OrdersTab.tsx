@@ -409,7 +409,7 @@ const OrdersTab = ({}: OrdersTabProps) => {
                       {order.address_info || 'Sin dirección'}
                     </span>
                   </div>
-                  <div className="flex items-center space-x-4 text-sm">
+                  <div className="flex items-center space-x-4 text-sm flex-wrap gap-2">
                     <div className="flex items-center space-x-2">
                       <span className="text-gray-600">Estado:</span>
                       <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
@@ -424,41 +424,40 @@ const OrdersTab = ({}: OrdersTabProps) => {
                         {ORDER_TYPE_LABELS[order.order_type] || order.order_type}
                       </span>
                     </div>
+                    {/* Action Buttons */}
+                    <div className="flex items-center space-x-2 ml-auto">
+                      <motion.button
+                        onClick={() => {
+                          if (fullOrder) {
+                            setSelectedOrder(fullOrder)
+                            setShowBoletaModal(true)
+                          }
+                        }}
+                        disabled={isDisabled}
+                        className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700 transition-colors flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                        whileHover={!isDisabled ? { scale: 1.05 } : {}}
+                        whileTap={!isDisabled ? { scale: 0.95 } : {}}
+                      >
+                        <Receipt className="w-3.5 h-3.5" />
+                        <span>Boleta</span>
+                      </motion.button>
+                      <motion.button
+                        onClick={() => {
+                          if (fullOrder) {
+                            setSelectedOrder(fullOrder)
+                            setShowFacturaModal(true)
+                          }
+                        }}
+                        disabled={isDisabled}
+                        className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                        whileHover={!isDisabled ? { scale: 1.05 } : {}}
+                        whileTap={!isDisabled ? { scale: 0.95 } : {}}
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>Factura</span>
+                      </motion.button>
+                    </div>
                   </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="mt-4 pt-4 border-t border-gray-200 flex items-center space-x-3">
-                  <motion.button
-                    onClick={() => {
-                      if (fullOrder) {
-                        setSelectedOrder(fullOrder)
-                        setShowBoletaModal(true)
-                      }
-                    }}
-                    disabled={isDisabled}
-                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    whileHover={!isDisabled ? { scale: 1.02 } : {}}
-                    whileTap={!isDisabled ? { scale: 0.98 } : {}}
-                  >
-                    <Receipt className="w-4 h-4" />
-                    <span>Crear Boleta</span>
-                  </motion.button>
-                  <motion.button
-                    onClick={() => {
-                      if (fullOrder) {
-                        setSelectedOrder(fullOrder)
-                        setShowFacturaModal(true)
-                      }
-                    }}
-                    disabled={isDisabled}
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    whileHover={!isDisabled ? { scale: 1.02 } : {}}
-                    whileTap={!isDisabled ? { scale: 0.98 } : {}}
-                  >
-                    <FileText className="w-4 h-4" />
-                    <span>Crear Factura</span>
-                  </motion.button>
                 </div>
               </div>
             </div>
