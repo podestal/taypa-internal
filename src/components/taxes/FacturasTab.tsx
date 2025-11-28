@@ -14,7 +14,9 @@ const FacturasTab = () => {
   // Map API documents to UI format
   const facturas = useMemo(() => {
     if (!facturasData?.results) return []
-    return facturasData.results.map(mapDocumentToSunatDocument)
+    return facturasData.results
+    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+    .map(mapDocumentToSunatDocument)
   }, [facturasData])
 
   if (error) {

@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Receipt, ShoppingCart, Plus, CheckCircle2, XCircle, RefreshCw, Coins, FileText } from 'lucide-react'
+import { Receipt, ShoppingCart, Plus, CheckCircle2, Coins, FileText } from 'lucide-react'
 import moment from 'moment'
 import BoletasTab from './BoletasTab'
 import FacturasTab from './FacturasTab'
+import SunatConnectionStatus from './SunatConnectionStatus'
 
 interface OrderForTaxes {
   id: number
@@ -59,8 +60,7 @@ const TaxesMain = () => {
   const [selectedOrders, setSelectedOrders] = useState<number[]>([])
   const [documentType, setDocumentType] = useState<'boleta' | 'factura'>('boleta')
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [isSyncing, setIsSyncing] = useState(false)
-  const [connectionStatus, setConnectionStatus] = useState({
+  const [connectionStatus] = useState({
     connected: true,
     lastSync: '2024-01-17T08:00:00',
     environment: 'sandbox' as 'production' | 'sandbox'
@@ -68,17 +68,6 @@ const TaxesMain = () => {
 
   // Mock orders data (in real app, this would come from API)
   const [orders] = useState<OrderForTaxes[]>(mockOrders)
-
-  const handleSync = () => {
-    setIsSyncing(true)
-    setTimeout(() => {
-      setIsSyncing(false)
-      setConnectionStatus({
-        ...connectionStatus,
-        lastSync: new Date().toISOString()
-      })
-    }, 2000)
-  }
 
   const handleToggleOrder = (orderId: number) => {
     setSelectedOrders(prev =>
@@ -303,69 +292,11 @@ const TaxesMain = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                {connectionStatus.connected ? (
-                  <CheckCircle2 className="w-6 h-6 text-green-600" />
-                ) : (
-                  <XCircle className="w-6 h-6 text-red-600" />
-                )}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Estado de Conexión SUNAT
-                  </h3>
-                  <p className={`text-sm font-medium ${
-                    connectionStatus.connected ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {connectionStatus.connected ? 'Conectado' : 'Desconectado'}
-                  </p>
-                </div>
-              </div>
-              <motion.button
-                onClick={handleSync}
-                disabled={isSyncing || !connectionStatus.connected}
-                className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
-                  connectionStatus.connected && !isSyncing
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-                whileHover={connectionStatus.connected && !isSyncing ? { scale: 1.05 } : {}}
-                whileTap={connectionStatus.connected && !isSyncing ? { scale: 0.95 } : {}}
-              >
-                {isSyncing ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>Sincronizando...</span>
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="w-4 h-4" />
-                    <span>Sincronizar</span>
-                  </>
-                )}
-              </motion.button>
-            </div>
-            
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-gray-500">Ambiente</p>
-                  <p className="font-medium text-gray-900 capitalize">
-                    {connectionStatus.environment === 'production' ? 'Producción' : 'Pruebas'}
-                  </p>
-                </div>
-                {connectionStatus.lastSync && (
-                  <div>
-                    <p className="text-gray-500">Última Sincronización</p>
-                    <p className="font-medium text-gray-900">
-                      {moment(connectionStatus.lastSync).format('DD/MM/YYYY HH:mm')}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <SunatConnectionStatus
+            connected={connectionStatus.connected}
+            lastSync={connectionStatus.lastSync}
+            environment={connectionStatus.environment}
+          />
         </motion.div>
 
         {/* Tabs */}

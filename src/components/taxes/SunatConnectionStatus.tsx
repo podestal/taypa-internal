@@ -1,22 +1,38 @@
 import { motion } from 'framer-motion'
 import { CheckCircle2, XCircle, RefreshCw } from 'lucide-react'
 import moment from 'moment'
+import useSyncSunat from '../../hooks/sunat/useSyncSunat'
+import useAuthStore from '../../store/useAuthStore'
+import { useState, useEffect } from 'react'
 
 interface SunatConnectionStatusProps {
   connected: boolean
   lastSync?: string
   environment: 'production' | 'sandbox'
-  onSync?: () => void
-  isSyncing?: boolean
 }
 
 const SunatConnectionStatus = ({ 
   connected, 
-  lastSync, 
-  environment, 
-  onSync,
-  isSyncing = false 
+  lastSync: initialLastSync, 
+  environment
 }: SunatConnectionStatusProps) => {
+  const access = useAuthStore(state => state.access) || ''
+  const [lastSync, setLastSync] = useState(initialLastSync)
+  const syncMutation = useSyncSunat({access})
+
+  useEffect(() => {
+    if (initialLastSync) {
+      setLastSync(initialLastSync)
+    }
+  }, [initialLastSync])
+
+  const handleSync = () => {
+    syncMutation.mutate(undefined, {
+      onSuccess: (data) => {
+        setLastSync(new Date().toISOString())
+      }
+    })
+  }
   return (
     <motion.div
       className="bg-white rounded-xl shadow-lg p-6"
@@ -43,17 +59,17 @@ const SunatConnectionStatus = ({
           </div>
         </div>
         <motion.button
-          onClick={onSync}
-          disabled={isSyncing || !connected}
+          onClick={handleSync}
+          disabled={syncMutation.isPending || !connected}
           className={`px-4 py-2 rounded-lg font-medium transition-all flex items-center gap-2 ${
-            connected && !isSyncing
+            connected && !syncMutation.isPending
               ? 'bg-blue-600 text-white hover:bg-blue-700'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
-          whileHover={connected && !isSyncing ? { scale: 1.05 } : {}}
-          whileTap={connected && !isSyncing ? { scale: 0.95 } : {}}
+          whileHover={connected && !syncMutation.isPending ? { scale: 1.05 } : {}}
+          whileTap={connected && !syncMutation.isPending ? { scale: 0.95 } : {}}
         >
-          {isSyncing ? (
+          {syncMutation.isPending ? (
             <>
               <RefreshCw className="w-4 h-4 animate-spin" />
               <span>Sincronizando...</span>

@@ -56,6 +56,8 @@ interface GetAllDocumentsServiceProps {
     documentType: string
 }
 
+export const syncDocumentsService = () => new SunatClient<void>('/documents/sync/')
+
 export const getAllDocumentsService = ({ documentType }: GetAllDocumentsServiceProps) => {
 
     let url = '/documents/'
