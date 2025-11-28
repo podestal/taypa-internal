@@ -40,6 +40,40 @@ export const getOrderInKitchenService = () => {
     return new APIClient<OrderInKitchen[]>('/orders/in_kitchen/')
 }
 
+export interface OrderItemForBilling {
+    id: string
+    name: string
+    quantity: number
+    cost: number
+}
+
+export interface OrderForBilling {
+    id: number
+    order_number: string
+    status: string
+    created_at: string
+    order_type: string
+    customer_name: string
+    customer_phone: string
+    customer_ruc: string
+    customer_address: string
+    order_items: OrderItemForBilling[]
+    total_amount: number
+    has_document: boolean
+    document: any | null
+}
+
+export interface OrdersForBillingPage {
+    count: number
+    next: string | null
+    previous: string | null
+    results: OrderForBilling[]
+}
+
+export const getOrderForBillingService = () => {
+    return new APIClient<OrdersForBillingPage>('/orders/for-billing/')
+}
+
 interface Props {
     byClient?: boolean
     inKitchen?: boolean

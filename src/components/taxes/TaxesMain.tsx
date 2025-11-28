@@ -1,10 +1,14 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Receipt, ShoppingCart, Plus, CheckCircle2, Coins, FileText } from 'lucide-react'
 import moment from 'moment'
 import BoletasTab from './BoletasTab'
 import FacturasTab from './FacturasTab'
 import SunatConnectionStatus from './SunatConnectionStatus'
+import useGetOrdersForBilling from '../../hooks/api/order/useGetOrdersForBilling'
+import useAuthStore from '../../store/useAuthStore'
+import { type OrderForBilling } from '../../services/api/orderService'
+import Paginator from '../ui/Paginator'
 
 interface OrderForTaxes {
   id: number
@@ -21,53 +25,52 @@ interface OrderForTaxes {
 
 type TabType = 'boletas' | 'facturas' | 'orders'
 
-
-const mockOrders: OrderForTaxes[] = [
-  {
-    id: 103,
-    order_number: 'ORD-2024-001',
-    customer_name: 'Carlos Rodríguez',
-    address_info: 'Calle Los Olivos 456',
-    total: 156.75,
-    created_at: '2024-01-17T10:30:00',
-    status: 'C'
-  },
-  {
-    id: 104,
-    order_number: 'ORD-2024-002',
-    customer_name: 'Ana Martínez',
-    customer_ruc: '20123456790',
-    address_info: 'Av. Miraflores 789',
-    total: 320.50,
-    created_at: '2024-01-17T11:15:00',
-    status: 'C'
-  },
-  {
-    id: 105,
-    order_number: 'ORD-2024-003',
-    customer_name: 'Luis Sánchez',
-    address_info: 'Jr. Libertad 321',
-    total: 78.90,
-    created_at: '2024-01-17T12:00:00',
-    status: 'C',
-    has_document: true,
-    document_type: 'boleta'
+const mapOrderForBillingToOrderForTaxes = (order: OrderForBilling): OrderForTaxes => {
+  // Determine document type from the document if it exists
+  let document_type: 'boleta' | 'factura' | undefined = undefined
+  if (order.document) {
+    // Assuming document has a type field, adjust based on actual API response
+    document_type = order.document.document_type === '03' ? 'boleta' : 'factura'
   }
-]
+
+  return {
+    id: order.id,
+    order_number: order.order_number,
+    customer_name: order.customer_name || '',
+    customer_ruc: order.customer_ruc || undefined,
+    address_info: order.customer_address || '',
+    total: order.total_amount,
+    created_at: order.created_at,
+    status: order.status,
+    has_document: order.has_document,
+    document_type
+  }
+}
 
 const TaxesMain = () => {
+  const access = useAuthStore(state => state.access) || ''
   const [activeTab, setActiveTab] = useState<TabType>('orders')
   const [selectedOrders, setSelectedOrders] = useState<number[]>([])
   const [documentType, setDocumentType] = useState<'boleta' | 'factura'>('boleta')
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [ordersPage, setOrdersPage] = useState(1)
   const [connectionStatus] = useState({
     connected: true,
     lastSync: '2024-01-17T08:00:00',
     environment: 'sandbox' as 'production' | 'sandbox'
   })
 
-  // Mock orders data (in real app, this would come from API)
-  const [orders] = useState<OrderForTaxes[]>(mockOrders)
+  // Fetch orders from API
+  const { data: ordersData, isLoading: isLoadingOrders, error: ordersError } = useGetOrdersForBilling({
+    access,
+    page: ordersPage
+  })
+
+  // Map API orders to UI format
+  const orders = useMemo(() => {
+    if (!ordersData?.results) return []
+    return ordersData.results.map(mapOrderForBillingToOrderForTaxes)
+  }, [ordersData])
 
   const handleToggleOrder = (orderId: number) => {
     setSelectedOrders(prev =>
@@ -110,6 +113,24 @@ const TaxesMain = () => {
   const renderOrdersList = () => {
     const availableOrders = orders.filter(o => !o.has_document)
     const allSelected = availableOrders.length > 0 && selectedOrders.length === availableOrders.length
+
+    if (isLoadingOrders) {
+      return (
+        <div className="text-center py-12 bg-white rounded-lg">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-gray-500 text-lg mt-4">Cargando órdenes...</p>
+        </div>
+      )
+    }
+
+    if (ordersError) {
+      return (
+        <div className="text-center py-12 bg-white rounded-lg">
+          <p className="text-red-500 text-lg">Error al cargar las órdenes</p>
+          <p className="text-red-400 text-sm mt-2">{ordersError.message}</p>
+        </div>
+      )
+    }
 
     if (orders.length === 0) {
       return (
@@ -269,6 +290,14 @@ const TaxesMain = () => {
             </motion.div>
           )
         })}
+        {ordersData && (
+          <Paginator
+            page={ordersPage}
+            setPage={setOrdersPage}
+            itemsCount={ordersData.count}
+            itemsPerPage={10}
+          />
+        )}
       </div>
     )
   }
