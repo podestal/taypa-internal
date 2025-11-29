@@ -11,6 +11,12 @@ import useAuthStore from "../../../store/useAuthStore"
 import useNotificationStore from "../../../store/useNotificationStore"
 import { useQueryClient } from "@tanstack/react-query"
 import { Trash2 } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import useOrderInfo from "../../../store/useOrderInfo"
+import useCustomerInfo from "../../../store/useCustomerInfo"
+import useAddressInfo from "../../../store/useAddressInfo"
+import useOrderStep from "../../../store/useOrderStep"
+import getOrderService from "../../../services/api/orderService"
 
 interface Props {
     order: OrderByStatus
@@ -27,8 +33,14 @@ const OrderByStatusCard = ({ order, index, status }: Props) => {
     const removeOrder = useRemoveOrder({ orderId: order.id })
     const addNotification = useNotificationStore(state => state.addNotification)
     const queryClient = useQueryClient()
+    const navigate = useNavigate()
+    const setOrderInfo = useOrderInfo(state => state.setOrderInfo)
+    const setCustomerInfo = useCustomerInfo(state => state.setCustomerInfo)
+    const setAddressInfo = useAddressInfo(state => state.setAddressInfo)
+    const setOrderStep = useOrderStep(state => state.setOrderStep)
 
     const isGuardadas = status === 'IP'
+    const orderService = getOrderService({ orderId: order.id })
 
     useEffect(() => {
         if (!isGuardadas) {
@@ -61,6 +73,66 @@ const OrderByStatusCard = ({ order, index, status }: Props) => {
         })
     }
 
+    const handleLoadOrder = async () => {
+        try {
+            // Fetch full order to get customer and address IDs
+            const fullOrderData = await orderService.get(access)
+            
+            // Handle both array and single object responses
+            const orderData = Array.isArray(fullOrderData) ? fullOrderData[0] : fullOrderData
+            
+            if (orderData) {
+                // Populate order info
+                setOrderInfo({
+                    id: order.id,
+                    orderNumber: order.order_number,
+                    customer: orderData.customer,
+                    address: orderData.address,
+                    createdAt: typeof order.created_at === 'string' ? order.created_at : order.created_at.toString(),
+                    updatedAt: typeof order.updated_at === 'string' ? order.updated_at : order.updated_at.toString(),
+                })
+
+                // Parse customer name (assuming format: "FirstName LastName" or just "Name")
+                const customerNameParts = order.customer_name.trim().split(' ')
+                const firstName = customerNameParts[0] || ''
+                const lastName = customerNameParts.slice(1).join(' ') || ''
+                
+                setCustomerInfo({
+                    id: orderData.customer,
+                    firstName: firstName,
+                    lastName: lastName,
+                    phone: '', // Not available in OrderByStatus
+                })
+
+                // Parse address info (assuming format: "Street - Reference" or just "Street")
+                const addressParts = order.address_info.split(' - ')
+                const street = addressParts[0] || order.address_info
+                const reference = addressParts[1] || ''
+                
+                setAddressInfo({
+                    id: orderData.address,
+                    street: street,
+                    reference: reference,
+                    is_primary: false,
+                    customer: orderData.customer,
+                })
+
+                // Set order step to items to show the order items
+                setOrderStep('items')
+
+                // Navigate to orders page
+                navigate('/orders')
+            }
+        } catch (error) {
+            console.error('Error loading order:', error)
+            addNotification({
+                title: 'Error',
+                message: 'Error al cargar la orden',
+                type: 'error',
+            })
+        }
+    }
+
   return (
     <>
     <motion.div
@@ -68,7 +140,8 @@ const OrderByStatusCard = ({ order, index, status }: Props) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.1 }}
-        className={`bg-gray-50 rounded-lg p-4 border-l-4 border-blue-600`}
+        className={`bg-gray-50 rounded-lg p-4 border-l-4 border-blue-600 ${isGuardadas ? 'cursor-pointer hover:bg-gray-100 transition-colors' : ''}`}
+        onClick={isGuardadas ? handleLoadOrder : undefined}
     >
         <div className="flex items-center justify-between mb-3">
             <h3 className="font-bold text-lg text-gray-900">#{order.order_number.split('-')[1]}</h3>
