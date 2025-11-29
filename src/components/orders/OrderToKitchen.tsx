@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X } from "lucide-react"
+import { X, Loader2 } from "lucide-react"
 import useUpdateOrder from "../../hooks/api/order/useUpdateOrder"
 import useAuthStore from "../../store/useAuthStore"
 import useNotificationStore from "../../store/useNotificationStore"
@@ -265,15 +265,23 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
     >
         <button
             onClick={handleSendToKitchen}
-            className="w-full mt-3 cursor-pointer bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
+            disabled={updateOrder.isPending || createTicket.isPending}
+            className="w-full mt-3 cursor-pointer bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
         >
-            Ticket
+            {(updateOrder.isPending || createTicket.isPending) && (
+                <Loader2 className="w-4 h-4 animate-spin" />
+            )}
+            <span>{updateOrder.isPending || createTicket.isPending ? 'Enviando...' : 'Ticket'}</span>
         </button>
         <button
             onClick={handleSendToKitchenBoleta}
-            className="w-full mt-3 cursor-pointer bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            disabled={updateOrder.isPending || createTicket.isPending}
+            className="w-full mt-3 cursor-pointer bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
         >
-            Boleta
+            {(updateOrder.isPending || createTicket.isPending) && (
+                <Loader2 className="w-4 h-4 animate-spin" />
+            )}
+            <span>{updateOrder.isPending || createTicket.isPending ? 'Creando...' : 'Boleta'}</span>
         </button>
         <button
             onClick={() => {
@@ -284,9 +292,13 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
                 })
                 setShowFacturaModal(true)
             }}
-            className="w-full mt-3 cursor-pointer bg-yellow-600 text-white py-3 rounded-lg font-medium hover:bg-yellow-700 transition-colors"
+            disabled={updateOrder.isPending || createInvoice.isPending}
+            className="w-full mt-3 cursor-pointer bg-yellow-600 text-white py-3 rounded-lg font-medium hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
         >
-            Factura
+            {(updateOrder.isPending || createInvoice.isPending) && (
+                <Loader2 className="w-4 h-4 animate-spin" />
+            )}
+            <span>{updateOrder.isPending || createInvoice.isPending ? 'Procesando...' : 'Factura'}</span>
         </button>
     </motion.div>
 
@@ -298,7 +310,11 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50"
-                onClick={() => setShowFacturaModal(false)}
+                onClick={() => {
+                    if (!createInvoice.isPending && !updateOrder.isPending) {
+                        setShowFacturaModal(false)
+                    }
+                }}
             >
                 <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
@@ -311,7 +327,8 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
                         <h3 className="text-xl font-bold text-gray-900">Crear Factura</h3>
                         <button
                             onClick={() => setShowFacturaModal(false)}
-                            className="text-gray-400 hover:text-gray-600 transition-colors"
+                            disabled={createInvoice.isPending || updateOrder.isPending}
+                            className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <X className="w-6 h-6" />
                         </button>
@@ -331,7 +348,8 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
                                     if (facturaErrors.ruc) setFacturaErrors(prev => ({ ...prev, ruc: '' }))
                                 }}
                                 maxLength={11}
-                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                                disabled={createInvoice.isPending || updateOrder.isPending}
+                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed ${
                                     facturaErrors.ruc ? 'border-red-500' : 'border-gray-300'
                                 }`}
                                 placeholder="20123456789"
@@ -352,7 +370,8 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
                                     if (facturaErrors.address) setFacturaErrors(prev => ({ ...prev, address: '' }))
                                 }}
                                 rows={3}
-                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                                disabled={createInvoice.isPending || updateOrder.isPending}
+                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed ${
                                     facturaErrors.address ? 'border-red-500' : 'border-gray-300'
                                 }`}
                                 placeholder="Dirección completa del cliente"
@@ -366,20 +385,24 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
                     <div className="flex space-x-3 mt-6 justify-end">
                         <motion.button
                             onClick={() => setShowFacturaModal(false)}
-                            className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
+                            disabled={createInvoice.isPending || updateOrder.isPending}
+                            className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            whileHover={!createInvoice.isPending && !updateOrder.isPending ? { scale: 1.02 } : {}}
+                            whileTap={!createInvoice.isPending && !updateOrder.isPending ? { scale: 0.98 } : {}}
                         >
                             Cancelar
                         </motion.button>
                         <motion.button
                             onClick={handleSendToKitchenFactura}
                             disabled={createInvoice.isPending || updateOrder.isPending}
-                            className="px-6 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
+                            className="px-6 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                            whileHover={!createInvoice.isPending && !updateOrder.isPending ? { scale: 1.02 } : {}}
+                            whileTap={!createInvoice.isPending && !updateOrder.isPending ? { scale: 0.98 } : {}}
                         >
-                            {createInvoice.isPending || updateOrder.isPending ? 'Creando...' : 'Crear Factura'}
+                            {(createInvoice.isPending || updateOrder.isPending) && (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            )}
+                            <span>{createInvoice.isPending || updateOrder.isPending ? 'Creando...' : 'Crear Factura'}</span>
                         </motion.button>
                     </div>
                 </motion.div>
