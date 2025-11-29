@@ -37,7 +37,7 @@ const OrderItemList = ({ orderId }: Props) => {
                     S/.{orderItems.reduce((sum, item) => sum + Number(item.price ?? 0), 0).toFixed(2)}
                     </span>
                   </div>
-                  <OrderToKitchen orderId={orderId} />
+                  <OrderToKitchen orderId={orderId} orderItems={orderItems} />
                 </div>
               </div> 
               : 

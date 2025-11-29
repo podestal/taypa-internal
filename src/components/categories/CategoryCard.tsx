@@ -10,10 +10,10 @@ interface Props {
 }
 
 const categoryIcons = [
-    <Drumstick />,
-    <Hamburger />,
-    <Salad />,
-    <CupSoda />
+    {name: 'Pollo', icon: <Drumstick />},
+    {name: 'Burger', icon: <Hamburger />},
+    {name: 'Salchipapa', icon: <Salad />},
+    {name: 'Bebidas', icon: <CupSoda />}
 ]
 
 const CategoryCard = ({ category, setSelectedCategory, selectedCategory, idx }: Props) => {
@@ -29,7 +29,7 @@ const CategoryCard = ({ category, setSelectedCategory, selectedCategory, idx }: 
         whileTap={{ scale: 0.98 }}
     >
         <div className="flex items-center justify-center mb-2">
-        {categoryIcons[idx]}
+        {categoryIcons.find(icon => icon.name === category.name)?.icon}
         </div>
         <div className="text-sm font-medium">{category.name}</div>
     </motion.button>

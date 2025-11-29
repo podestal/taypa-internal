@@ -40,7 +40,6 @@ const OrdersSelectionList = ({
   }
 
   const allSelected = orders.length > 0 && selectedOrders.length === orders.length
-  const someSelected = selectedOrders.length > 0 && selectedOrders.length < orders.length
 
   if (isLoading) {
     return (
