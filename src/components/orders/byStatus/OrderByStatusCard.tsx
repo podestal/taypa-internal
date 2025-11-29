@@ -34,7 +34,7 @@ const OrderByStatusCard = ({ order, index, status }: Props) => {
     const addNotification = useNotificationStore(state => state.addNotification)
     const queryClient = useQueryClient()
     const navigate = useNavigate()
-    const setOrderInfo = useOrderInfo(state => state.setOrderInfo)
+    const { orderInfo, setOrderInfo } = useOrderInfo()
     const setCustomerInfo = useCustomerInfo(state => state.setCustomerInfo)
     const setAddressInfo = useAddressInfo(state => state.setAddressInfo)
     const setOrderStep = useOrderStep(state => state.setOrderStep)
@@ -55,6 +55,33 @@ const OrderByStatusCard = ({ order, index, status }: Props) => {
         removeOrder.mutate({ access }, {
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ['orders by status', status] })
+                
+                // Reset stores if the deleted order is the current one
+                if (orderInfo.id === order.id) {
+                    setOrderInfo({
+                        id: 0,
+                        orderNumber: '',
+                        customer: 0,
+                        address: 0,
+                        createdAt: '',
+                        updatedAt: '',
+                    })
+                    setCustomerInfo({
+                        id: 0,
+                        firstName: '',
+                        lastName: '',
+                        phone: '',
+                    })
+                    setAddressInfo({
+                        id: 0,
+                        street: '',
+                        reference: '',
+                        is_primary: false,
+                        customer: 0,
+                    })
+                    setOrderStep('customer')
+                }
+                
                 addNotification({
                     title: 'Orden eliminada',
                     message: 'La orden ha sido eliminada correctamente',
@@ -135,12 +162,13 @@ const OrderByStatusCard = ({ order, index, status }: Props) => {
 
   return (
     <>
+    <div className="relative">
     <motion.div
         key={order.id}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.1 }}
-        className={`bg-gray-50 rounded-lg p-4 border-l-4 border-blue-600 ${isGuardadas ? 'cursor-pointer hover:bg-gray-100 transition-colors' : ''}`}
+        className={`bg-gray-50 rounded-lg p-4 border-l-4 border-blue-600 ${isGuardadas ? 'cursor-pointer hover:bg-gray-100 transition-colors pr-12' : ''}`}
         onClick={isGuardadas ? handleLoadOrder : undefined}
     >
         <div className="flex items-center justify-between mb-3">
@@ -149,17 +177,6 @@ const OrderByStatusCard = ({ order, index, status }: Props) => {
                 <div className={`px-2 py-1 rounded text-sm font-bold ${getTimeColor(timeElapsed)}`}>
                     {formatTimer(timeElapsed)}
                 </div>
-            )}
-            {isGuardadas && (
-                <motion.button
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    disabled={removeOrder.isPending}
-                >
-                    <Trash2 className="w-4 h-4" />
-                </motion.button>
             )}
         </div>
         
@@ -173,7 +190,10 @@ const OrderByStatusCard = ({ order, index, status }: Props) => {
         <div className="flex justify-between items-center mt-4 mb-2">
             {!isGuardadas && <UpdateOrderStatus orderId={order.id} orderStatus={order.status} orderType={order.order_type} />}
             <motion.button
-                onClick={() => setShowMore(true)}
+                onClick={(e) => {
+                    e.stopPropagation()
+                    setShowMore(true)
+                }}
                 className={`flex items-center ${isGuardadas ? 'justify-start' : 'justify-end'} cursor-pointer text-blue-600 hover:text-blue-800 text-sm font-medium`}
                 whileHover={{ scale: 1.02 }}
                 >
@@ -181,6 +201,21 @@ const OrderByStatusCard = ({ order, index, status }: Props) => {
             </motion.button>
         </div>
     </motion.div>
+    {isGuardadas && (
+        <motion.button
+            onClick={(e) => {
+                e.stopPropagation()
+                setShowDeleteConfirm(true)
+            }}
+            className="absolute top-2 right-2 p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors z-10"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            disabled={removeOrder.isPending}
+        >
+            <Trash2 className="w-4 h-4" />
+        </motion.button>
+    )}
+    </div>
     <Modal 
     isOpen={showMore}
     onClose={() => setShowMore(false)}
