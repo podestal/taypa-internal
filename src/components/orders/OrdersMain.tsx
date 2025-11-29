@@ -14,74 +14,10 @@ import OrderByStatusMain from './byStatus/OrderByStatusMain'
 import useAuthStore from '../../store/useAuthStore'
 
 const OrdersMain = () => {
-  const [orders, setOrders] = useState([
-    {
-      id: 1,
-      customer: {
-        firstName: 'María',
-        lastName: 'González',
-        phone: '+52 55 1234 5678',
-        address: 'Av. Reforma 123',
-        addressReference: 'Entre Insurgentes y Roma Norte'
-      },
-      items: [
-        { name: 'Pizza Margherita', category: 'Pizzas', quantity: 2, price: 150, observations: 'Sin cebolla' },
-        { name: 'Coca Cola', category: 'Bebidas', quantity: 2, price: 25, observations: '' }
-      ],
-      total: 350,
-      status: 'preparing',
-      orderTime: '2025-10-23 08:35',
-      estimatedDelivery: '15:00'
-    },
-    {
-      id: 2,
-      customer: {
-        firstName: 'Carlos',
-        lastName: 'Rodríguez',
-        phone: '+52 55 9876 5432',
-        address: 'Calle Insurgentes 456',
-        addressReference: 'Frente al metro Insurgentes'
-      },
-      items: [
-        { name: 'Hamburguesa Clásica', category: 'Hamburguesas', quantity: 1, price: 120, observations: 'Bien cocida' },
-        { name: 'Papas Fritas', category: 'Acompañamientos', quantity: 1, price: 45, observations: '' },
-        { name: 'Agua Natural', category: 'Bebidas', quantity: 1, price: 15, observations: '' }
-      ],
-      total: 180,
-      status: 'preparing',
-      orderTime: '2025-10-23 08:40',
-      estimatedDelivery: '14:45'
-    },
-    {
-      id: 3,
-      customer: {
-        firstName: 'Ana',
-        lastName: 'Martínez',
-        phone: '+52 55 5555 1234',
-        address: 'Plaza Mayor 789',
-        addressReference: 'Edificio B, Depto 5'
-      },
-      items: [
-        { name: 'Tacos al Pastor', category: 'Tacos', quantity: 6, price: 90, observations: 'Con todo' },
-        { name: 'Refresco', category: 'Bebidas', quantity: 1, price: 20, observations: '' }
-      ],
-      total: 110,
-      status: 'preparing',
-      orderTime: '2025-10-23 08:45',
-      estimatedDelivery: '14:15'
-    }
-  ])
 
   const [selectedCategory, setSelectedCategory] = useState(0)
-  const [currentOrder, setCurrentOrder] = useState<Array<{
-    name: string
-    category: string
-    quantity: number
-    price: number
-    observations: string
-  }>>([])
   const { orderInfo, setOrderInfo } = useOrderInfo()
-  const {customerInfo, setCustomerInfo} = useCustomerInfo()
+  const {customerInfo} = useCustomerInfo()
 
   const { addressInfo, setAddressInfo } = useAddressInfo()
   const access = useAuthStore((state) => state.access) || ''
@@ -191,78 +127,6 @@ const OrdersMain = () => {
     return addressInfo.street.trim().length > 0
   }
 
-  const addItemToOrder = (item: { name: string; price: number }, category: string) => {
-    const existingItemIndex = currentOrder.findIndex(orderItem => 
-      orderItem.name === item.name && orderItem.observations === ''
-    )
-    
-    if (existingItemIndex >= 0) {
-      const updatedOrder = [...currentOrder]
-      updatedOrder[existingItemIndex].quantity += 1
-      setCurrentOrder(updatedOrder)
-    } else {
-      setCurrentOrder(prev => [...prev, {
-        name: item.name,
-        category: category,
-        quantity: 1,
-        price: item.price,
-        observations: ''
-      }])
-    }
-  }
-
-  const updateItemQuantity = (index: number, quantity: number) => {
-    if (quantity <= 0) {
-      removeItemFromOrder(index)
-      return
-    }
-    const updatedOrder = [...currentOrder]
-    updatedOrder[index].quantity = quantity
-    setCurrentOrder(updatedOrder)
-  }
-
-  const updateItemObservations = (index: number, observations: string) => {
-    const updatedOrder = [...currentOrder]
-    updatedOrder[index].observations = observations
-    setCurrentOrder(updatedOrder)
-  }
-
-  const removeItemFromOrder = (index: number) => {
-    setCurrentOrder(prev => prev.filter((_, i) => i !== index))
-  }
-
-  const createOrderInternal = () => {
-    if (currentOrder.length === 0) return
-    
-    const total = currentOrder.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-    const newOrder = {
-      id: orders.length + 1,
-      customer: customerInfo,
-      items: currentOrder,
-      total,
-      status: 'preparing' as const,
-      orderTime: new Date().toLocaleString('es-MX'),
-      estimatedDelivery: new Date(Date.now() + 30 * 60000).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
-    }
-    
-    setOrders(prev => [newOrder, ...prev])
-    setCurrentOrder([])
-    setSelectedCategory('')
-    setOrderStep('customer')
-    setCustomerInfo({
-      id: 0,
-      firstName: '',
-      lastName: '',
-      phone: '',
-    })
-    setAddressInfo({
-      id: 0,
-      street: '',
-      reference: '',
-      is_primary: false,
-      customer: 0,
-    })
-  }
 
   return (
     <div className="h-full bg-gray-50">

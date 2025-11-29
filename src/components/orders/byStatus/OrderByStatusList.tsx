@@ -28,11 +28,15 @@ const OrderByStatusList = ({ status }: Props) => {
                 layout
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                 {orders?.map((order, index) => (
-                    <OrderByStatusCard key={order.id} order={order} index={index} />
+                    <OrderByStatusCard key={order.id} order={order} index={index} status={status} />
                 ))}
             </motion.div>
         : 
-        <p className="text-center text-gray-500 text-xs">No hay órdenes {status === 'IK' ? 'en la cocina' : 'pendientes'}</p>}
+        <p className="text-center text-gray-500 text-xs">
+            {status === 'IP' ? 'No hay órdenes guardadas' : 
+             status === 'IK' ? 'No hay órdenes en la cocina' : 
+             'No hay órdenes pendientes'}
+        </p>}
     </>
   )
 }

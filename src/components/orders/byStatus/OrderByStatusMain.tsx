@@ -6,7 +6,7 @@ import { ChefHat } from "lucide-react"
 
 const OrderByStatusMain = () => {
 
-    const [selectedOrderStatus, setSelectedOrderStatus] = useState<string>('IK')
+    const [selectedOrderStatus, setSelectedOrderStatus] = useState<string>('IP')
     // const [showOrderStatusList, setShowOrderStatusList] = useState(false)
 
   return (

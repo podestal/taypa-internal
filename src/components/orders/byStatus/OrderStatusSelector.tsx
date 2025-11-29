@@ -1,5 +1,5 @@
 import { motion } from "framer-motion"
-import { CheckCircle, ChefHat, Package, Truck } from "lucide-react"
+import { CheckCircle, ChefHat, Package, Truck, Save } from "lucide-react"
 
 interface Props {
     selectedOrderStatus: string
@@ -7,6 +7,7 @@ interface Props {
 }
 
 const orderStatusTabs = [
+    { id: 'IP' as const, label: 'Guardadas', icon: <Save className="w-4 h-4" />, color: 'gray' },
     { id: 'IK' as const, label: 'En Cocina', icon: <ChefHat className="w-4 h-4" />, color: 'orange' },
     { id: 'PA' as const, label: 'Preparadas', icon: <Package className="w-4 h-4" />, color: 'blue' },
     { id: 'IT' as const, label: 'En Tránsito', icon: <Truck className="w-4 h-4" />, color: 'purple' },
@@ -20,6 +21,7 @@ const OrderStatusSelector = ({ selectedOrderStatus, setSelectedOrderStatus }: Pr
         {orderStatusTabs.map((tab) => {
         const isActive = selectedOrderStatus === tab.id
         const colorClasses = {
+            gray: isActive ? 'bg-gray-600 text-white border-gray-600' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100',
             orange: isActive ? 'bg-orange-600 text-white border-orange-600' : 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100',
             blue: isActive ? 'bg-blue-600 text-white border-blue-600' : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
             purple: isActive ? 'bg-purple-600 text-white border-purple-600' : 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100',
