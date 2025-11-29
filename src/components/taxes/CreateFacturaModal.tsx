@@ -61,6 +61,7 @@ const CreateFacturaModal = ({ isOpen, onClose, order, onSuccess }: CreateFactura
       await createInvoice.mutateAsync({
         order_items: order.order_items,
         ruc: formData.ruc.trim(),
+        razon_social: formData.razon_social.trim(),
         address: formData.address.trim(),
         order_id: order.id
       })
@@ -131,7 +132,7 @@ const CreateFacturaModal = ({ isOpen, onClose, order, onSuccess }: CreateFactura
                       {item.quantity}x {item.name}
                     </span>
                     <span className="text-gray-900 font-medium">
-                      {formatCurrency(item.cost * item.quantity)}
+                      {formatCurrency(item.cost)}
                     </span>
                   </div>
                 ))}
@@ -142,6 +143,7 @@ const CreateFacturaModal = ({ isOpen, onClose, order, onSuccess }: CreateFactura
           {/* Form */}
           <div className="space-y-4 mb-6">
             <div>
+                <>{console.log('order', order)}</>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 RUC <span className="text-red-500">*</span>
               </label>

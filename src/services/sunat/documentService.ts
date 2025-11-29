@@ -82,6 +82,7 @@ export interface CreateTicketRequest {
 export interface CreateInvoiceRequest {
     order_items: OrderItem[]
     ruc: string
+    razon_social: string
     address: string
     order_id?: number
 }

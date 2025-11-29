@@ -31,10 +31,12 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
     const [showFacturaModal, setShowFacturaModal] = useState(false)
     const [facturaFormData, setFacturaFormData] = useState({
         ruc: '',
+        razon_social: '',
         address: addressInfo.street || ''
     })
     const [facturaErrors, setFacturaErrors] = useState({
         ruc: '',
+        razon_social: '',
         address: ''
     })
 
@@ -161,7 +163,7 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
     }
 
     const validateFacturaForm = () => {
-        const newErrors = { ruc: '', address: '' }
+        const newErrors = { ruc: '', razon_social: '', address: '' }
         let hasError = false
 
         if (!facturaFormData.ruc.trim()) {
@@ -169,6 +171,11 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
             hasError = true
         } else if (!/^\d{11}$/.test(facturaFormData.ruc.trim())) {
             newErrors.ruc = 'El RUC debe tener 11 dígitos'
+            hasError = true
+        }
+
+        if (!facturaFormData.razon_social.trim()) {
+            newErrors.razon_social = 'La razón social es requerida'
             hasError = true
         }
 
@@ -196,9 +203,10 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
                         id: item.id.toString(),
                         name: `${item.category} - ${item.dish}`,
                         quantity: item.quantity,
-                        cost: item.price
+                        cost: Number((item.price / item.quantity).toFixed(2))
                     })),
                     ruc: facturaFormData.ruc.trim(),
+                    razon_social: facturaFormData.razon_social.trim(),
                     address: facturaFormData.address.trim(),
                     order_id: orderId
                 }, {
@@ -234,6 +242,7 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
                         setShowFacturaModal(false)
                         setFacturaFormData({
                             ruc: '',
+                            razon_social: '',
                             address: ''
                         })
                     },
@@ -288,6 +297,7 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
                 // Pre-fill form with available data
                 setFacturaFormData({
                     ruc: '',
+                    razon_social: '',
                     address: addressInfo.street || ''
                 })
                 setShowFacturaModal(true)
@@ -356,6 +366,28 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
                             />
                             {facturaErrors.ruc && (
                                 <p className="text-red-500 text-sm mt-1">{facturaErrors.ruc}</p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Razón Social <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={facturaFormData.razon_social}
+                                onChange={(e) => {
+                                    setFacturaFormData(prev => ({ ...prev, razon_social: e.target.value }))
+                                    if (facturaErrors.razon_social) setFacturaErrors(prev => ({ ...prev, razon_social: '' }))
+                                }}
+                                disabled={createInvoice.isPending || updateOrder.isPending}
+                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed ${
+                                    facturaErrors.razon_social ? 'border-red-500' : 'border-gray-300'
+                                }`}
+                                placeholder="Nombre de la empresa"
+                            />
+                            {facturaErrors.razon_social && (
+                                <p className="text-red-500 text-sm mt-1">{facturaErrors.razon_social}</p>
                             )}
                         </div>
 
