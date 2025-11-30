@@ -15,7 +15,6 @@ const FacturasTab = () => {
   const facturas = useMemo(() => {
     if (!facturasData?.results) return []
     return facturasData.results
-    .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
     .map(mapDocumentToSunatDocument)
   }, [facturasData])
 

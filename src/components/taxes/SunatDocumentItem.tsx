@@ -48,9 +48,6 @@ const SunatDocumentItem = ({ doc, type, index }: Props) => {
     }).format(amount)
   }
 
-  // Use fetched amount if available, otherwise use doc.total
-  const displayAmount = ''
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -67,7 +64,7 @@ const SunatDocumentItem = ({ doc, type, index }: Props) => {
                 {type === 'boletas' ? 'Boleta' : 'Factura'} {doc.serie}-{doc.numero}
               </h4>
               <p className="text-sm text-gray-500">
-                Emitida el {moment(doc.fecha_emision).format('DD/MM/YYYY')}
+                Emitida el {moment(doc.created_at).format('DD/MM/YYYY')}
               </p>
             </div>
           </div>

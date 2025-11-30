@@ -38,7 +38,6 @@ const SunatDocumentsList = ({ documents, type, isLoading }: Props) => {
 
   return (
     <div className="space-y-4">
-      <>{console.log('documents', documents)}</>
       {documents.map((doc, index) => (
         <SunatDocumentItem
           key={doc.id}

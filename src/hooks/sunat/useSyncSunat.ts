@@ -1,12 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { syncDocumentsService } from "../../services/sunat/documentService"
 
-interface SyncResponse {
-  success: boolean
-  message?: string
-  lastSync?: string
-}
-
 interface Props {
     access: string
 }
