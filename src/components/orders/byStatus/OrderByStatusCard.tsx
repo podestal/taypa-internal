@@ -43,13 +43,13 @@ const OrderByStatusCard = ({ order, index, status }: Props) => {
     const orderService = getOrderService({ orderId: order.id })
 
     useEffect(() => {
-        if (!isGuardadas) {
+        if (!isGuardadas && order.status !== 'DO' && order.status !== 'HA') {
             const timer = setInterval(() => {
               setCurrentTime(new Date())
             }, 1000)
             return () => clearInterval(timer)
         }
-    }, [isGuardadas])
+    }, [isGuardadas, order.status])
 
     const handleDeleteOrder = () => {
         removeOrder.mutate({ access }, {
@@ -173,18 +173,58 @@ const OrderByStatusCard = ({ order, index, status }: Props) => {
     >
         <div className="flex items-center justify-between mb-3">
             <h3 className="font-bold text-lg text-gray-900">#{order.order_number.split('-')[1]}</h3>
-            {!isGuardadas && order.status !== 'DO' && (
+            {!isGuardadas && order.status !== 'DO' && order.status !== 'HA' && (
                 <div className={`px-2 py-1 rounded text-sm font-bold ${getTimeColor(timeElapsed)}`}>
                     {formatTimer(timeElapsed)}
                 </div>
             )}
         </div>
         
-        <div className="text-sm text-gray-600 mb-2">
+        <div className="text-sm text-gray-600 mb-2 font-semibold">
             {order.customer_name}
         </div>
-        <div className="text-xs text-gray-600">
-            <strong>Dir:</strong> {order.address_info}
+        <div className="text-xs text-gray-600 mb-3">
+            <strong></strong> {order.address_info}
+        </div>
+        
+        {/* Items Summary */}
+        <div className="mb-3 pt-3 border-t border-gray-200">
+            <div className="text-xs text-gray-500 mb-2">
+                <strong>Items:</strong> {Object.values(order.categories).reduce((total, items) => total + items.reduce((sum, item) => sum + item.quantity, 0), 0)} unidades
+            </div>
+            <div className="text-xs text-gray-600 space-y-1 max-h-20 overflow-y-auto">
+                {Object.entries(order.categories).flatMap(([categoryName, items]) => 
+                    items.map((item, idx) => (
+                        <div key={`${categoryName}-${item.id}-${idx}`} className="flex items-center justify-between">
+                            <span className="truncate flex-1 mr-2">
+                                {item.quantity}x {item.dish}
+                            </span>
+                            {item.price && (
+                                <span className="text-gray-700 font-medium whitespace-nowrap">
+                                    S/.{(item.price * item.quantity).toFixed(2)}
+                                </span>
+                            )}
+                        </div>
+                    ))
+                ).slice(0, 4)}
+                {Object.values(order.categories).reduce((total, items) => total + items.length, 0) > 4 && (
+                    <div className="text-gray-400 italic text-xs pt-1">
+                        +{Object.values(order.categories).reduce((total, items) => total + items.length, 0) - 4} más...
+                    </div>
+                )}
+            </div>
+        </div>
+        
+        {/* Total */}
+        <div className="mb-3 pt-2 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-gray-700">Total:</span>
+                <span className="text-lg font-bold text-blue-600">
+                    S/.{Object.values(order.categories).reduce((acc, items) => 
+                        acc + items.reduce((sum, item) => sum + (item.price ?? 0) * item.quantity, 0), 0
+                    ).toFixed(2)}
+                </span>
+            </div>
         </div>
         
         <div className="flex justify-between items-center mt-4 mb-2">

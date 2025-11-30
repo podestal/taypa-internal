@@ -1,4 +1,4 @@
-import APIClie from "./apiClient"
+import APIClient from "./apiClient"
 
 export interface Category {
     id: number
@@ -21,7 +21,7 @@ const getCategoryService = ({ categoryId }: Props) => {
     if (categoryId) {
         url += `${categoryId}/`
     }
-    return new APIClie<Category[], CreateUpdateCategory>(url)
+    return new APIClient<Category[], CreateUpdateCategory>(url)
 }
 
 export default getCategoryService

@@ -8,12 +8,23 @@ interface Props {
 
 const useGetOrderByStatus = ({ access, status }: Props): UseQueryResult<OrderByStatus[], Error> => {
     const orderByStatusService = getOrderByStatusService()
-    const params: Record<string, string> = {
-        status
-    }
+    
     return useQuery({
         queryKey: ['orders by status', status],
-        queryFn: () => orderByStatusService.get(access, params),
+        queryFn: async () => {
+            // For 'DO' status, also fetch 'HA' orders
+            if (status === 'DO') {
+                const [doOrders, haOrders] = await Promise.all([
+                    orderByStatusService.get(access, { status: 'DO' }),
+                    orderByStatusService.get(access, { status: 'HA' })
+                ])
+                // Combine and return both arrays
+                return [...doOrders, ...haOrders]
+            } else {
+                // For other statuses, fetch normally
+                return orderByStatusService.get(access, { status })
+            }
+        },
     })
 }
 

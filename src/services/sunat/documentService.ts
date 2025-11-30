@@ -77,6 +77,7 @@ export interface OrderItem {
 export interface CreateTicketRequest {
     order_items: OrderItem[]
     order_id?: number
+    return_pdf?: true
 }
 
 export interface CreateInvoiceRequest {
@@ -85,6 +86,7 @@ export interface CreateInvoiceRequest {
     razon_social: string
     address: string
     order_id?: number
+    return_pdf?: true
 }
 
 export const createTicketService = () => {

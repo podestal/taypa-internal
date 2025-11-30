@@ -35,6 +35,7 @@ const OrderByStatusList = ({ status }: Props) => {
         <p className="text-center text-gray-500 text-xs">
             {status === 'IP' ? 'No hay órdenes guardadas' : 
              status === 'IK' ? 'No hay órdenes en la cocina' : 
+             status === 'DO' ? 'No hay órdenes entregadas o entregadas a mano' :
              'No hay órdenes pendientes'}
         </p>}
     </>

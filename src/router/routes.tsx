@@ -10,6 +10,7 @@ import DishesMain from "../components/dishes/DishesMain";
 import LoginPage from "../components/auth/LoginPage";
 import PrivateRoutes from "../components/auth/PrivateRoutes";
 import TaxesMain from "../components/taxes/TaxesMain";
+import CategoriesPage from "../components/categories/page/CategoriesPage";
 
 const routes = createBrowserRouter([
     {
@@ -45,10 +46,10 @@ const routes = createBrowserRouter([
                         path: "inventory",
                         element: <InventoryMain />
                     },
-                    // {
-                    //     path: "categories",
-                    //     element: <CategoriesMainWrapper />
-                    // },
+                    {
+                        path: "categories",
+                        element: <CategoriesPage /> 
+                    },
                     {
                         path: "kitchen",
                         element: <KitchenMain />

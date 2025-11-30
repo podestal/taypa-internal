@@ -4,6 +4,8 @@ import { X, FileText } from 'lucide-react'
 import { type OrderForBilling } from '../../services/api/orderService'
 import useCreateInvoice from '../../hooks/sunat/useCreateInvoice'
 import useAuthStore from '../../store/useAuthStore'
+import useNotificationStore from '../../store/useNotificationStore'
+import axios from 'axios'
 
 interface CreateFacturaModalProps {
   isOpen: boolean
@@ -15,6 +17,7 @@ interface CreateFacturaModalProps {
 const CreateFacturaModal = ({ isOpen, onClose, order, onSuccess }: CreateFacturaModalProps) => {
   const access = useAuthStore(state => state.access) || ''
   const createInvoice = useCreateInvoice({ access })
+  const addNotification = useNotificationStore(state => state.addNotification)
   
   const [formData, setFormData] = useState({
     ruc: order.customer_ruc || '',
@@ -54,22 +57,64 @@ const CreateFacturaModal = ({ isOpen, onClose, order, onSuccess }: CreateFactura
     return !hasError
   }
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!validateForm()) return
-
-    try {
-      await createInvoice.mutateAsync({
-        order_items: order.order_items,
+    createInvoice.mutate({
+        order_items: order.order_items.map(item => ({
+          id: item.id.toString(),
+          name: item.name,
+          quantity: item.quantity,
+          cost: Number((item.cost / item.quantity).toFixed(2))
+        })),
         ruc: formData.ruc.trim(),
         razon_social: formData.razon_social.trim(),
         address: formData.address.trim(),
         order_id: order.id
+      }, {
+        onSuccess: async (res) => {
+          addNotification({
+            title: 'Factura creada correctamente',
+            message: 'La factura ha sido creada correctamente',
+            type: 'success'
+          })
+          onClose()
+          try {
+            const response = await axios.post(
+              `${import.meta.env.VITE_TAXES_URL}documents/generate-ticket/`,
+              {
+                sunat_id: res.sunat_id,
+                document_type: 'factura',
+              },
+              {
+                responseType: 'blob',
+                headers: {
+                  'Authorization': `JWT ${access}`,
+                },
+              }
+            );
+        
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            
+            // Open in new tab
+            window.open(url, '_blank');
+            
+            // Clean up URL after a delay (optional)
+            // setTimeout(() => window.URL.revokeObjectURL(url), 100);
+          } catch (error) {
+            console.error('Error generating ticket:', error);
+          }
+        },
+        onError: (error) => {
+          console.error('Error creating factura:', error)
+          addNotification({
+            title: 'Error al crear la factura',
+            message: 'Error al crear la factura',
+            type: 'error'
+          })
+        }
       })
-      onSuccess?.()
-      onClose()
-    } catch (error) {
-      console.error('Error creating factura:', error)
-    }
+    
   }
 
   const formatCurrency = (amount: number) => {

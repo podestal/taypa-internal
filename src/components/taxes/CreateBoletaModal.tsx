@@ -4,6 +4,8 @@ import moment from 'moment'
 import { type OrderForBilling } from '../../services/api/orderService'
 import useCreateTicket from '../../hooks/sunat/useCreateTicket'
 import useAuthStore from '../../store/useAuthStore'
+import useNotificationStore from '../../store/useNotificationStore'
+import axios from 'axios'
 
 interface CreateBoletaModalProps {
   isOpen: boolean
@@ -12,9 +14,10 @@ interface CreateBoletaModalProps {
   onSuccess?: () => void
 }
 
-const CreateBoletaModal = ({ isOpen, onClose, order, onSuccess }: CreateBoletaModalProps) => {
+const CreateBoletaModal = ({ isOpen, onClose, order }: CreateBoletaModalProps) => {
   const access = useAuthStore(state => state.access) || ''
   const createTicket = useCreateTicket({ access })
+  const addNotification = useNotificationStore(state => state.addNotification)
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-PE', {
@@ -23,23 +26,61 @@ const CreateBoletaModal = ({ isOpen, onClose, order, onSuccess }: CreateBoletaMo
     }).format(amount)
   }
 
-  const handleSubmit = async () => {
-    try {
-      await createTicket.mutateAsync({
-        order_items: order.order_items,
+  const handleSubmit = () => {
+      createTicket.mutate({
+        order_items: order.order_items.map(item => ({
+          id: item.id.toString(),
+          name: item.name,
+          quantity: item.quantity,
+          cost: Number((item.cost / item.quantity).toFixed(2))
+        })),
         order_id: order.id
+      }, {
+        onSuccess: async (res) => {
+          addNotification({
+            title: 'Boleta creada correctamente',
+            message: 'La boleta ha sido creada correctamente',
+            type: 'success'
+          })
+          onClose()
+          try {
+            const response = await axios.post(
+              `${import.meta.env.VITE_TAXES_URL}documents/generate-ticket/`,
+              {
+                sunat_id: res.sunat_id,
+                document_type: 'boleta',
+              },
+              {
+                responseType: 'blob',
+                headers: {
+                  'Authorization': `JWT ${access}`,
+                },
+              }
+            );
+        
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            
+            // Open in new tab
+            window.open(url, '_blank');
+            
+            // Clean up URL after a delay (optional)
+            // setTimeout(() => window.URL.revokeObjectURL(url), 100);
+          } catch (error) {
+            console.error('Error generating ticket:', error);
+          }
+        },
+        onError: (error) => {
+          console.error('Error creating boleta:', error)
+        }
       })
-      onSuccess?.()
-      onClose()
-    } catch (error) {
-      console.error('Error creating boleta:', error)
     }
-  }
 
   if (!isOpen) return null
 
   return (
     <AnimatePresence>
+      <> {console.log('order', order)} </>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -103,7 +144,7 @@ const CreateBoletaModal = ({ isOpen, onClose, order, onSuccess }: CreateBoletaMo
                       {item.quantity}x {item.name}
                     </span>
                     <span className="text-gray-900 font-medium">
-                      {formatCurrency(item.cost * item.quantity)}
+                      {formatCurrency(item.cost)}
                     </span>
                   </div>
                 ))}

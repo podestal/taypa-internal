@@ -1,6 +1,6 @@
-import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { X, Loader2 } from "lucide-react"
+
+import { motion } from "framer-motion"
+import { Loader2 } from "lucide-react"
 import useUpdateOrder from "../../hooks/api/order/useUpdateOrder"
 import useAuthStore from "../../store/useAuthStore"
 import useNotificationStore from "../../store/useNotificationStore"
@@ -8,9 +8,8 @@ import useOrderInfo from "../../store/useOrderInfo"
 import useCustomerInfo from "../../store/useCustomerInfo"
 import useAddressInfo from "../../store/useAddressInfo"
 import useOrderStep from "../../store/useOrderStep"
-import useCreateTicket from "../../hooks/sunat/useCreateTicket"
-import useCreateInvoice from "../../hooks/sunat/useCreateInvoice"
 import type { OrderItem } from "../../services/api/orderItemService"
+import axios from "axios"
 
 interface Props {
     orderId: number
@@ -25,20 +24,7 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
     const setCustomerInfo = useCustomerInfo(state => state.setCustomerInfo)
     const setAddressInfo = useAddressInfo(state => state.setAddressInfo)
     const setOrderStep = useOrderStep(state => state.setOrderStep)
-    const addressInfo = useAddressInfo(state => state.addressInfo)
-    const createTicket = useCreateTicket({ access })
-    const createInvoice = useCreateInvoice({ access })
-    const [showFacturaModal, setShowFacturaModal] = useState(false)
-    const [facturaFormData, setFacturaFormData] = useState({
-        ruc: '',
-        razon_social: '',
-        address: addressInfo.street || ''
-    })
-    const [facturaErrors, setFacturaErrors] = useState({
-        ruc: '',
-        razon_social: '',
-        address: ''
-    })
+
 
     const handleSendToKitchen = () => {
         console.log('send to kitchen', orderId)
@@ -48,7 +34,7 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
                 status: 'IK'
             } as any
         }, {
-            onSuccess: () => {
+            onSuccess: async () => {
                 addNotification({
                     title: 'Orden enviada a cocina',
                     message: 'La orden ha sido enviada a cocina',
@@ -76,15 +62,38 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
                     customer: 0,
                 })
                 setOrderStep('customer')
-                createTicket.mutate({
-                    order_items: orderItems.map(item => ({
-                        id: item.id.toString(),
-                        name: `${item.category} - ${item.dish}`,
-                        quantity: item.quantity,
-                        cost: item.price
-                    })),
-                    order_id: orderId
-                })
+                try {
+                    const response = await axios.post(
+                      `${import.meta.env.VITE_TAXES_URL}documents/generate-ticket/`,
+                      {
+                        order_items:  orderItems.map(item => ({
+                            id: item.id.toString(),
+                            name: `${item.category} - ${item.dish}`,
+                            quantity: item.quantity,
+                            cost: Number((item.price / item.quantity).toFixed(2))
+                        })),
+                        order_number: orderId.toString(),
+                        document_type: 'ticket',
+                      },
+                      {
+                        responseType: 'blob',
+                        headers: {
+                          'Authorization': `JWT ${access}`,
+                        },
+                      }
+                    );
+                
+                    const blob = new Blob([response.data], { type: 'application/pdf' });
+                    const url = window.URL.createObjectURL(blob);
+                    
+                    // Open in new tab
+                    window.open(url, '_blank');
+                    
+                    // Clean up URL after a delay (optional)
+                    // setTimeout(() => window.URL.revokeObjectURL(url), 100);
+                  } catch (error) {
+                    console.error('Error generating ticket:', error);
+                  }
             },
             onError: () => {
                 addNotification({
@@ -95,175 +104,7 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
             }
         })
     }
-
-    const handleSendToKitchenBoleta = () => {
-        updateOrder.mutate({
-            access,
-            order: {
-                status: 'IK'
-            } as any
-        }, {
-            onSuccess: () => {
-                createTicket.mutate({
-                    order_items: orderItems.map(item => ({
-                        id: item.id.toString(),
-                        name: `${item.category} - ${item.dish}`,
-                        quantity: item.quantity,
-                        cost: Number((item.price / item.quantity).toFixed(2))
-                    })),
-                    order_id: orderId
-                }, {
-                    onSuccess: () => {
-                        addNotification({
-                            title: 'Boleta creada y orden enviada a cocina',
-                            message: 'La boleta ha sido creada y la orden enviada a cocina',
-                            type: 'success'
-                        })
-                        // Reset form
-                        setOrderInfo({
-                            id: 0,
-                            orderNumber: '',
-                            customer: 0,
-                            address: 0,
-                            createdAt: '',
-                            updatedAt: '',
-                        })
-                        setCustomerInfo({
-                            id: 0,
-                            firstName: '',
-                            lastName: '',
-                            phone: '',
-                        })
-                        setAddressInfo({
-                            id: 0,
-                            street: '',
-                            reference: '',
-                            is_primary: false,
-                            customer: 0,
-                        })
-                        setOrderStep('customer')
-                    },
-                    onError: () => {
-                        addNotification({
-                            title: 'Error al crear la boleta',
-                            message: 'Error al crear la boleta',
-                            type: 'error'
-                        })
-                    }
-                })
-            },
-            onError: () => {
-                addNotification({
-                    title: 'Error al enviar la orden a cocina',
-                    message: 'Error al enviar la orden a cocina',
-                    type: 'error'
-                })
-            }
-        })
-    }
-
-    const validateFacturaForm = () => {
-        const newErrors = { ruc: '', razon_social: '', address: '' }
-        let hasError = false
-
-        if (!facturaFormData.ruc.trim()) {
-            newErrors.ruc = 'El RUC es requerido'
-            hasError = true
-        } else if (!/^\d{11}$/.test(facturaFormData.ruc.trim())) {
-            newErrors.ruc = 'El RUC debe tener 11 dígitos'
-            hasError = true
-        }
-
-        if (!facturaFormData.razon_social.trim()) {
-            newErrors.razon_social = 'La razón social es requerida'
-            hasError = true
-        }
-
-        if (!facturaFormData.address.trim()) {
-            newErrors.address = 'La dirección es requerida'
-            hasError = true
-        }
-
-        setFacturaErrors(newErrors)
-        return !hasError
-    }
-
-    const handleSendToKitchenFactura = () => {
-        if (!validateFacturaForm()) return
-
-        updateOrder.mutate({
-            access,
-            order: {
-                status: 'IK'
-            } as any
-        }, {
-            onSuccess: () => {
-                createInvoice.mutate({
-                    order_items: orderItems.map(item => ({
-                        id: item.id.toString(),
-                        name: `${item.category} - ${item.dish}`,
-                        quantity: item.quantity,
-                        cost: Number((item.price / item.quantity).toFixed(2))
-                    })),
-                    ruc: facturaFormData.ruc.trim(),
-                    razon_social: facturaFormData.razon_social.trim(),
-                    address: facturaFormData.address.trim(),
-                    order_id: orderId
-                }, {
-                    onSuccess: () => {
-                        addNotification({
-                            title: 'Factura creada y orden enviada a cocina',
-                            message: 'La factura ha sido creada y la orden enviada a cocina',
-                            type: 'success'
-                        })
-                        // Reset form
-                        setOrderInfo({
-                            id: 0,
-                            orderNumber: '',
-                            customer: 0,
-                            address: 0,
-                            createdAt: '',
-                            updatedAt: '',
-                        })
-                        setCustomerInfo({
-                            id: 0,
-                            firstName: '',
-                            lastName: '',
-                            phone: '',
-                        })
-                        setAddressInfo({
-                            id: 0,
-                            street: '',
-                            reference: '',
-                            is_primary: false,
-                            customer: 0,
-                        })
-                        setOrderStep('customer')
-                        setShowFacturaModal(false)
-                        setFacturaFormData({
-                            ruc: '',
-                            razon_social: '',
-                            address: ''
-                        })
-                    },
-                    onError: () => {
-                        addNotification({
-                            title: 'Error al crear la factura',
-                            message: 'Error al crear la factura',
-                            type: 'error'
-                        })
-                    }
-                })
-            },
-            onError: () => {
-                addNotification({
-                    title: 'Error al enviar la orden a cocina',
-                    message: 'Error al enviar la orden a cocina',
-                    type: 'error'
-                })
-            }
-        })
-    }
+    
   return (
     <>
     <motion.div
@@ -274,173 +115,15 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
     >
         <button
             onClick={handleSendToKitchen}
-            disabled={updateOrder.isPending || createTicket.isPending}
+            disabled={updateOrder.isPending}
             className="w-full mt-3 cursor-pointer bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
         >
-            {(updateOrder.isPending || createTicket.isPending) && (
+            {(updateOrder.isPending) && (
                 <Loader2 className="w-4 h-4 animate-spin" />
             )}
-            <span>{updateOrder.isPending || createTicket.isPending ? 'Enviando...' : 'Ticket'}</span>
-        </button>
-        <button
-            onClick={handleSendToKitchenBoleta}
-            disabled={updateOrder.isPending || createTicket.isPending}
-            className="w-full mt-3 cursor-pointer bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-        >
-            {(updateOrder.isPending || createTicket.isPending) && (
-                <Loader2 className="w-4 h-4 animate-spin" />
-            )}
-            <span>{updateOrder.isPending || createTicket.isPending ? 'Creando...' : 'Boleta'}</span>
-        </button>
-        <button
-            onClick={() => {
-                // Pre-fill form with available data
-                setFacturaFormData({
-                    ruc: '',
-                    razon_social: '',
-                    address: addressInfo.street || ''
-                })
-                setShowFacturaModal(true)
-            }}
-            disabled={updateOrder.isPending || createInvoice.isPending}
-            className="w-full mt-3 cursor-pointer bg-yellow-600 text-white py-3 rounded-lg font-medium hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-        >
-            {(updateOrder.isPending || createInvoice.isPending) && (
-                <Loader2 className="w-4 h-4 animate-spin" />
-            )}
-            <span>{updateOrder.isPending || createInvoice.isPending ? 'Procesando...' : 'Factura'}</span>
+            <span>{updateOrder.isPending ? 'Enviando...' : 'Enviar a cocina'}</span>
         </button>
     </motion.div>
-
-    {/* Factura Modal */}
-    <AnimatePresence>
-        {showFacturaModal && (
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50"
-                onClick={() => {
-                    if (!createInvoice.isPending && !updateOrder.isPending) {
-                        setShowFacturaModal(false)
-                    }
-                }}
-            >
-                <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.9, opacity: 0 }}
-                    className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-xl font-bold text-gray-900">Crear Factura</h3>
-                        <button
-                            onClick={() => setShowFacturaModal(false)}
-                            disabled={createInvoice.isPending || updateOrder.isPending}
-                            className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <X className="w-6 h-6" />
-                        </button>
-                    </div>
-
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                RUC <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                value={facturaFormData.ruc}
-                                onChange={(e) => {
-                                    const value = e.target.value.replace(/\D/g, '')
-                                    setFacturaFormData(prev => ({ ...prev, ruc: value }))
-                                    if (facturaErrors.ruc) setFacturaErrors(prev => ({ ...prev, ruc: '' }))
-                                }}
-                                maxLength={11}
-                                disabled={createInvoice.isPending || updateOrder.isPending}
-                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed ${
-                                    facturaErrors.ruc ? 'border-red-500' : 'border-gray-300'
-                                }`}
-                                placeholder="20123456789"
-                            />
-                            {facturaErrors.ruc && (
-                                <p className="text-red-500 text-sm mt-1">{facturaErrors.ruc}</p>
-                            )}
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Razón Social <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                value={facturaFormData.razon_social}
-                                onChange={(e) => {
-                                    setFacturaFormData(prev => ({ ...prev, razon_social: e.target.value }))
-                                    if (facturaErrors.razon_social) setFacturaErrors(prev => ({ ...prev, razon_social: '' }))
-                                }}
-                                disabled={createInvoice.isPending || updateOrder.isPending}
-                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed ${
-                                    facturaErrors.razon_social ? 'border-red-500' : 'border-gray-300'
-                                }`}
-                                placeholder="Nombre de la empresa"
-                            />
-                            {facturaErrors.razon_social && (
-                                <p className="text-red-500 text-sm mt-1">{facturaErrors.razon_social}</p>
-                            )}
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Dirección <span className="text-red-500">*</span>
-                            </label>
-                            <textarea
-                                value={facturaFormData.address}
-                                onChange={(e) => {
-                                    setFacturaFormData(prev => ({ ...prev, address: e.target.value }))
-                                    if (facturaErrors.address) setFacturaErrors(prev => ({ ...prev, address: '' }))
-                                }}
-                                rows={3}
-                                disabled={createInvoice.isPending || updateOrder.isPending}
-                                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed ${
-                                    facturaErrors.address ? 'border-red-500' : 'border-gray-300'
-                                }`}
-                                placeholder="Dirección completa del cliente"
-                            />
-                            {facturaErrors.address && (
-                                <p className="text-red-500 text-sm mt-1">{facturaErrors.address}</p>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="flex space-x-3 mt-6 justify-end">
-                        <motion.button
-                            onClick={() => setShowFacturaModal(false)}
-                            disabled={createInvoice.isPending || updateOrder.isPending}
-                            className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            whileHover={!createInvoice.isPending && !updateOrder.isPending ? { scale: 1.02 } : {}}
-                            whileTap={!createInvoice.isPending && !updateOrder.isPending ? { scale: 0.98 } : {}}
-                        >
-                            Cancelar
-                        </motion.button>
-                        <motion.button
-                            onClick={handleSendToKitchenFactura}
-                            disabled={createInvoice.isPending || updateOrder.isPending}
-                            className="px-6 py-2 bg-yellow-600 text-white rounded-lg font-medium hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-                            whileHover={!createInvoice.isPending && !updateOrder.isPending ? { scale: 1.02 } : {}}
-                            whileTap={!createInvoice.isPending && !updateOrder.isPending ? { scale: 0.98 } : {}}
-                        >
-                            {(createInvoice.isPending || updateOrder.isPending) && (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                            )}
-                            <span>{createInvoice.isPending || updateOrder.isPending ? 'Creando...' : 'Crear Factura'}</span>
-                        </motion.button>
-                    </div>
-                </motion.div>
-            </motion.div>
-        )}
-    </AnimatePresence>
     </>
   )
 }
