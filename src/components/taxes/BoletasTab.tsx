@@ -33,6 +33,7 @@ const BoletasTab = () => {
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.3 }}
     >
+      <>{console.log('boletas', boletas)}</>
       <SunatDocumentsList 
         documents={boletas} 
         type="boletas" 

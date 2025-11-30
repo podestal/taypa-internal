@@ -23,6 +23,8 @@ export interface SunatDocument {
   responseTime: number | null
   production: boolean
   faults: any[] | null
+  created_at: string
+  updated_at: string
 }
 
 /**
@@ -129,7 +131,9 @@ export const mapDocumentToSunatDocument = (doc: Document): SunatDocument => {
     issueTime: doc.sunat_issue_time,
     responseTime: doc.sunat_response_time,
     production: doc.production,
-    faults: doc.faults
+    faults: doc.faults,
+    created_at: doc.created_at,
+    updated_at: doc.updated_at
   }
 }
 

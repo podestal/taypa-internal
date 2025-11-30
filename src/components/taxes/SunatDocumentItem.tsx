@@ -56,6 +56,7 @@ const SunatDocumentItem = ({ doc, type, index }: Props) => {
       className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
     >
       <div className="flex items-start justify-between mb-4">
+        {/* <>{console.log('doc', doc)}</> */}
         <div className="flex-1">
           <div className="flex items-center space-x-3 mb-2">
             <FileText className="w-6 h-6 text-blue-600" />
