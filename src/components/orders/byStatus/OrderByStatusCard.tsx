@@ -197,11 +197,11 @@ const OrderByStatusCard = ({ order, index, status }: Props) => {
                     items.map((item, idx) => (
                         <div key={`${categoryName}-${item.id}-${idx}`} className="flex items-center justify-between">
                             <span className="truncate flex-1 mr-2">
-                                {item.quantity}x {item.dish}
+                                {item.quantity}x {categoryName}-{item.dish}
                             </span>
                             {item.price && (
                                 <span className="text-gray-700 font-medium whitespace-nowrap">
-                                    S/.{(item.price * item.quantity).toFixed(2)}
+                                    S/.{(item.price).toFixed(2)}
                                 </span>
                             )}
                         </div>
@@ -221,7 +221,7 @@ const OrderByStatusCard = ({ order, index, status }: Props) => {
                 <span className="text-sm font-semibold text-gray-700">Total:</span>
                 <span className="text-lg font-bold text-blue-600">
                     S/.{Object.values(order.categories).reduce((acc, items) => 
-                        acc + items.reduce((sum, item) => sum + (item.price ?? 0) * item.quantity, 0), 0
+                        acc + items.reduce((sum, item) => sum + (item.price ?? 0), 0), 0
                     ).toFixed(2)}
                 </span>
             </div>

@@ -53,20 +53,7 @@ export interface DocumentsPage {
     total_amount?: number
 }
 
-interface GetAllDocumentsServiceProps {
-    documentType: string
-}
-
 export const syncDocumentsService = () => new SunatClient<void>('/documents/sync-today/')
-
-export const getAllDocumentsService = ({ documentType }: GetAllDocumentsServiceProps) => {
-
-    let url = '/documents/'
-    if (documentType === '01') url += 'get-invoices/'
-    else if (documentType === '03') url += 'get-tickets/'
-
-    return new SunatClient<DocumentsPage>(url)
-}
 
 export interface OrderItem {
     id: string

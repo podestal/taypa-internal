@@ -7,6 +7,7 @@ export interface DocumentsFilters {
     date?: string
     start_date?: string
     end_date?: string
+    year?: number
 }
 
 interface Props {
@@ -37,7 +38,12 @@ const useGetDocuments = ({ access, page, filters }: Props): UseQueryResult<Docum
         if (filters.end_date) {
             params.end_date = filters.end_date
         }
+        if (filters.year) {
+            params.year = filters.year.toString()
+        }
     }
+
+    console.log('params', params)
     
     return useQuery({
         queryKey: ['documents', page, filters],
