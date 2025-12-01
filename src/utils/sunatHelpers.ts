@@ -6,6 +6,7 @@ import type { Document } from '../services/sunat/documentService'
  */
 export interface SunatDocument {
   id: string
+  sunat_id: string | null
   numero: string
   serie: string
   fecha_emision: string
@@ -114,6 +115,7 @@ export const mapDocumentToSunatDocument = (doc: Document): SunatDocument => {
   
   return {
     id: doc.id,
+    sunat_id: doc.sunat_id,
     numero: doc.numero,
     serie: doc.serie,
     fecha_emision: doc.sunat_issue_time 

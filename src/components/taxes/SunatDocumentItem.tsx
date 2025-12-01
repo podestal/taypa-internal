@@ -1,7 +1,12 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { FileText, CheckCircle2, XCircle, Clock, AlertCircle, FileDown } from 'lucide-react'
+import { FileText, CheckCircle2, XCircle, Clock, AlertCircle, FileDown, RefreshCw, Loader2 } from 'lucide-react'
 import moment from 'moment'
+import axios from 'axios'
 import type { SunatDocument } from '../../utils/sunatHelpers'
+import useAuthStore from '../../store/useAuthStore'
+import useNotificationStore from '../../store/useNotificationStore'
+import useSyncSingleDocument from '../../hooks/sunat/useSyncSingleDocument'
 
 interface Props {
   doc: SunatDocument
@@ -10,6 +15,11 @@ interface Props {
 }
 
 const SunatDocumentItem = ({ doc, type, index }: Props) => {
+  const access = useAuthStore(state => state.access) || ''
+  const addNotification = useNotificationStore(state => state.addNotification)
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false)
+  const syncDocument = useSyncSingleDocument()
+
   // Determine document type from serie: B001 = Boleta, F001 = Factura
   const getDocumentTypeFromSerie = (serie: string): 'boleta' | 'factura' => {
     if (serie.startsWith('B')) return 'boleta'
@@ -20,6 +30,7 @@ const SunatDocumentItem = ({ doc, type, index }: Props) => {
 
   const documentType = type === 'documentos' ? getDocumentTypeFromSerie(doc.serie) : type === 'boletas' ? 'boleta' : 'factura'
   const documentLabel = documentType === 'boleta' ? 'Boleta' : 'Factura'
+  const isAccepted = doc.estado.toLowerCase() === 'aceptado'
 
   const getStatusIcon = (estado: string) => {
     switch (estado.toLowerCase()) {
@@ -56,6 +67,79 @@ const SunatDocumentItem = ({ doc, type, index }: Props) => {
       style: 'currency',
       currency: 'PEN'
     }).format(amount)
+  }
+
+  const handleDownloadPdf = async () => {
+    if (!doc.sunat_id || !isAccepted) return
+
+    setIsDownloadingPdf(true)
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_TAXES_URL}documents/generate-ticket/`,
+        {
+          sunat_id: doc.sunat_id,
+          document_type: documentType,
+        },
+        {
+          responseType: 'blob',
+          headers: {
+            'Authorization': `JWT ${access}`,
+          },
+        }
+      )
+
+      const blob = new Blob([response.data], { type: 'application/pdf' })
+      const url = window.URL.createObjectURL(blob)
+      
+      // Open in new tab
+      window.open(url, '_blank')
+      
+      // Clean up URL after a delay
+      setTimeout(() => window.URL.revokeObjectURL(url), 100)
+      
+      addNotification({
+        title: 'PDF generado',
+        message: `El PDF de la ${documentLabel.toLowerCase()} se ha generado correctamente`,
+        type: 'success'
+      })
+    } catch (error) {
+      console.error('Error generating PDF:', error)
+      addNotification({
+        title: 'Error',
+        message: 'Error al generar el PDF',
+        type: 'error'
+      })
+    } finally {
+      setIsDownloadingPdf(false)
+    }
+  }
+
+  const handleSync = () => {
+    if (!doc.sunat_id) return
+
+    syncDocument.mutate(
+      {
+        sunat_id: doc.sunat_id,
+        access
+      },
+      {
+        onSuccess: () => {
+          addNotification({
+            title: 'Sincronización exitosa',
+            message: `La ${documentLabel.toLowerCase()} se ha sincronizado correctamente`,
+            type: 'success'
+          })
+        },
+        onError: (error: any) => {
+          const errorMessage = error?.response?.data?.error || error?.message || 'Error al sincronizar el documento'
+          addNotification({
+            title: 'Error',
+            message: errorMessage,
+            type: 'error'
+          })
+        }
+      }
+    )
   }
 
   return (
@@ -141,14 +225,34 @@ const SunatDocumentItem = ({ doc, type, index }: Props) => {
       
       <div className="mt-4 pt-4 border-t border-gray-200 flex justify-end space-x-2">
         <motion.button
-          className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          disabled={!doc.pdf_file}
-          title={doc.pdf_file ? 'Descargar PDF' : 'PDF no disponible'}
+          onClick={handleDownloadPdf}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          whileHover={isAccepted && !isDownloadingPdf ? { scale: 1.05 } : {}}
+          whileTap={isAccepted && !isDownloadingPdf ? { scale: 0.95 } : {}}
+          disabled={!isAccepted || isDownloadingPdf}
+          title={isAccepted ? 'Descargar PDF' : 'Solo disponible para documentos aceptados'}
         >
-          <FileDown className="w-4 h-4" />
+          {isDownloadingPdf ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <FileDown className="w-4 h-4" />
+          )}
           <span>PDF</span>
+        </motion.button>
+        <motion.button
+          onClick={handleSync}
+          className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          whileHover={!syncDocument.isPending ? { scale: 1.05 } : {}}
+          whileTap={!syncDocument.isPending ? { scale: 0.95 } : {}}
+          disabled={syncDocument.isPending}
+          title="Sincronizar documento"
+        >
+          {syncDocument.isPending ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <RefreshCw className="w-4 h-4" />
+          )}
+          <span>Sincronizar</span>
         </motion.button>
       </div>
     </motion.div>

@@ -50,6 +50,7 @@ export interface DocumentsPage {
     next: string | null
     previous: string | null
     results: Document[]
+    total_amount?: number
 }
 
 interface GetAllDocumentsServiceProps {
@@ -95,4 +96,13 @@ export const createTicketService = () => {
 
 export const createInvoiceService = () => {
     return new SunatClient<any, CreateInvoiceRequest>('/documents/create-invoice/')
+}
+
+export interface SyncSingleDocumentRequest {
+    sunat_id: string
+    document_type: 'boleta' | 'factura'
+}
+
+export const syncSingleDocumentService = () => {
+    return new SunatClient<any, SyncSingleDocumentRequest>('/documents/sync-single/')
 }
