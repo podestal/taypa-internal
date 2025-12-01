@@ -19,6 +19,7 @@ export interface SunatDocument {
   // Additional fields from API
   xml: string | null
   cdr: string | null
+  pdf_file: string | null
   issueTime: number | null
   responseTime: number | null
   production: boolean
@@ -128,6 +129,7 @@ export const mapDocumentToSunatDocument = (doc: Document): SunatDocument => {
     // Additional fields from API
     xml: doc.xml_url,
     cdr: doc.cdr_url,
+    pdf_file: doc.pdf_file,
     issueTime: doc.sunat_issue_time,
     responseTime: doc.sunat_response_time,
     production: doc.production,

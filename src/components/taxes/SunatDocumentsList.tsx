@@ -5,7 +5,7 @@ import { type SunatDocument } from '../../utils/sunatHelpers'
 
 interface Props {
   documents: SunatDocument[]
-  type: 'boletas' | 'facturas'
+  type: 'boletas' | 'facturas' | 'documentos'
   isLoading?: boolean
 }
 
@@ -25,12 +25,13 @@ const SunatDocumentsList = ({ documents, type, isLoading }: Props) => {
   }
 
   if (documents.length === 0) {
+    const typeLabel = type === 'documentos' ? 'documentos' : type
     return (
       <div className="text-center py-12 bg-white rounded-lg">
         <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-        <p className="text-gray-500 text-lg">No hay {type} registradas</p>
+        <p className="text-gray-500 text-lg">No hay {typeLabel} registrados</p>
         <p className="text-gray-400 text-sm mt-2">
-          Las {type} aparecerán aquí una vez que se generen desde las órdenes
+          Los {typeLabel} aparecerán aquí una vez que se generen desde las órdenes
         </p>
       </div>
     )

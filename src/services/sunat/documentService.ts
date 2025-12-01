@@ -43,7 +43,7 @@ export interface Document {
     updated_at: string                   // ISO datetime string
 }
 
-export const getDocumentsService = new SunatClient<Document[]>('/documents/')
+export const getDocumentsService = new SunatClient<DocumentsPage | Document[]>('/documents/')
 
 export interface DocumentsPage {
     count: number

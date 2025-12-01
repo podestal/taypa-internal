@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Receipt, ShoppingCart, Coins, FileText } from 'lucide-react'
+import { Receipt, ShoppingCart, Coins, FileText, FileCheck } from 'lucide-react'
 import BoletasTab from './BoletasTab'
 import FacturasTab from './FacturasTab'
 import OrdersTab from './OrdersTab'
+import FacturacionTab from './FacturacionTab'
 import SunatConnectionStatus from './SunatConnectionStatus'
 
-type TabType = 'boletas' | 'facturas' | 'orders'
+type TabType = 'boletas' | 'facturas' | 'orders' | 'facturacion'
 
 const TaxesMain = () => {
   const [activeTab, setActiveTab] = useState<TabType>('orders')
@@ -54,6 +55,7 @@ const TaxesMain = () => {
             <nav className="flex space-x-1 p-2">
               {[
                 { id: 'orders' as TabType, label: 'Órdenes', icon: ShoppingCart },
+                { id: 'facturacion' as TabType, label: 'Facturación', icon: FileCheck },
                 { id: 'boletas' as TabType, label: 'Boletas', icon: Receipt },
                 { id: 'facturas' as TabType, label: 'Facturas', icon: FileText }
               ].map((tab) => {
@@ -81,16 +83,20 @@ const TaxesMain = () => {
           {/* Tab Content */}
           <div className="p-6">
             <AnimatePresence mode="wait">
+              {activeTab === 'orders' && (
+                <OrdersTab key="orders" />
+              )}
+
+              {activeTab === 'facturacion' && (
+                <FacturacionTab key="facturacion" />
+              )}
+
               {activeTab === 'boletas' && (
                 <BoletasTab key="boletas" />
               )}
 
               {activeTab === 'facturas' && (
                 <FacturasTab key="facturas" />
-              )}
-
-              {activeTab === 'orders' && (
-                <OrdersTab key="orders" />
               )}
             </AnimatePresence>
           </div>

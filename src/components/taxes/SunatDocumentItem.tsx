@@ -1,15 +1,25 @@
 import { motion } from 'framer-motion'
-import { FileText, CheckCircle2, XCircle, Clock, Download, AlertCircle } from 'lucide-react'
+import { FileText, CheckCircle2, XCircle, Clock, AlertCircle, FileDown } from 'lucide-react'
 import moment from 'moment'
-import type { SunatDocument } from './SunatDocumentsList'
+import type { SunatDocument } from '../../utils/sunatHelpers'
 
 interface Props {
   doc: SunatDocument
-  type: 'boletas' | 'facturas'
+  type: 'boletas' | 'facturas' | 'documentos'
   index: number
 }
 
 const SunatDocumentItem = ({ doc, type, index }: Props) => {
+  // Determine document type from serie: B001 = Boleta, F001 = Factura
+  const getDocumentTypeFromSerie = (serie: string): 'boleta' | 'factura' => {
+    if (serie.startsWith('B')) return 'boleta'
+    if (serie.startsWith('F')) return 'factura'
+    // Fallback to tipo_documento if serie doesn't match pattern
+    return doc.tipo_documento || 'boleta'
+  }
+
+  const documentType = type === 'documentos' ? getDocumentTypeFromSerie(doc.serie) : type === 'boletas' ? 'boleta' : 'factura'
+  const documentLabel = documentType === 'boleta' ? 'Boleta' : 'Factura'
 
   const getStatusIcon = (estado: string) => {
     switch (estado.toLowerCase()) {
@@ -62,7 +72,7 @@ const SunatDocumentItem = ({ doc, type, index }: Props) => {
             <FileText className="w-6 h-6 text-blue-600" />
             <div>
               <h4 className="text-lg font-semibold text-gray-900">
-                {type === 'boletas' ? 'Boleta' : 'Factura'} {doc.serie}-{doc.numero}
+                {documentLabel} {doc.serie}-{doc.numero}
               </h4>
               <p className="text-sm text-gray-500">
                 Emitida el {moment(doc.created_at).format('DD/MM/YYYY')}
@@ -130,32 +140,16 @@ const SunatDocumentItem = ({ doc, type, index }: Props) => {
       </div>
       
       <div className="mt-4 pt-4 border-t border-gray-200 flex justify-end space-x-2">
-        {doc.xml && (
-          <motion.a
-            href={doc.xml}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center space-x-2"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Download className="w-4 h-4" />
-            <span>XML</span>
-          </motion.a>
-        )}
-        {doc.cdr && (
-          <motion.a
-            href={doc.cdr}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center space-x-2"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Download className="w-4 h-4" />
-            <span>CDR</span>
-          </motion.a>
-        )}
+        <motion.button
+          className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          disabled={!doc.pdf_file}
+          title={doc.pdf_file ? 'Descargar PDF' : 'PDF no disponible'}
+        >
+          <FileDown className="w-4 h-4" />
+          <span>PDF</span>
+        </motion.button>
       </div>
     </motion.div>
   )
