@@ -23,9 +23,9 @@ const getDishService = ({ byCategory, dishId }: Props) => {
     if (byCategory) {
         url += `by_category/`
     } else if (dishId) {
-        url += `/${dishId}`
+        url += `${dishId}/`
     }
-    return new APIClient<Dish[], CreateUpdateDish>(url)
+    return new APIClient<Dish[] | Dish, CreateUpdateDish>(url)
 }
 
 export default getDishService

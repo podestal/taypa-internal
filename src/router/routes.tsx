@@ -4,13 +4,12 @@ import OrdersMain from "../components/orders/OrdersMain";
 import TrackerMain from "../components/tracker/TrackerMain";
 import SalesMain from "../components/sales/SalesMain";
 import InventoryMain from "../components/inventory/InventoryMain";
-// import CategoriesMainWrapper from "../components/categories/CategoriesMainWrapper";
 import KitchenMain from "../components/kitchen/KitchenMain";
-import DishesMain from "../components/dishes/DishesMain";
 import LoginPage from "../components/auth/LoginPage";
 import PrivateRoutes from "../components/auth/PrivateRoutes";
 import TaxesMain from "../components/taxes/TaxesMain";
 import CategoriesPage from "../components/categories/page/CategoriesPage";
+import DishesPage from "../components/dishes/page/DishesPage";
 
 const routes = createBrowserRouter([
     {
@@ -36,7 +35,7 @@ const routes = createBrowserRouter([
                     },
                     {
                         path: "dishes",
-                        element: <DishesMain categoryId={1}/>
+                        element: <DishesPage />
                     },
                     {
                         path: "sales",
