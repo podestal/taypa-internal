@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { ArrowUpDown, TrendingUp, TrendingDown } from 'lucide-react'
+import { TrendingUp, TrendingDown } from 'lucide-react'
 
 interface Props {
     typeFilter: TypeFilter
@@ -9,7 +9,6 @@ interface Props {
 type TypeFilter = 'all' | 'I' | 'E'
 
 const typeFilterButtons = [
-    { id: 'all' as TypeFilter, label: 'Todos', icon: <ArrowUpDown className="w-4 h-4" />, color: 'gray' },
     { id: 'I' as TypeFilter, label: 'Ingresos', icon: <TrendingUp className="w-4 h-4" />, color: 'green' },
     { id: 'E' as TypeFilter, label: 'Gastos', icon: <TrendingDown className="w-4 h-4" />, color: 'red' }
 ]

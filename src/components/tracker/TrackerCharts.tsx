@@ -29,7 +29,8 @@ const TrackerCharts = ({ categories, transactions, isLoading }: Props) => {
         lineData: [],
         incomeByCategory: [],
         expenseByCategory: [],
-        totals: { income: 0, expense: 0, net: 0 }
+        totals: { income: 0, expense: 0, net: 0 },
+        monthlyData: []
       }
     }
 
@@ -56,6 +57,15 @@ const TrackerCharts = ({ categories, transactions, isLoading }: Props) => {
     const sortedDates = Object.values(dateGroups).sort((a, b) => 
       new Date(a.date).getTime() - new Date(b.date).getTime()
     )
+
+    // Filter to current month only for monthly chart
+    const now = moment()
+    const currentMonth = now.month()
+    const currentYear = now.year()
+    const monthlyData = sortedDates.filter((d: { date: string; income: number; expense: number }) => {
+      const date = moment(d.date)
+      return date.month() === currentMonth && date.year() === currentYear
+    })
 
     // Category breakdown
     const categoryIncome = transactions
@@ -109,6 +119,10 @@ const TrackerCharts = ({ categories, transactions, isLoading }: Props) => {
 
     return {
       lineData: sortedDates.map(d => ({
+        ...d,
+        net: d.income - d.expense
+      })),
+      monthlyData: monthlyData.map((d: { date: string; income: number; expense: number }) => ({
         ...d,
         net: d.income - d.expense
       })),
@@ -256,86 +270,39 @@ const TrackerCharts = ({ categories, transactions, isLoading }: Props) => {
       )}
     </div>
 
-    {/* Income vs Expenses by Date */}
+    {/* Net Profit Trend - Current Month Only */}
     <div className="bg-gray-50 rounded-lg p-4">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Ingresos vs Gastos por Fecha</h3>
-      <div className="space-y-3">
-        {chartData.lineData.slice(-10).map((item, index) => {
-          const maxValue = Math.max(
-            ...chartData.lineData.map(d => Math.max(d.income, d.expense))
-          )
-          const incomeWidth = maxValue > 0 ? (item.income / maxValue) * 100 : 0
-          const expenseWidth = maxValue > 0 ? (item.expense / maxValue) * 100 : 0
-          
-          return (
-            <div key={index} className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium text-gray-700">
-                  {moment(item.date).format('DD/MM/YYYY')}
-                </span>
-                <div className="flex gap-4 text-xs">
-                  <span className="text-green-600 font-medium">
-                    +{formatCurrency(item.income)}
-                  </span>
-                  <span className="text-red-600 font-medium">
-                    -{formatCurrency(item.expense)}
-                  </span>
-                </div>
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-green-700 w-16">Ingresos</span>
-                  <div className="flex-1 bg-gray-200 rounded-full h-3">
-                    <div 
-                      className="bg-green-500 h-3 rounded-full transition-all"
-                      style={{ width: `${incomeWidth}%` }}
-                    />
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-red-700 w-16">Gastos</span>
-                  <div className="flex-1 bg-gray-200 rounded-full h-3">
-                    <div 
-                      className="bg-red-500 h-3 rounded-full transition-all"
-                      style={{ width: `${expenseWidth}%` }}
-                    />
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        Ganancia Neta por Fecha - {moment().format('MMMM YYYY')}
+      </h3>
+      {chartData.monthlyData.length > 0 ? (
+        <div className="h-64 flex items-end gap-2">
+          {chartData.monthlyData.map((item, index) => {
+            const maxNet = Math.max(...chartData.monthlyData.map(d => Math.abs(d.net)))
+            const height = maxNet > 0 ? (Math.abs(item.net) / maxNet) * 100 : 0
+            
+            return (
+              <div key={index} className="flex-1 flex flex-col items-center">
+                <div className="relative w-full flex flex-col items-center justify-end" style={{ height: '240px' }}>
+                  <div
+                    className={`w-full rounded-t transition-all ${
+                      item.net >= 0 ? 'bg-blue-500' : 'bg-orange-500'
+                    }`}
+                    style={{ height: `${height}%` }}
+                  />
+                  <div className="absolute -bottom-6 text-xs text-gray-600 text-center whitespace-nowrap">
+                    {moment(item.date).format('DD/MM')}
                   </div>
                 </div>
               </div>
-            </div>
-          )
-        })}
-        {chartData.lineData.length === 0 && (
-          <p className="text-gray-500 text-center py-8">No hay datos en este período</p>
-        )}
-      </div>
-    </div>
-
-    {/* Net Profit Trend */}
-    <div className="bg-gray-50 rounded-lg p-4">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Ganancia Neta por Fecha</h3>
-      <div className="h-64 flex items-end gap-2">
-        {chartData.lineData.slice(-10).map((item, index) => {
-          const maxNet = Math.max(...chartData.lineData.map(d => Math.abs(d.net)))
-          const height = maxNet > 0 ? (Math.abs(item.net) / maxNet) * 100 : 0
-          
-          return (
-            <div key={index} className="flex-1 flex flex-col items-center">
-              <div className="relative w-full flex flex-col items-center justify-end" style={{ height: '240px' }}>
-                <div
-                  className={`w-full rounded-t transition-all ${
-                    item.net >= 0 ? 'bg-blue-500' : 'bg-orange-500'
-                  }`}
-                  style={{ height: `${height}%` }}
-                />
-                <div className="absolute -bottom-6 text-xs text-gray-600 text-center whitespace-nowrap">
-                  {moment(item.date).format('DD/MM')}
-                </div>
-              </div>
-            </div>
-          )
-        })}
-      </div>
+            )
+          })}
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <p className="text-gray-500">No hay datos para el mes actual</p>
+        </div>
+      )}
       <div className="mt-8 flex items-center justify-center gap-6 text-xs">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-blue-500 rounded"></div>

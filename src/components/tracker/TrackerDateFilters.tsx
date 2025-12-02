@@ -18,7 +18,6 @@ const dateFilterButtons = [
     { id: 'last7days' as DateFilter, label: 'Últimos 7 días' },
     { id: 'thisWeek' as DateFilter, label: 'Esta Semana' },
     { id: 'thisMonth' as DateFilter, label: 'Este Mes' },
-    { id: 'all' as DateFilter, label: 'Todos' },
 ]
 
 const TrackerDateFilters = ({

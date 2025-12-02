@@ -4,7 +4,7 @@ import TrackerTypeFilters from './TrackerTypeFilters'
 import TrackerSorter from './TrackerSorter'
 
 type DateFilter = 'today' | 'last7days' | 'thisWeek' | 'thisMonth' | 'custom' | 'all'
-type SortBy = 'date' | 'amount'
+type SortBy = 'date' | 'amount' | null
 type SortOrder = 'asc' | 'desc'
 
 interface Props {

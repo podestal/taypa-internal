@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 
-type SortBy = 'date' | 'amount'
+type SortBy = 'date' | 'amount' | null
 
 interface Props {
     sortBy: SortBy
@@ -11,9 +11,18 @@ interface Props {
 }
 
 const TrackerSorter = ({ sortBy, setSortBy, sortOrder, setSortOrder }: Props) => {
-    const handleSort = (sortBy: SortBy) => {
-        setSortBy(sortBy)
-        setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+    const handleSort = (newSortBy: 'date' | 'amount') => {
+        // If clicking the same sort, toggle order. Otherwise, set new sort.
+        if (sortBy === newSortBy) {
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+        } else {
+            setSortBy(newSortBy)
+            setSortOrder('desc') // Default to descending
+        }
+    }
+    
+    const handleClearSort = () => {
+        setSortBy(null)
     }
   return (
 <div>
@@ -23,8 +32,8 @@ const TrackerSorter = ({ sortBy, setSortBy, sortOrder, setSortOrder }: Props) =>
     </h3>
     <div className="flex flex-wrap gap-2">
         {[
-        { id: 'date' as SortBy, label: 'Fecha' },
-        { id: 'amount' as SortBy, label: 'Monto' },
+        { id: 'date' as const, label: 'Fecha' },
+        { id: 'amount' as const, label: 'Monto' },
         ].map((option) => {
         const isActive = sortBy === option.id
         return (
@@ -46,6 +55,16 @@ const TrackerSorter = ({ sortBy, setSortBy, sortOrder, setSortOrder }: Props) =>
             </motion.button>
         )
         })}
+        {sortBy && (
+            <motion.button
+            onClick={handleClearSort}
+            className="px-4 py-2 rounded-lg font-medium text-sm transition-all bg-gray-200 text-gray-700 hover:bg-gray-300"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            >
+            Limpiar
+            </motion.button>
+        )}
     </div>
     </div>
   )

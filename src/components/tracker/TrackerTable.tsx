@@ -9,7 +9,8 @@ import Paginator from '../ui/Paginator'
 interface Props {
   categories: Category[]
   transactions: Transaction[]
-  sortBy: 'date' | 'amount'
+  sortBy: 'date' | 'amount' | null
+  sortOrder: 'asc' | 'desc'
   page: number
   setPage: React.Dispatch<React.SetStateAction<number>>
   isLoading: boolean
@@ -17,10 +18,15 @@ interface Props {
 
 const ITEMS_PER_PAGE = 10
 
-const TrackerTable = ({ categories, transactions, sortBy, page, setPage, isLoading }: Props) => {
+const TrackerTable = ({ categories, transactions, sortBy, sortOrder, page, setPage, isLoading }: Props) => {
   
-  // Sort transactions
+  // Sort transactions only if sortBy is explicitly set (not default)
   const sortedTransactions = useMemo(() => {
+    // If no sort is selected, return transactions as API returns them
+    if (!sortBy) {
+      return transactions
+    }
+    
     const sorted = [...transactions]
     sorted.sort((a, b) => {
       let comparison = 0
@@ -31,11 +37,12 @@ const TrackerTable = ({ categories, transactions, sortBy, page, setPage, isLoadi
         comparison = Math.abs(a.amount) - Math.abs(b.amount)
       }
       
-      return comparison
+      // Apply sort order (asc or desc)
+      return sortOrder === 'asc' ? comparison : -comparison
     })
     
     return sorted
-  }, [transactions, sortBy])
+  }, [transactions, sortBy, sortOrder])
 
   // Paginate transactions
   const paginatedTransactions = useMemo(() => {

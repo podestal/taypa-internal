@@ -71,7 +71,7 @@ const categories: Category[] = [
 ]
 
 type DateFilter = 'today' | 'last7days' | 'thisWeek' | 'thisMonth' | 'custom' | 'all'
-type SortBy = 'date' | 'amount'
+type SortBy = 'date' | 'amount' | null
 type SortOrder = 'asc' | 'desc'
 
 const TrackerMain = () => {
@@ -79,7 +79,7 @@ const TrackerMain = () => {
   const transactionService = getTransactionService()
   
   const [dateFilter, setDateFilter] = useState<DateFilter>('today')
-  const [sortBy, setSortBy] = useState<SortBy>('date')
+  const [sortBy, setSortBy] = useState<SortBy>(null) // null = API default order
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
@@ -230,6 +230,7 @@ const TrackerMain = () => {
                   categories={categories} 
                   transactions={transactions}
                   sortBy={sortBy}
+                  sortOrder={sortOrder}
                   page={currentPage}
                   setPage={setCurrentPage}
                   isLoading={isLoadingTransactions}
