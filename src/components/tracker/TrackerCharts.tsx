@@ -1,6 +1,174 @@
+import { useMemo } from 'react'
 import { motion } from 'framer-motion'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import type { Category } from './TrackerMain'
+import type { Transaction } from '../../services/api/transactionService'
+import moment from 'moment'
 
-const TrackerCharts = () => {
+interface Props {
+  categories: Category[]
+  transactions: Transaction[]
+  isLoading: boolean
+}
+
+const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
+
+const TrackerCharts = ({ categories, transactions, isLoading }: Props) => {
+  // Format currency helper
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('es-PE', {
+      style: 'currency',
+      currency: 'PEN',
+      minimumFractionDigits: 2
+    }).format(value)
+  }
+
+  const chartData = useMemo(() => {
+    if (!transactions || transactions.length === 0) {
+      return {
+        lineData: [],
+        incomeByCategory: [],
+        expenseByCategory: [],
+        totals: { income: 0, expense: 0, net: 0 }
+      }
+    }
+
+    // Group by date
+    const dateGroups = transactions.reduce((acc, t) => {
+      const date = moment(t.transaction_date).format('YYYY-MM-DD')
+      if (!acc[date]) {
+        acc[date] = { date, income: 0, expense: 0 }
+      }
+      // Ensure amount is a number - convert string to number if needed
+      const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : Number(t.amount)
+      if (isNaN(amount)) {
+        console.warn('Invalid amount in transaction:', t)
+        return acc
+      }
+      if (t.transaction_type === 'I') {
+        acc[date].income = Number(acc[date].income) + amount
+      } else {
+        acc[date].expense = Number(acc[date].expense) + amount
+      }
+      return acc
+    }, {} as Record<string, { date: string; income: number; expense: number }>)
+
+    const sortedDates = Object.values(dateGroups).sort((a, b) => 
+      new Date(a.date).getTime() - new Date(b.date).getTime()
+    )
+
+    // Category breakdown
+    const categoryIncome = transactions
+      .filter(t => t.transaction_type === 'I')
+      .reduce((acc, t) => {
+        const cat = categories.find(c => c.id === t.category)
+        if (cat) {
+          // Ensure amount is a number - convert string to number if needed
+          const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : Number(t.amount)
+          if (isNaN(amount)) {
+            console.warn('Invalid amount in transaction:', t)
+            return acc
+          }
+          const currentValue = Number(acc[cat.name] || 0)
+          acc[cat.name] = currentValue + amount
+        }
+        return acc
+      }, {} as Record<string, number>)
+
+    const categoryExpense = transactions
+      .filter(t => t.transaction_type === 'E')
+      .reduce((acc, t) => {
+        const cat = categories.find(c => c.id === t.category)
+        if (cat) {
+          // Ensure amount is a number - convert string to number if needed
+          const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : Number(t.amount)
+          if (isNaN(amount)) {
+            console.warn('Invalid amount in transaction:', t)
+            return acc
+          }
+          const currentValue = Number(acc[cat.name] || 0)
+          acc[cat.name] = currentValue + amount
+        }
+        return acc
+      }, {} as Record<string, number>)
+
+    // Calculate totals from ALL transactions, not just those with matching categories
+    const totalIncome = transactions
+      .filter(t => t.transaction_type === 'I')
+      .reduce((sum, t) => {
+        const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : Number(t.amount)
+        return isNaN(amount) ? sum : Number(sum) + amount
+      }, 0)
+    
+    const totalExpense = transactions
+      .filter(t => t.transaction_type === 'E')
+      .reduce((sum, t) => {
+        const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : Number(t.amount)
+        return isNaN(amount) ? sum : Number(sum) + amount
+      }, 0)
+
+    return {
+      lineData: sortedDates.map(d => ({
+        ...d,
+        net: d.income - d.expense
+      })),
+      incomeByCategory: Object.entries(categoryIncome)
+        .map(([name, value]) => ({
+          name,
+          value: Number(value.toFixed(2)),
+          percentage: totalIncome > 0 ? (value / totalIncome) * 100 : 0
+        }))
+        .sort((a, b) => b.value - a.value),
+      expenseByCategory: Object.entries(categoryExpense)
+        .map(([name, value]) => ({
+          name,
+          value: Number(value.toFixed(2)),
+          percentage: totalExpense > 0 ? (value / totalExpense) * 100 : 0
+        }))
+        .sort((a, b) => b.value - a.value),
+      totals: {
+        income: totalIncome,
+        expense: totalExpense,
+        net: totalIncome - totalExpense
+      }
+    }
+  }, [transactions, categories])
+
+  if (isLoading) {
+    return (
+      <motion.div
+        key="charts"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        className="space-y-6"
+      >
+        <div className="text-center py-12 bg-white rounded-lg">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-gray-500 text-lg mt-4">Cargando gráficos...</p>
+        </div>
+      </motion.div>
+    )
+  }
+
+  if (transactions.length === 0) {
+    return (
+      <motion.div
+        key="charts"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        className="space-y-6"
+      >
+        <div className="text-center py-12 bg-white rounded-lg">
+          <p className="text-gray-500 text-lg">No hay datos para mostrar</p>
+          <p className="text-gray-400 text-sm mt-2">Los gráficos aparecerán cuando haya transacciones</p>
+        </div>
+      </motion.div>
+    )
+  }
+
+
   return (
     <motion.div
     key="charts"
@@ -14,13 +182,13 @@ const TrackerCharts = () => {
       <div className="bg-green-50 rounded-lg p-4 border-l-4 border-green-500">
         <p className="text-sm text-green-700 font-medium mb-1">Total Ingresos</p>
         <p className="text-2xl font-bold text-green-900">
-          ${chartData.totals.income.toFixed(2)}
+          {formatCurrency(chartData.totals.income)}
         </p>
       </div>
       <div className="bg-red-50 rounded-lg p-4 border-l-4 border-red-500">
         <p className="text-sm text-red-700 font-medium mb-1">Total Gastos</p>
         <p className="text-2xl font-bold text-red-900">
-          ${chartData.totals.expense.toFixed(2)}
+          {formatCurrency(chartData.totals.expense)}
         </p>
       </div>
       <div className={`rounded-lg p-4 border-l-4 ${
@@ -36,9 +204,56 @@ const TrackerCharts = () => {
         <p className={`text-2xl font-bold ${
           chartData.totals.net >= 0 ? 'text-blue-900' : 'text-orange-900'
         }`}>
-          ${chartData.totals.net.toFixed(2)}
+          {formatCurrency(chartData.totals.net)}
         </p>
       </div>
+    </div>
+
+    {/* Income vs Expenses Line Chart */}
+    <div className="bg-white rounded-lg p-6 shadow-md">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">Ingresos vs Gastos</h3>
+      {chartData.lineData.length > 0 ? (
+        <ResponsiveContainer width="100%" height={350}>
+          <LineChart data={chartData.lineData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis 
+              dataKey="date" 
+              tickFormatter={(value) => moment(value).format('DD/MM')}
+            />
+            <YAxis />
+            <Tooltip 
+              formatter={(value: number | string) => {
+                const numValue = typeof value === 'number' ? value : parseFloat(String(value))
+                return formatCurrency(numValue)
+              }}
+              labelFormatter={(value) => moment(value).format('DD/MM/YYYY')}
+            />
+            <Legend />
+            <Line 
+              type="monotone" 
+              dataKey="income" 
+              stroke="#10b981" 
+              strokeWidth={3}
+              dot={{ fill: '#10b981', r: 4 }}
+              activeDot={{ r: 6 }}
+              name="Ingresos" 
+            />
+            <Line 
+              type="monotone" 
+              dataKey="expense" 
+              stroke="#ef4444" 
+              strokeWidth={3}
+              dot={{ fill: '#ef4444', r: 4 }}
+              activeDot={{ r: 6 }}
+              name="Gastos" 
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      ) : (
+        <div className="text-center py-12">
+          <p className="text-gray-500">No hay datos para mostrar</p>
+        </div>
+      )}
     </div>
 
     {/* Income vs Expenses by Date */}
@@ -56,14 +271,14 @@ const TrackerCharts = () => {
             <div key={index} className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="font-medium text-gray-700">
-                  {new Date(item.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                  {moment(item.date).format('DD/MM/YYYY')}
                 </span>
                 <div className="flex gap-4 text-xs">
                   <span className="text-green-600 font-medium">
-                    +${item.income.toFixed(2)}
+                    +{formatCurrency(item.income)}
                   </span>
                   <span className="text-red-600 font-medium">
-                    -${item.expense.toFixed(2)}
+                    -{formatCurrency(item.expense)}
                   </span>
                 </div>
               </div>
@@ -90,6 +305,9 @@ const TrackerCharts = () => {
             </div>
           )
         })}
+        {chartData.lineData.length === 0 && (
+          <p className="text-gray-500 text-center py-8">No hay datos en este período</p>
+        )}
       </div>
     </div>
 
@@ -111,7 +329,7 @@ const TrackerCharts = () => {
                   style={{ height: `${height}%` }}
                 />
                 <div className="absolute -bottom-6 text-xs text-gray-600 text-center whitespace-nowrap">
-                  {new Date(item.date).toLocaleDateString('es-ES', { day: 'numeric' })}
+                  {moment(item.date).format('DD/MM')}
                 </div>
               </div>
             </div>
@@ -139,7 +357,7 @@ const TrackerCharts = () => {
             <div key={index} className="space-y-1">
               <div className="flex items-center justify-between text-sm">
                 <span className="font-medium text-gray-700">{item.name}</span>
-                <span className="text-green-600 font-bold">${item.value.toFixed(2)}</span>
+                <span className="text-green-600 font-bold">{formatCurrency(item.value)}</span>
               </div>
               <div className="bg-gray-200 rounded-full h-2">
                 <div
@@ -164,7 +382,7 @@ const TrackerCharts = () => {
             <div key={index} className="space-y-1">
               <div className="flex items-center justify-between text-sm">
                 <span className="font-medium text-gray-700">{item.name}</span>
-                <span className="text-red-600 font-bold">${item.value.toFixed(2)}</span>
+                <span className="text-red-600 font-bold">{formatCurrency(item.value)}</span>
               </div>
               <div className="bg-gray-200 rounded-full h-2">
                 <div
@@ -218,7 +436,7 @@ const TrackerCharts = () => {
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
                 <p className="text-2xl font-bold text-gray-900">
-                  ${chartData.totals.income.toFixed(0)}
+                  {formatCurrency(chartData.totals.income)}
                 </p>
                 <p className="text-xs text-gray-600">Total</p>
               </div>
@@ -233,7 +451,7 @@ const TrackerCharts = () => {
                 style={{ backgroundColor: COLORS[index % COLORS.length] }}
               />
               <span className="flex-1">{item.name}</span>
-              <span className="font-medium">${item.value.toFixed(2)}</span>
+              <span className="font-medium">{formatCurrency(item.value)}</span>
               <span className="text-gray-500 text-xs">({item.percentage.toFixed(1)}%)</span>
             </div>
           ))}
@@ -274,7 +492,7 @@ const TrackerCharts = () => {
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center">
                 <p className="text-2xl font-bold text-gray-900">
-                  ${chartData.totals.expense.toFixed(0)}
+                  {formatCurrency(chartData.totals.expense)}
                 </p>
                 <p className="text-xs text-gray-600">Total</p>
               </div>
@@ -289,7 +507,7 @@ const TrackerCharts = () => {
                 style={{ backgroundColor: COLORS[index % COLORS.length] }}
               />
               <span className="flex-1">{item.name}</span>
-              <span className="font-medium">${item.value.toFixed(2)}</span>
+              <span className="font-medium">{formatCurrency(item.value)}</span>
               <span className="text-gray-500 text-xs">({item.percentage.toFixed(1)}%)</span>
             </div>
           ))}

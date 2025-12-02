@@ -1,29 +1,50 @@
+import { useMemo } from 'react'
 import { motion } from 'framer-motion'
-import type { Category, Transaction } from './TrackerMain'
+import type { Category } from './TrackerMain'
+import type { Transaction } from '../../services/api/transactionService'
 import { DollarSign } from 'lucide-react'
-import useAuthStore from '../../store/useAuthStore'
-import useGetTransactionsPage from '../../hooks/api/transaction/useGetTransactionsPage'
 import moment from 'moment'
 import Paginator from '../ui/Paginator'
 
 interface Props {
   categories: Category[]
-  dateFilter: 'today' | 'last7days' | 'thisWeek' | 'thisMonth' | 'custom' | 'all'
-  typeFilter: 'all' | 'I' | 'E'
+  transactions: Transaction[]
   sortBy: 'date' | 'amount'
   page: number
   setPage: React.Dispatch<React.SetStateAction<number>>
+  isLoading: boolean
 }
 
-const TrackerTable = ({ categories, dateFilter, typeFilter, sortBy, page, setPage }: Props) => {
+const ITEMS_PER_PAGE = 10
 
-  const access = useAuthStore((state) => state.access) || ''
-  const { data: transactionsPage, isLoading, error, isError, isSuccess } = useGetTransactionsPage({ access, dateFilter, typeFilter, sortBy, page })
+const TrackerTable = ({ categories, transactions, sortBy, page, setPage, isLoading }: Props) => {
+  
+  // Sort transactions
+  const sortedTransactions = useMemo(() => {
+    const sorted = [...transactions]
+    sorted.sort((a, b) => {
+      let comparison = 0
+      
+      if (sortBy === 'date') {
+        comparison = new Date(a.transaction_date).getTime() - new Date(b.transaction_date).getTime()
+      } else if (sortBy === 'amount') {
+        comparison = Math.abs(a.amount) - Math.abs(b.amount)
+      }
+      
+      return comparison
+    })
+    
+    return sorted
+  }, [transactions, sortBy])
 
-  if (isLoading) return <div>Cargando...</div>
-  if (error) return <div>Error: {error.message}</div>
+  // Paginate transactions
+  const paginatedTransactions = useMemo(() => {
+    const startIndex = (page - 1) * ITEMS_PER_PAGE
+    const endIndex = startIndex + ITEMS_PER_PAGE
+    return sortedTransactions.slice(startIndex, endIndex)
+  }, [sortedTransactions, page])
 
-  // const transactions = data?.results || []
+  if (isLoading) return <div className="text-center py-12">Cargando...</div>
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('es-ES', {
@@ -45,7 +66,7 @@ const TrackerTable = ({ categories, dateFilter, typeFilter, sortBy, page, setPag
       
       {/* Mobile Card View */}
       <div className="block sm:hidden">
-        {transactionsPage?.results.map((transaction, index) => (
+        {paginatedTransactions.map((transaction, index) => (
           <motion.div
             key={transaction.id}
             initial={{ opacity: 0, y: 20 }}
@@ -91,7 +112,7 @@ const TrackerTable = ({ categories, dateFilter, typeFilter, sortBy, page, setPag
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {transactionsPage?.results.map((transaction, index) => (
+            {paginatedTransactions.map((transaction, index) => (
               <motion.tr
                 key={transaction.id}
                 initial={{ opacity: 0, x: -20 }}
@@ -125,7 +146,7 @@ const TrackerTable = ({ categories, dateFilter, typeFilter, sortBy, page, setPag
         </table>
       </div>
 
-      {transactionsPage?.results.length === 0 && (
+      {paginatedTransactions.length === 0 && (
         <div className="text-center py-12">
           <div className="text-gray-400 mb-2">
             <DollarSign size={48} className="mx-auto" />
@@ -133,7 +154,7 @@ const TrackerTable = ({ categories, dateFilter, typeFilter, sortBy, page, setPag
           <p className="text-gray-500 text-sm sm:text-base">No hay transacciones registradas</p>
         </div>
       )}
-      <Paginator page={page} setPage={setPage} itemsCount={transactionsPage?.count || 0} itemsPerPage={10} />
+      <Paginator page={page} setPage={setPage} itemsCount={sortedTransactions.length} itemsPerPage={ITEMS_PER_PAGE} />
     </motion.div>
   )
 }
