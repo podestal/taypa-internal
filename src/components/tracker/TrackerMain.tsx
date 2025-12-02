@@ -103,10 +103,19 @@ const TrackerMain = () => {
         
         // Date filter - only add if not 'all'
         if (dateFilter && dateFilter !== 'all') {
-          // If custom date range, use start_date and end_date
-          if (dateFilter === 'custom' && startDate && endDate) {
-            params.start_date = startDate
-            params.end_date = endDate
+          // If custom date range, only add if BOTH dates are provided
+          if (dateFilter === 'custom') {
+            if (startDate && endDate) {
+              // Django expects date_filter='custom' AND start_date/end_date
+              params.date_filter = 'custom'
+              params.start_date = startDate
+              params.end_date = endDate
+            } else {
+              // Don't send request if custom is selected but dates are incomplete
+              // Skip this page fetch
+              hasMore = false
+              break
+            }
           } else {
             // Otherwise use date_filter for predefined ranges
             params.date_filter = dateFilter
@@ -134,7 +143,7 @@ const TrackerMain = () => {
       console.log('[TrackerMain] Total transactions fetched:', allTransactions.length)
       return allTransactions
     },
-    enabled: !!access,
+    enabled: !!access && !(dateFilter === 'custom' && (!startDate || !endDate)),
   })
 
   // Transactions are already filtered by the API based on dateFilter and typeFilter

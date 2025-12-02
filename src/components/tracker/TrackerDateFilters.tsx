@@ -64,7 +64,7 @@ const TrackerDateFilters = ({
         }}
         className={`px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2 ${
           dateFilter === 'custom'
-            ? 'bg-purple-600 text-white shadow-md'
+            ? 'bg-blue-600 text-white shadow-md'
             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
         }`}
         whileHover={{ scale: 1.05 }}
@@ -114,9 +114,14 @@ const TrackerDateFilters = ({
               setShowDatePicker(false)
             }
           }}
-          className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          disabled={!startDate || !endDate}
+          className={`mt-4 px-4 py-2 rounded-lg font-medium transition-colors ${
+            startDate && endDate
+              ? 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+          whileHover={startDate && endDate ? { scale: 1.05 } : {}}
+          whileTap={startDate && endDate ? { scale: 0.95 } : {}}
         >
           Aplicar Rango
         </motion.button>
