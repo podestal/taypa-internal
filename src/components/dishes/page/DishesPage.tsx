@@ -328,7 +328,9 @@ const DishesPage = () => {
                 >
                   Todos
                 </motion.button>
-                {categories.map((category) => (
+                {categories
+                .filter(category => category.is_menu_category)
+                .map((category) => (
                   <motion.button
                     key={category.id}
                     onClick={() => setSelectedCategoryFilter(category.id)}

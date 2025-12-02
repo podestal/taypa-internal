@@ -31,16 +31,16 @@ const Sidebar = () => {
         path: '/categories',
         icon: <Tags />
     },
-    {
-        name: 'Ventas',
-        path: '/sales',
-        icon: <ChartBar />
-    },
-    {
-        name: 'Inventario',
-        path: '/inventory',
-        icon: <PackageSearch />
-    },
+    // {
+    //     name: 'Ventas',
+    //     path: '/sales',
+    //     icon: <ChartBar />
+    // },
+    // {
+    //     name: 'Inventario',
+    //     path: '/inventory',
+    //     icon: <PackageSearch />
+    // },
     {
         name: 'Cocina',
         path: '/kitchen',

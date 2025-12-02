@@ -2,8 +2,8 @@ import { createBrowserRouter } from "react-router-dom";
 import MainPage from "../pages/MainPage";
 import OrdersMain from "../components/orders/OrdersMain";
 import TrackerMain from "../components/tracker/TrackerMain";
-import SalesMain from "../components/sales/SalesMain";
-import InventoryMain from "../components/inventory/InventoryMain";
+// import SalesMain from "../components/sales/SalesMain";
+// import InventoryMain from "../components/inventory/InventoryMain";
 import KitchenMain from "../components/kitchen/KitchenMain";
 import LoginPage from "../components/auth/LoginPage";
 import PrivateRoutes from "../components/auth/PrivateRoutes";
@@ -37,14 +37,14 @@ const routes = createBrowserRouter([
                         path: "dishes",
                         element: <DishesPage />
                     },
-                    {
-                        path: "sales",
-                        element: <SalesMain />
-                    },
-                    {
-                        path: "inventory",
-                        element: <InventoryMain />
-                    },
+                    // {
+                    //     path: "sales",
+                    //     element: <SalesMain />
+                    // },
+                    // {
+                    //     path: "inventory",
+                    //     element: <InventoryMain />
+                    // },
                     {
                         path: "categories",
                         element: <CategoriesPage /> 
