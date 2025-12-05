@@ -10,6 +10,7 @@ import PrivateRoutes from "../components/auth/PrivateRoutes";
 import TaxesMain from "../components/taxes/TaxesMain";
 import CategoriesPage from "../components/categories/page/CategoriesPage";
 import DishesPage from "../components/dishes/page/DishesPage";
+import NotFoundError from "../components/errores/NotFoundError";
 
 const routes = createBrowserRouter([
     {
@@ -19,7 +20,7 @@ const routes = createBrowserRouter([
     {
         path: "/",
         element: <PrivateRoutes />,
-        errorElement: <div>Error</div>,
+        errorElement: <NotFoundError />,
         children: [
             {
                 path: "",
@@ -60,6 +61,10 @@ const routes = createBrowserRouter([
                 ]
             }
         ]
+    },
+    {
+        path: "*",
+        element: <NotFoundError />
     }
 ]);
 
