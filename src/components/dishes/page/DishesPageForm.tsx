@@ -1,5 +1,6 @@
+import { useRef } from 'react'
 import { motion } from 'framer-motion'
-import { Loader2, X } from 'lucide-react'
+import { Loader2, X, Image as ImageIcon, XCircle } from 'lucide-react'
 import type { CreateUpdateDish } from '../../../services/api/dishService'
 import type { Category } from '../../../services/api/categoryService'
 import type { ReactElement } from 'react'
@@ -11,6 +12,8 @@ interface Props {
   isEditing: boolean
   categories: Category[]
   onInputChange: (field: keyof CreateUpdateDish, value: string | number | boolean) => void
+  onImageChange: (file: File | null) => void
+  imagePreview: string | null
   onSubmit: () => void
   onCancel: () => void
   isModal?: boolean
@@ -23,10 +26,25 @@ const DishesPageForm = ({
   isEditing,
   categories,
   onInputChange,
+  onImageChange,
+  imagePreview,
   onSubmit,
   onCancel,
   isModal = false
 }: Props): ReactElement => {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null
+    onImageChange(file)
+  }
+
+  const handleRemoveImage = () => {
+    onImageChange(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
   const formContent = (
     <>
       <div className="flex items-center justify-between mb-4">
@@ -122,6 +140,50 @@ const DishesPageForm = ({
           {errors.category && (
             <p className="text-red-500 text-xs mt-1">{errors.category}</p>
           )}
+        </div>
+
+        {/* Image Upload */}
+        <div className={isModal ? "w-full" : "w-full"}>
+          <label className={`block font-medium text-gray-700 mb-1 ${isModal ? 'text-sm' : 'text-xs'}`}>
+            Imagen
+          </label>
+          <div className="space-y-2">
+            {imagePreview ? (
+              <div className="relative">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-full h-48 object-cover rounded-lg border border-gray-300"
+                />
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  disabled={isSubmitting}
+                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors disabled:opacity-50"
+                >
+                  <XCircle className="w-5 h-5" />
+                </button>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors bg-gray-50">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <ImageIcon className="w-10 h-10 text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-500 mb-1">
+                    <span className="font-semibold">Click para subir</span> o arrastra y suelta
+                  </p>
+                  <p className="text-xs text-gray-400">PNG, JPG, GIF hasta 10MB</p>
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  disabled={isSubmitting}
+                  className="hidden"
+                />
+              </label>
+            )}
+          </div>
         </div>
 
         <div className={`flex items-center ${isModal ? 'w-full' : 'px-3'}`}>

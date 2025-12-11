@@ -30,11 +30,18 @@ class APIClient<ResponseType, RequestType = ResponseType> {
             .then(res => res.data);
     }
 
-    post = (data: RequestType, access?: string, params?: Record<string, string>) => {
+    post = (data: RequestType | FormData, access?: string, params?: Record<string, string>) => {
 
         const config: any = {}
         if (access) {
             config.headers = { Authorization: `JWT ${access}` }
+        }
+
+        // If data is FormData, let axios set Content-Type automatically (multipart/form-data)
+        // Otherwise, keep the default JSON Content-Type
+        if (data instanceof FormData) {
+            // Don't set Content-Type header, let browser set it with boundary
+            // axios will automatically handle FormData
         }
 
         if (params) {
@@ -46,11 +53,18 @@ class APIClient<ResponseType, RequestType = ResponseType> {
             .then(res => res.data)            
     }
 
-    update = (data: RequestType, access?: string, params?: Record<string, string>) => {
+    update = (data: RequestType | FormData, access?: string, params?: Record<string, string>) => {
 
         const config: any = {}
         if (access) {
             config.headers = { Authorization: `JWT ${access}` }
+        }
+
+        // If data is FormData, let axios set Content-Type automatically (multipart/form-data)
+        // Otherwise, keep the default JSON Content-Type
+        if (data instanceof FormData) {
+            // Don't set Content-Type header, let browser set it with boundary
+            // axios will automatically handle FormData
         }
 
         if (params) {

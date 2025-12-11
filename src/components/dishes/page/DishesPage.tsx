@@ -48,6 +48,10 @@ const DishesPage = () => {
     category: ''
   })
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<number | null>(null)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [editImageFile, setEditImageFile] = useState<File | null>(null)
+  const [editImagePreview, setEditImagePreview] = useState<string | null>(null)
 
   const createDish = useCreateDish()
   const updateDish = useUpdateDish({ dishId: editingDish?.id || 0 })
@@ -94,10 +98,12 @@ const DishesPage = () => {
   const handleEditSubmit = () => {
     if (!validateEditForm() || !editingDish) return
 
-    updateDish.mutate({
-      dish: editFormData,
-      access
-    }, {
+    // Create FormData if image exists, otherwise send regular data
+    const dataToSend = editImageFile
+      ? { dish: editFormData, image: editImageFile, access }
+      : { dish: editFormData, access }
+
+    updateDish.mutate(dataToSend, {
       onSuccess: () => {
         addNotification({
           title: 'Plato actualizado',
@@ -118,6 +124,8 @@ const DishesPage = () => {
           price: '',
           category: ''
         })
+        setEditImageFile(null)
+        setEditImagePreview(null)
       },
       onError: () => {
         addNotification({
@@ -127,6 +135,32 @@ const DishesPage = () => {
         })
       }
     })
+  }
+
+  const handleImageChange = (file: File | null) => {
+    setImageFile(file)
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    } else {
+      setImagePreview(null)
+    }
+  }
+
+  const handleEditImageChange = (file: File | null) => {
+    setEditImageFile(file)
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setEditImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    } else {
+      setEditImagePreview(null)
+    }
   }
 
   const resetForm = () => {
@@ -142,6 +176,8 @@ const DishesPage = () => {
       price: '',
       category: ''
     })
+    setImageFile(null)
+    setImagePreview(null)
     setEditingDish(null)
   }
 
@@ -178,10 +214,12 @@ const DishesPage = () => {
   const handleSubmit = () => {
     if (!validateForm()) return
 
-    createDish.mutate({
-      dish: formData,
-      access
-    }, {
+    // Create FormData if image exists, otherwise send regular data
+    const dataToSend = imageFile
+      ? { dish: formData, image: imageFile, access }
+      : { dish: formData, access }
+
+    createDish.mutate(dataToSend, {
       onSuccess: () => {
         addNotification({
           title: 'Plato creado',
@@ -214,6 +252,8 @@ const DishesPage = () => {
       price: '',
       category: ''
     })
+    setEditImageFile(null)
+    setEditImagePreview(null)
     setShowEditModal(true)
   }
 
@@ -232,6 +272,8 @@ const DishesPage = () => {
       price: '',
       category: ''
     })
+    setEditImageFile(null)
+    setEditImagePreview(null)
   }
 
   const handleDelete = (dish: Dish) => {
@@ -300,6 +342,8 @@ const DishesPage = () => {
             isEditing={false}
             categories={categories}
             onInputChange={handleInputChange}
+            onImageChange={handleImageChange}
+            imagePreview={imagePreview}
             onSubmit={handleSubmit}
             onCancel={resetForm}
           />
@@ -390,6 +434,8 @@ const DishesPage = () => {
             isEditing={true}
             categories={categories}
             onInputChange={handleEditInputChange}
+            onImageChange={handleEditImageChange}
+            imagePreview={editImagePreview}
             onSubmit={handleEditSubmit}
             onCancel={handleCloseEditModal}
             isModal={true}
