@@ -47,7 +47,7 @@ const DishesPageForm = ({
   }
   const formContent = (
     <>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-gray-900">
           {isEditing ? 'Editar Plato' : 'Nuevo Plato'}
         </h2>
@@ -61,150 +61,152 @@ const DishesPageForm = ({
         )}
       </div>
 
-      <div className={isModal ? "space-y-4" : "flex items-end gap-3"}>
-        <div className={isModal ? "w-full" : "flex-1"}>
-          <label className={`block font-medium text-gray-700 mb-1 ${isModal ? 'text-sm' : 'text-xs'}`}>
-            Nombre <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={formData.name}
-            onChange={(e) => onInputChange('name', e.target.value)}
-            className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              errors.name ? 'border-red-500' : 'border-gray-300'
-            }`}
-            placeholder="Nombre del plato"
-            disabled={isSubmitting}
-          />
-          {errors.name && (
-            <p className="text-red-500 text-xs mt-1">{errors.name}</p>
-          )}
+      <div className="space-y-6">
+        {/* Basic Information Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Nombre <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => onInputChange('name', e.target.value)}
+              className={`w-full px-4 py-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                errors.name ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="Nombre del plato"
+              disabled={isSubmitting}
+            />
+            {errors.name && (
+              <p className="text-red-500 text-xs mt-1.5">{errors.name}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Precio <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={formData.price}
+              onChange={(e) => onInputChange('price', parseFloat(e.target.value) || 0)}
+              className={`w-full px-4 py-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                errors.price ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="0.00"
+              disabled={isSubmitting}
+            />
+            {errors.price && (
+              <p className="text-red-500 text-xs mt-1.5">{errors.price}</p>
+            )}
+          </div>
         </div>
 
-        <div className={isModal ? "w-full" : "flex-1"}>
-          <label className={`block font-medium text-gray-700 mb-1 ${isModal ? 'text-sm' : 'text-xs'}`}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Categoría <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={formData.category}
+              onChange={(e) => onInputChange('category', parseInt(e.target.value))}
+              className={`w-full px-4 py-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                errors.category ? 'border-red-500' : 'border-gray-300'
+              }`}
+              disabled={isSubmitting}
+            >
+              <option value="">Seleccionar categoría</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+            {errors.category && (
+              <p className="text-red-500 text-xs mt-1.5">{errors.category}</p>
+            )}
+          </div>
+
+          <div className="flex items-end">
+            <label className="flex items-center space-x-2 cursor-pointer p-2">
+              <input
+                type="checkbox"
+                checked={formData.is_active}
+                onChange={(e) => onInputChange('is_active', e.target.checked)}
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                disabled={isSubmitting}
+              />
+              <span className="text-sm font-medium text-gray-700">Activo</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Descripción
           </label>
           <input
             type="text"
             value={formData.description}
             onChange={(e) => onInputChange('description', e.target.value)}
-            className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              errors.price ? 'border-red-500' : 'border-gray-300'
-            }`}
-            placeholder="Descripción (opcional)"
+            className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            placeholder="Descripción del plato (opcional)"
             disabled={isSubmitting}
           />
         </div>
 
-        <div className={isModal ? "w-full" : "w-32"}>
-          <label className={`block font-medium text-gray-700 mb-1 ${isModal ? 'text-sm' : 'text-xs'}`}>
-            Precio <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="number"
-            step="0.01"
-            min="0"
-            value={formData.price}
-            onChange={(e) => onInputChange('price', parseFloat(e.target.value) || 0)}
-            className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              errors.price ? 'border-red-500' : 'border-gray-300'
-            }`}
-            placeholder="0.00"
-            disabled={isSubmitting}
-          />
-          {errors.price && (
-            <p className="text-red-500 text-xs mt-1">{errors.price}</p>
-          )}
-        </div>
-
-        <div className={isModal ? "w-full" : "w-48"}>
-          <label className={`block font-medium text-gray-700 mb-1 ${isModal ? 'text-sm' : 'text-xs'}`}>
-            Categoría <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={formData.category}
-            onChange={(e) => onInputChange('category', parseInt(e.target.value))}
-            className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-              errors.category ? 'border-red-500' : 'border-gray-300'
-            }`}
-            disabled={isSubmitting}
-          >
-            <option value="">Seleccionar categoría</option>
-            {categories.map(cat => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-          {errors.category && (
-            <p className="text-red-500 text-xs mt-1">{errors.category}</p>
-          )}
-        </div>
-
-        {/* Image Upload */}
-        <div className={isModal ? "w-full" : "w-full"}>
-          <label className={`block font-medium text-gray-700 mb-1 ${isModal ? 'text-sm' : 'text-xs'}`}>
+        {/* Image Upload Section */}
+        <div className="flex flex-col items-center justify-center gap-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Imagen
           </label>
-          <div className="space-y-2">
-            {imagePreview ? (
-              <div className="relative">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="w-full h-48 object-cover rounded-lg border border-gray-300"
-                />
-                <button
-                  type="button"
-                  onClick={handleRemoveImage}
-                  disabled={isSubmitting}
-                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors disabled:opacity-50"
-                >
-                  <XCircle className="w-5 h-5" />
-                </button>
+          {imagePreview ? (
+            <div className="relative group">
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="w-full max-w-md h-64 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
+              />
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                disabled={isSubmitting}
+                className="absolute top-3 right-3 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors disabled:opacity-50 shadow-lg"
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+          ) : (
+            <label className="flex flex-col items-center justify-center w-full max-w-md h-64 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 bg-gray-50">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <ImageIcon className="w-12 h-12 text-gray-400 mb-3" />
+                <p className="text-sm text-gray-600 mb-1">
+                  <span className="font-semibold text-blue-600">Click para subir</span> o arrastra y suelta
+                </p>
+                <p className="text-xs text-gray-400">PNG, JPG, GIF hasta 10MB</p>
               </div>
-            ) : (
-              <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors bg-gray-50">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <ImageIcon className="w-10 h-10 text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-500 mb-1">
-                    <span className="font-semibold">Click para subir</span> o arrastra y suelta
-                  </p>
-                  <p className="text-xs text-gray-400">PNG, JPG, GIF hasta 10MB</p>
-                </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageSelect}
-                  disabled={isSubmitting}
-                  className="hidden"
-                />
-              </label>
-            )}
-          </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageSelect}
+                disabled={isSubmitting}
+                className="hidden"
+              />
+            </label>
+          )}
         </div>
 
-        <div className={`flex items-center ${isModal ? 'w-full' : 'px-3'}`}>
-          <label className="flex items-center space-x-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={formData.is_active}
-              onChange={(e) => onInputChange('is_active', e.target.checked)}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              disabled={isSubmitting}
-            />
-            <span className="text-sm text-gray-700">Activo</span>
-          </label>
-        </div>
-
-        <div className={`flex gap-2 ${isModal ? 'w-full pt-2' : ''}`}>
+        {/* Action Buttons */}
+        <div className="flex justify-center gap-10 pt-2">
           {isEditing && (
             <motion.button
               onClick={onCancel}
               disabled={isSubmitting}
-              className={`${isModal ? 'flex-1' : ''} px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors disabled:opacity-50`}
+              className=" px-6 py-2.5 text-sm bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors disabled:opacity-50"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -214,7 +216,7 @@ const DishesPageForm = ({
           <motion.button
             onClick={onSubmit}
             disabled={isSubmitting}
-            className={`${isModal ? 'flex-1' : ''} px-4 py-2 text-sm bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2`}
+            className={`px-6 py-2.5 text-sm bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 shadow-sm`}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >

@@ -21,6 +21,7 @@ const DishesPage = () => {
   
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
+  const [showCreateModal, setShowCreateModal] = useState(false)
   const [selectedDish, setSelectedDish] = useState<Dish | null>(null)
   const [editingDish, setEditingDish] = useState<Dish | null>(null)
   const [formData, setFormData] = useState<CreateUpdateDish>({
@@ -178,7 +179,7 @@ const DishesPage = () => {
     })
     setImageFile(null)
     setImagePreview(null)
-    setEditingDish(null)
+    setShowCreateModal(false)
   }
 
   const validateForm = () => {
@@ -236,6 +237,11 @@ const DishesPage = () => {
         })
       }
     })
+  }
+
+  const handleCloseCreateModal = () => {
+    setShowCreateModal(false)
+    resetForm()
   }
 
   const handleEdit = (dish: Dish) => {
@@ -327,27 +333,24 @@ const DishesPage = () => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center space-x-3"
+          className="flex items-center justify-between"
         >
-          <UtensilsCrossed className="w-8 h-8 text-blue-600" />
-          <h1 className="text-3xl font-bold text-gray-900">Gestión de Platos</h1>
+          <div className="flex items-center space-x-3">
+            <UtensilsCrossed className="w-8 h-8 text-blue-600" />
+            <h1 className="text-3xl font-bold text-gray-900">Gestión de Platos</h1>
+          </div>
+          {categories && (
+            <motion.button
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <UtensilsCrossed className="w-5 h-5" />
+              Nuevo Plato
+            </motion.button>
+          )}
         </motion.div>
-
-        {/* Create Form */}
-        {categories && (
-          <DishesPageForm
-            formData={formData}
-            errors={errors}
-            isSubmitting={createDish.isPending}
-            isEditing={false}
-            categories={categories}
-            onInputChange={handleInputChange}
-            onImageChange={handleImageChange}
-            imagePreview={imagePreview}
-            onSubmit={handleSubmit}
-            onCancel={resetForm}
-          />
-        )}
 
         {/* Category Filters */}
         {categories && categories.length > 0 && (
@@ -423,6 +426,25 @@ const DishesPage = () => {
           )}
         </motion.div>
       </div>
+
+      {/* Create Modal */}
+      {categories && (
+        <Modal isOpen={showCreateModal} onClose={handleCloseCreateModal} width="max-w-2xl">
+          <DishesPageForm
+            formData={formData}
+            errors={errors}
+            isSubmitting={createDish.isPending}
+            isEditing={false}
+            categories={categories}
+            onInputChange={handleInputChange}
+            onImageChange={handleImageChange}
+            imagePreview={imagePreview}
+            onSubmit={handleSubmit}
+            onCancel={handleCloseCreateModal}
+            isModal={true}
+          />
+        </Modal>
+      )}
 
       {/* Edit Modal */}
       {categories && (
