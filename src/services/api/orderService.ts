@@ -10,6 +10,7 @@ export interface Order {
     updated_at: Date
     order_type: string
     status: string
+    payment_method?: string
 }
 
 export interface CategoryOrderItem {
