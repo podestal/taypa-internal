@@ -16,7 +16,6 @@ interface Props {
     orderItems: OrderItem[]
 }
 const OrderToKitchen = ({ orderId, orderItems }: Props) => {
-
     const access = useAuthStore(state => state.access) || ''
     const updateOrder = useUpdateOrder({ orderId })
     const addNotification = useNotificationStore(state => state.addNotification)
@@ -26,13 +25,22 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
     const setOrderStep = useOrderStep(state => state.setOrderStep)
 
 
-    const handleSendToKitchen = () => {
+    const handleSendToKitchen = (paymentMethod: 'EF' | 'VW') => {
         console.log('send to kitchen', orderId)
+        
+        // Build order update object
+        const orderUpdate: any = {
+            status: 'IK'
+        }
+        
+        // Only add payment_method if it's Effectivo (EF)
+        if (paymentMethod === 'EF') {
+            orderUpdate.payment_method = 'EF'
+        }
+        
         updateOrder.mutate({
             access,
-            order: {
-                status: 'IK'
-            } as any
+            order: orderUpdate
         }, {
             onSuccess: async () => {
                 addNotification({
@@ -111,18 +119,32 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: 0.2 }}
-    className="flex gap-2 justify-between"
+    className="space-y-3 my-6"
     >
-        <button
-            onClick={handleSendToKitchen}
-            disabled={updateOrder.isPending}
-            className="w-full mt-3 cursor-pointer bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-        >
-            {(updateOrder.isPending) && (
-                <Loader2 className="w-4 h-4 animate-spin" />
-            )}
-            <span>{updateOrder.isPending ? 'Enviando...' : 'Enviar a cocina'}</span>
-        </button>
+        {/* Payment Method Selection */}
+        <p className="text-sm font-medium text-gray-700 mb-2">Enviar a cocina:</p>
+        <div className="flex gap-2">
+            <button
+                onClick={() => handleSendToKitchen('EF')}
+                disabled={updateOrder.isPending}
+                className="flex-1 py-3 px-4 rounded-lg font-medium transition-colors cursor-pointer text-xs bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+            >
+                {updateOrder.isPending && (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                )}
+                <span>{updateOrder.isPending ? 'Enviando...' : 'Efectivo'}</span>
+            </button>
+            <button
+                onClick={() => handleSendToKitchen('VW')}
+                disabled={updateOrder.isPending}
+                className="flex-1 py-3 px-4 rounded-lg font-medium transition-colors cursor-pointer text-xs bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+            >
+                {updateOrder.isPending && (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                )}
+                <span>{updateOrder.isPending ? 'Enviando...' : 'Yape'}</span>
+            </button>
+        </div>
     </motion.div>
     </>
   )

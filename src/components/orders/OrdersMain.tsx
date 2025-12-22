@@ -52,6 +52,7 @@ const OrdersMain = () => {
               created_by: 1,
               order_type: 'D',
               status: 'IP',
+              payment_method: 'EF',
             }
           }, {
             onSuccess: (data) => {
