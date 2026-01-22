@@ -4,12 +4,27 @@ import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Logout from '../components/auth/Logout'
+import useAuthStore from '../store/useAuthStore'
 
 const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const location = useLocation()
 
+  const userId = useAuthStore((state) => state.userId)
+
+  const restrictedNavigationItems = [
+    {
+      name: 'Pedidos',
+      path: '/orders',
+      icon: <Bike />
+    },
+    {
+      name: 'Cocina',
+      path: '/kitchen',
+      icon: <ChefHat />
+    }
+  ]
   const navigationItems = [
     {
         name: 'Pedidos',
@@ -52,6 +67,9 @@ const Sidebar = () => {
         icon: <Coins />
     }
   ]
+
+  console.log('userId', userId)
+  const finalRoutes = userId === 2 ? restrictedNavigationItems : navigationItems
 
   const mockUser = {
     name: 'Luis Rodriguez',
@@ -148,7 +166,7 @@ const Sidebar = () => {
             {/* Navigation */}
             <nav className="flex-1 p-4">
               <ul className="space-y-2">
-                {navigationItems.map((item, index) => {
+                {finalRoutes.map((item, index) => {
                   const isActive = location.pathname === item.path
                   return (
                     <motion.li 
@@ -236,7 +254,7 @@ const Sidebar = () => {
       {/* Navigation */}
       <nav className="flex-1 p-4">
         <ul className="space-y-2">
-          {navigationItems.map((item) => {
+          {finalRoutes.map((item) => {
             const isActive = location.pathname === item.path
             return (
               <li key={item.path}>

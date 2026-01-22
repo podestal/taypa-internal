@@ -69,7 +69,7 @@ const OrderItemForm = ({ createOrderItem, dish }: Props) => {
         <div className="flex flex-col gap-3 w-full">
             <div className="flex items-center justify-between">
                 <h3 className="text-lg text-gray-700 font-bold">{dish.name}</h3>
-                {/* <p className="text-lg text-gray-500">${dish.price}</p> */}
+                <p className="text-lg text-gray-500">S/.{dish.price}</p>
             </div>
             {/* Quantity Controls */}
             <div className="flex items-center justify-between">
