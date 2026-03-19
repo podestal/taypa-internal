@@ -81,13 +81,12 @@ const TrackerTransactionForm = ({ onClose, transactionType, createTransaction }:
     }, {
       onSuccess: () => {
         setFormData({ 
-          fecha: new Date().toISOString().split('T')[0],
+          fecha: formData.fecha,
           monto: '', 
           categoria: 0, 
           observaciones: '' 
         })
         setErrors({ monto: '', categoria: '' })
-        onClose()
         addNotification({
           title: 'Transacción agregada correctamente',
           message: 'La transacción ha sido agregada correctamente',

@@ -30,7 +30,7 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
         
         // Build order update object
         const orderUpdate: any = {
-            status: 'IK'
+            status: 'DO'
         }
         
         // Only add payment_method if it's Effectivo (EF)
@@ -70,38 +70,38 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
                     customer: 0,
                 })
                 setOrderStep('customer')
-                try {
-                    const response = await axios.post(
-                      `${import.meta.env.VITE_TAXES_URL}documents/generate-ticket/`,
-                      {
-                        order_items:  orderItems.map(item => ({
-                            id: item.id.toString(),
-                            name: `${item.category} - ${item.dish}`,
-                            quantity: item.quantity,
-                            cost: Number((item.price / item.quantity).toFixed(2))
-                        })),
-                        order_number: orderId.toString(),
-                        document_type: 'ticket',
-                      },
-                      {
-                        responseType: 'blob',
-                        headers: {
-                          'Authorization': `JWT ${access}`,
-                        },
-                      }
-                    );
+                // try {
+                //     const response = await axios.post(
+                //       `${import.meta.env.VITE_TAXES_URL}documents/generate-ticket/`,
+                //       {
+                //         order_items:  orderItems.map(item => ({
+                //             id: item.id.toString(),
+                //             name: `${item.category} - ${item.dish}`,
+                //             quantity: item.quantity,
+                //             cost: Number((item.price / item.quantity).toFixed(2))
+                //         })),
+                //         order_number: orderId.toString(),
+                //         document_type: 'ticket',
+                //       },
+                //       {
+                //         responseType: 'blob',
+                //         headers: {
+                //           'Authorization': `JWT ${access}`,
+                //         },
+                //       }
+                //     );
                 
-                    const blob = new Blob([response.data], { type: 'application/pdf' });
-                    const url = window.URL.createObjectURL(blob);
+                //     const blob = new Blob([response.data], { type: 'application/pdf' });
+                //     const url = window.URL.createObjectURL(blob);
                     
-                    // Open in new tab
-                    window.open(url, '_blank');
+                //     // Open in new tab
+                //     window.open(url, '_blank');
                     
-                    // Clean up URL after a delay (optional)
-                    // setTimeout(() => window.URL.revokeObjectURL(url), 100);
-                  } catch (error) {
-                    console.error('Error generating ticket:', error);
-                  }
+                //     // Clean up URL after a delay (optional)
+                //     // setTimeout(() => window.URL.revokeObjectURL(url), 100);
+                //   } catch (error) {
+                //     console.error('Error generating ticket:', error);
+                //   }
             },
             onError: () => {
                 addNotification({
@@ -124,7 +124,7 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
         {/* Payment Method Selection */}
         <p className="text-sm font-medium text-gray-700 mb-2">Enviar a cocina:</p>
         <div className="flex gap-2">
-            <button
+            {/* <button
                 onClick={() => handleSendToKitchen('EF')}
                 disabled={updateOrder.isPending}
                 className="flex-1 py-3 px-4 rounded-lg font-medium transition-colors cursor-pointer text-xs bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
@@ -133,7 +133,7 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
                     <Loader2 className="w-4 h-4 animate-spin" />
                 )}
                 <span>{updateOrder.isPending ? 'Enviando...' : 'Efectivo'}</span>
-            </button>
+            </button> */}
             <button
                 onClick={() => handleSendToKitchen('VW')}
                 disabled={updateOrder.isPending}

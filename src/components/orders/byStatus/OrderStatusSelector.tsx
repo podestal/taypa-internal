@@ -11,7 +11,7 @@ const orderStatusTabs = [
     { id: 'IK' as const, label: 'En Cocina', icon: <ChefHat className="w-4 h-4" />, color: 'orange' },
     { id: 'PA' as const, label: 'Preparadas', icon: <Package className="w-4 h-4" />, color: 'blue' },
     { id: 'IT' as const, label: 'En Tránsito', icon: <Truck className="w-4 h-4" />, color: 'purple' },
-    { id: 'DO' as const, label: 'Entregadas', icon: <CheckCircle className="w-4 h-4" />, color: 'green' }
+    // { id: 'DO' as const, label: 'Entregadas', icon: <CheckCircle className="w-4 h-4" />, color: 'green' }
   ]
 
 const OrderStatusSelector = ({ selectedOrderStatus, setSelectedOrderStatus }: Props) => {

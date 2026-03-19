@@ -5,6 +5,8 @@ import { RouterProvider} from 'react-router-dom'
 import routes from './router/routes.tsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+// Import timezone configuration - this sets up moment-timezone for America/Lima
+import './utils/timezone';
 
 const queryClient = new QueryClient();
 
