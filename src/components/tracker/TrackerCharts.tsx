@@ -2,18 +2,19 @@ import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import type { Category } from './TrackerMain'
-import type { Transaction } from '../../services/api/transactionService'
+import type { Transaction, TransactionStatsResponse } from '../../services/api/transactionService'
 import moment from 'moment'
 
 interface Props {
   categories: Category[]
   transactions: Transaction[]
+  stats?: TransactionStatsResponse
   isLoading: boolean
 }
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
 
-const TrackerCharts = ({ categories, transactions, isLoading }: Props) => {
+const TrackerCharts = ({ categories, transactions, stats, isLoading }: Props) => {
   // Format currency helper
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-PE', {
@@ -24,13 +25,72 @@ const TrackerCharts = ({ categories, transactions, isLoading }: Props) => {
   }
 
   const chartData = useMemo(() => {
+    const fallbackIncomeByCategory = transactions
+      .filter(t => t.transaction_type === 'I')
+      .reduce((acc, t) => {
+        const cat = categories.find(c => c.id === t.category)
+        if (!cat) return acc
+        const amount = typeof t.amount === 'string' ? parseFloat(t.amount) : Number(t.amount)
+        if (isNaN(amount)) return acc
+        acc[cat.name] = (acc[cat.name] || 0) + amount
+        return acc
+      }, {} as Record<string, number>)
+
+    if (stats) {
+      const incomeByCategorySource =
+        stats.income_by_category && stats.income_by_category.length > 0
+          ? stats.income_by_category.map(item => ({
+              name: item.category_name,
+              value: Number(item.value),
+              percentage: Number(item.percentage)
+            }))
+          : Object.entries(fallbackIncomeByCategory).map(([name, value]) => ({
+              name,
+              value: Number(value.toFixed(2)),
+              percentage: stats.totals.income > 0 ? (value / stats.totals.income) * 100 : 0
+            }))
+
+      return {
+        lineData: stats.income_vs_expense_by_day.map(bucket => ({
+          date: bucket.date,
+          income: Number(bucket.income),
+          expense: Number(bucket.expense),
+          net: Number(bucket.net)
+        })),
+        monthlyData: stats.income_vs_expense_by_day.map(bucket => ({
+          date: bucket.date,
+          income: Number(bucket.income),
+          expense: Number(bucket.expense),
+          net: Number(bucket.net)
+        })),
+        incomeByCategory: incomeByCategorySource.sort((a, b) => b.value - a.value),
+        expenseByCategory: stats.expense_by_category
+          .map(item => ({
+            name: item.category_name,
+            value: Number(item.value),
+            percentage: Number(item.percentage)
+          }))
+          .sort((a, b) => b.value - a.value),
+        totals: {
+          income: Number(stats.totals.income),
+          expense: Number(stats.totals.expense),
+          net: Number(stats.totals.net)
+        },
+        periodLabel:
+          stats.meta.period === 'custom'
+            ? `${stats.meta.start_date} - ${stats.meta.end_date}`
+            : `${stats.meta.period} (${stats.meta.start_date} - ${stats.meta.end_date})`
+      }
+    }
+
     if (!transactions || transactions.length === 0) {
       return {
         lineData: [],
         incomeByCategory: [],
         expenseByCategory: [],
         totals: { income: 0, expense: 0, net: 0 },
-        monthlyData: []
+        monthlyData: [],
+        periodLabel: ''
       }
     }
 
@@ -144,9 +204,10 @@ const TrackerCharts = ({ categories, transactions, isLoading }: Props) => {
         income: totalIncome,
         expense: totalExpense,
         net: totalIncome - totalExpense
-      }
+      },
+      periodLabel: `${moment().format('MMMM YYYY')}`
     }
-  }, [transactions, categories])
+  }, [transactions, categories, stats])
 
   if (isLoading) {
     return (
@@ -165,7 +226,7 @@ const TrackerCharts = ({ categories, transactions, isLoading }: Props) => {
     )
   }
 
-  if (transactions.length === 0) {
+  if (!stats && transactions.length === 0) {
     return (
       <motion.div
         key="charts"
@@ -273,7 +334,7 @@ const TrackerCharts = ({ categories, transactions, isLoading }: Props) => {
     {/* Net Profit Trend - Current Month Only */}
     <div className="bg-gray-50 rounded-lg p-4">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">
-        Ganancia Neta por Fecha - {moment().format('MMMM YYYY')}
+        Ganancia Neta por Fecha {chartData.periodLabel ? `- ${chartData.periodLabel}` : ''}
       </h3>
       {chartData.monthlyData.length > 0 ? (
         <div className="h-64 flex items-end gap-2">

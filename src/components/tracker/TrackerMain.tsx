@@ -8,6 +8,7 @@ import TrackerCharts from './TrackerCharts'
 import useAuthStore from '../../store/useAuthStore'
 import getTransactionService, { type Transaction } from '../../services/api/transactionService'
 import { useQuery } from '@tanstack/react-query'
+import useGetTransactionStats from '../../hooks/api/transaction/useGetTransactionStats'
 
 // Using Transaction type from transactionService
 
@@ -70,7 +71,7 @@ const categories: Category[] = [
     }
 ]
 
-type DateFilter = 'today' | 'last7days' | 'thisWeek' | 'thisMonth' | 'custom' | 'all'
+type DateFilter = 'today' | 'last7days' | 'thisWeek' | 'thisMonth' | 'year' | 'custom' | 'all'
 type SortBy = 'date' | 'amount' | null
 type SortOrder = 'asc' | 'desc'
 
@@ -83,15 +84,21 @@ const TrackerMain = () => {
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [typeFilter, setTypeFilter] = useState<'all' | 'I' | 'E'>('all')
   const [activeTab, setActiveTab] = useState<'table' | 'charts'>('table')
   const [currentPage, setCurrentPage] = useState(1)
 
+  const getStatsGranularity = (filter: DateFilter): 'day' | 'week' | 'month' | 'year' => {
+    if (filter === 'all' || filter === 'year') return 'year'
+    return 'day'
+  }
+
   // Fetch all transactions based on filters
   const { data: transactions = [], isLoading: isLoadingTransactions } = useQuery({
-    queryKey: ['all-transactions', dateFilter, typeFilter, startDate, endDate],
+    queryKey: ['all-transactions', dateFilter, selectedYear, typeFilter, startDate, endDate],
     queryFn: async () => {
-      console.log('[TrackerMain] Fetching transactions with filters:', { dateFilter, typeFilter, startDate, endDate })
+      console.log('[TrackerMain] Fetching transactions with filters:', { dateFilter, typeFilter, selectedYear, startDate, endDate })
       let allTransactions: Transaction[] = []
       let page = 1
       let hasMore = true
@@ -116,6 +123,10 @@ const TrackerMain = () => {
               hasMore = false
               break
             }
+          } else if (dateFilter === 'year') {
+            params.date_filter = 'custom'
+            params.start_date = `${selectedYear}-01-01`
+            params.end_date = `${selectedYear}-12-31`
           } else {
             // Otherwise use date_filter for predefined ranges
             params.date_filter = dateFilter
@@ -143,7 +154,19 @@ const TrackerMain = () => {
       console.log('[TrackerMain] Total transactions fetched:', allTransactions.length)
       return allTransactions
     },
-    enabled: !!access && !(dateFilter === 'custom' && (!startDate || !endDate)),
+    enabled: !!access && activeTab === 'table' && !(dateFilter === 'custom' && (!startDate || !endDate)),
+  })
+
+  const {
+    data: transactionStats,
+    isLoading: isLoadingStats
+  } = useGetTransactionStats({
+    access,
+    period: dateFilter,
+    granularity: getStatsGranularity(dateFilter),
+    selectedYear,
+    startDate,
+    endDate
   })
 
   // Transactions are already filtered by the API based on dateFilter and typeFilter
@@ -152,7 +175,7 @@ const TrackerMain = () => {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1)
-  }, [dateFilter, typeFilter, sortBy, startDate, endDate])
+  }, [dateFilter, selectedYear, typeFilter, sortBy, startDate, endDate])
 
   return (
     <div className="min-h-screen bg-gray-50 p-3 sm:p-4 md:p-6">
@@ -175,6 +198,8 @@ const TrackerMain = () => {
         <TrackerFilters
           dateFilter={dateFilter}
           setDateFilter={setDateFilter}
+          selectedYear={selectedYear}
+          setSelectedYear={setSelectedYear}
           startDate={startDate}
           setStartDate={setStartDate}
           endDate={endDate}
@@ -252,7 +277,8 @@ const TrackerMain = () => {
               <TrackerCharts 
                 categories={categories}
                 transactions={transactions}
-                isLoading={isLoadingTransactions}
+                stats={transactionStats}
+                isLoading={isLoadingStats}
               />
             )}
           </AnimatePresence>

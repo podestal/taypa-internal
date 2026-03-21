@@ -3,13 +3,15 @@ import TrackerDateFilters from './TrackerDateFilters'
 import TrackerTypeFilters from './TrackerTypeFilters'
 import TrackerSorter from './TrackerSorter'
 
-type DateFilter = 'today' | 'last7days' | 'thisWeek' | 'thisMonth' | 'custom' | 'all'
+type DateFilter = 'today' | 'last7days' | 'thisWeek' | 'thisMonth' | 'year' | 'custom' | 'all'
 type SortBy = 'date' | 'amount' | null
 type SortOrder = 'asc' | 'desc'
 
 interface Props {
   dateFilter: DateFilter
   setDateFilter: (dateFilter: DateFilter) => void
+  selectedYear: number
+  setSelectedYear: (year: number) => void
   startDate: string
   setStartDate: (startDate: string) => void
   endDate: string
@@ -25,6 +27,8 @@ interface Props {
 const TrackerFilters = ({
   dateFilter,
   setDateFilter,
+  selectedYear,
+  setSelectedYear,
   startDate,
   setStartDate,
   endDate,
@@ -46,6 +50,8 @@ const TrackerFilters = ({
       <TrackerDateFilters
         dateFilter={dateFilter}
         setDateFilter={setDateFilter}
+        selectedYear={selectedYear}
+        setSelectedYear={setSelectedYear}
         startDate={startDate}
         setStartDate={setStartDate}
         endDate={endDate}

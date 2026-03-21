@@ -9,7 +9,7 @@ import useCustomerInfo from "../../store/useCustomerInfo"
 import useAddressInfo from "../../store/useAddressInfo"
 import useOrderStep from "../../store/useOrderStep"
 import type { OrderItem } from "../../services/api/orderItemService"
-import axios from "axios"
+// import axios from "axios"
 
 interface Props {
     orderId: number
@@ -124,7 +124,7 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
         {/* Payment Method Selection */}
         <p className="text-sm font-medium text-gray-700 mb-2">Enviar a cocina:</p>
         <div className="flex gap-2">
-            {/* <button
+            <button
                 onClick={() => handleSendToKitchen('EF')}
                 disabled={updateOrder.isPending}
                 className="flex-1 py-3 px-4 rounded-lg font-medium transition-colors cursor-pointer text-xs bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
@@ -133,7 +133,7 @@ const OrderToKitchen = ({ orderId, orderItems }: Props) => {
                     <Loader2 className="w-4 h-4 animate-spin" />
                 )}
                 <span>{updateOrder.isPending ? 'Enviando...' : 'Efectivo'}</span>
-            </button> */}
+            </button> 
             <button
                 onClick={() => handleSendToKitchen('VW')}
                 disabled={updateOrder.isPending}

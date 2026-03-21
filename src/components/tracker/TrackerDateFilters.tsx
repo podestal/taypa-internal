@@ -5,24 +5,29 @@ import { useState } from "react"
 interface Props {
     dateFilter: DateFilter
     setDateFilter: (dateFilter: DateFilter) => void
+    selectedYear: number
+    setSelectedYear: (year: number) => void
     startDate: string
     setStartDate: (startDate: string) => void
     endDate: string
     setEndDate: (endDate: string) => void
 }
 
-type DateFilter = 'today' | 'last7days' | 'thisWeek' | 'thisMonth' | 'custom' | 'all'
+type DateFilter = 'today' | 'last7days' | 'thisWeek' | 'thisMonth' | 'year' | 'custom' | 'all'
 
 const dateFilterButtons = [
     { id: 'today' as DateFilter, label: 'Hoy' },
     { id: 'last7days' as DateFilter, label: 'Últimos 7 días' },
     { id: 'thisWeek' as DateFilter, label: 'Esta Semana' },
     { id: 'thisMonth' as DateFilter, label: 'Este Mes' },
+    { id: 'year' as DateFilter, label: 'Año' },
 ]
 
 const TrackerDateFilters = ({
     dateFilter,
     setDateFilter,
+    selectedYear,
+    setSelectedYear,
     startDate,
     setStartDate,
     endDate,
@@ -30,6 +35,8 @@ const TrackerDateFilters = ({
 }: Props) => {
 
     const [showDatePicker, setShowDatePicker] = useState(false)
+    const currentYear = new Date().getFullYear()
+    const yearOptions = Array.from({ length: 8 }, (_, index) => currentYear - index)
   return (
     <div className="mb-6">
     <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
@@ -74,6 +81,27 @@ const TrackerDateFilters = ({
         Rango Personalizado
       </motion.button>
     </div>
+
+    {dateFilter === 'year' && (
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200"
+      >
+        <label className="block text-sm font-medium text-gray-700 mb-2">Seleccionar Año</label>
+        <select
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(Number(e.target.value))}
+          className="w-full sm:w-60 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          {yearOptions.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
+      </motion.div>
+    )}
 
     {/* Custom Date Range Picker */}
     <AnimatePresence>
