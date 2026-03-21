@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Table, BarChart3 } from 'lucide-react'
+import { Table, BarChart3, Wallet, Landmark, CreditCard } from 'lucide-react'
 import TrackerTable from './TrackerTable'
 import TrackerTransactions from './TrackerTransactions'
 import TrackerFilters from './TrackerFilters'
@@ -9,6 +9,7 @@ import useAuthStore from '../../store/useAuthStore'
 import getTransactionService, { type Transaction } from '../../services/api/transactionService'
 import { useQuery } from '@tanstack/react-query'
 import useGetTransactionStats from '../../hooks/api/transaction/useGetTransactionStats'
+import useGetAccounts from '../../hooks/api/account/useGetAccounts'
 
 // Using Transaction type from transactionService
 
@@ -169,6 +170,23 @@ const TrackerMain = () => {
     endDate
   })
 
+  const { data: accounts = [], isLoading: isLoadingAccounts } = useGetAccounts({ access })
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('es-PE', {
+      style: 'currency',
+      currency: 'PEN',
+      minimumFractionDigits: 2
+    }).format(value)
+  }
+
+  const getAccountIcon = (accountType: string) => {
+    const type = accountType.toLowerCase()
+    if (type.includes('bank') || type.includes('banco')) return Landmark
+    if (type.includes('card') || type.includes('tarjeta')) return CreditCard
+    return Wallet
+  }
+
   // Transactions are already filtered by the API based on dateFilter and typeFilter
   // No need for additional client-side filtering
 
@@ -192,6 +210,68 @@ const TrackerMain = () => {
           <div className="flex gap-2">
             <TrackerTransactions />
           </div>
+        </motion.div>
+
+        {/* Accounts Summary */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Wallet className="w-5 h-5 text-blue-600" />
+            <h2 className="text-lg font-semibold text-gray-900">Cuentas</h2>
+          </div>
+
+          {isLoadingAccounts ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+              {[1, 2, 3].map((item) => (
+                <div key={item} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-1/2 mb-3"></div>
+                  <div className="h-7 bg-gray-200 rounded w-2/3 mb-2"></div>
+                  <div className="h-3 bg-gray-100 rounded w-1/3"></div>
+                </div>
+              ))}
+            </div>
+          ) : accounts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+              {accounts.map((account) => {
+                const AccountIcon = getAccountIcon(account.account_type)
+                return (
+                  <div
+                    key={account.id}
+                    className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="min-w-0">
+                        <p className="text-sm text-gray-500 truncate">{account.account_type}</p>
+                        <h3 className="text-base font-semibold text-gray-900 truncate">{account.name}</h3>
+                      </div>
+                      <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                        <AccountIcon className="w-4 h-4 text-blue-600" />
+                      </div>
+                    </div>
+                    <p className={`text-2xl font-bold mt-3 ${account.balance >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                      {formatCurrency(Number(account.balance))}
+                    </p>
+                    <div className="mt-2">
+                      <span
+                        className={`inline-flex items-center text-xs px-2 py-1 rounded-full ${
+                          account.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-600'
+                        }`}
+                      >
+                        {account.is_active ? 'Activa' : 'Inactiva'}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl p-6 text-center border border-gray-100">
+              <p className="text-gray-500">No hay cuentas registradas</p>
+            </div>
+          )}
         </motion.div>
 
         {/* Filters Component */}
