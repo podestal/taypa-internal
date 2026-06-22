@@ -7,7 +7,7 @@ const axiosInstance = axios.create({
     withCredentials: true,
 })
 
-class KitchenClient<ResponseType, RequestType = ResponseType> {
+class KitchenClient<ResponseType, RequestType = ResponseType, UpdateType = RequestType> {
     endpoint: string
 
     constructor(endpoint: string) {
@@ -42,7 +42,7 @@ class KitchenClient<ResponseType, RequestType = ResponseType> {
             .then(res => res.data)
     }
 
-    update = (data: RequestType, access?: string, params?: Record<string, string>) => {
+    update = (data: UpdateType, access?: string, params?: Record<string, string>) => {
         const config: any = {}
         if (access) {
             config.headers = { Authorization: `JWT ${access}` }

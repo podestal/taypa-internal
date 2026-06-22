@@ -8,7 +8,14 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 // Import timezone configuration - this sets up moment-timezone for America/Lima
 import './utils/timezone';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            throwOnError: false,
+            retry: false,
+        },
+    },
+});
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -11,7 +11,11 @@ import TaxesMain from "../components/taxes/TaxesMain";
 import CategoriesPage from "../components/categories/page/CategoriesPage";
 import DishesPage from "../components/dishes/page/DishesPage";
 import NotFoundError from "../components/errores/NotFoundError";
+import RouteError from "../components/errores/RouteError";
 import ProductsMain from "../components/darkKitchen/products/ProductsMain";
+import InventoryMain from "../components/darkKitchen/inventory/InventoryMain";
+import PurchaseMain from "../components/darkKitchen/purchases/PurchaseMain";
+import AccountMain from "../components/darkKitchen/account/AccountMain";
 
 const routes = createBrowserRouter([
     {
@@ -21,7 +25,7 @@ const routes = createBrowserRouter([
     {
         path: "/",
         element: <PrivateRoutes />,
-        errorElement: <NotFoundError />,
+        errorElement: <RouteError />,
         children: [
             {
                 path: "",
@@ -30,6 +34,30 @@ const routes = createBrowserRouter([
                     {
                         path: "products",
                         element: <ProductsMain />
+                    },
+                    {
+                        path: "inventory",
+                        element: <InventoryMain />
+                    },
+                    {
+                        path: "inventario",
+                        element: <InventoryMain />
+                    },
+                    {
+                        path: "compras",
+                        element: <PurchaseMain />
+                    },
+                    {
+                        path: "purchases",
+                        element: <PurchaseMain />
+                    },
+                    {
+                        path: "cuentas",
+                        element: <AccountMain />
+                    },
+                    {
+                        path: "accounts",
+                        element: <AccountMain />
                     },
                     {
                         path: "orders",
