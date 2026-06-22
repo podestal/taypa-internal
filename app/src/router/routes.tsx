@@ -11,6 +11,7 @@ import TaxesMain from "../components/taxes/TaxesMain";
 import CategoriesPage from "../components/categories/page/CategoriesPage";
 import DishesPage from "../components/dishes/page/DishesPage";
 import NotFoundError from "../components/errores/NotFoundError";
+import ProductsMain from "../components/darkKitchen/products/ProductsMain";
 
 const routes = createBrowserRouter([
     {
@@ -26,6 +27,10 @@ const routes = createBrowserRouter([
                 path: "",
                 element: <MainPage />,
                 children: [
+                    {
+                        path: "products",
+                        element: <ProductsMain />
+                    },
                     {
                         path: "orders",
                         element: <OrdersMain />

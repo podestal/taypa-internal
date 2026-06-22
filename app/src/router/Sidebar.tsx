@@ -26,26 +26,26 @@ const Sidebar = () => {
     }
   ]
   const navigationItems = [
-    {
-        name: 'Pedidos',
-        path: '/orders',
-        icon: <Bike />
-    },
-    {
-        name: 'Gastos',
-        path: '/tracker',
-        icon: <AudioWaveform />
-    },
-    {
-        name: 'Platos',
-        path: '/dishes',
-        icon: <Hamburger />
-    },
-    {
-        name: 'Categorías',
-        path: '/categories',
-        icon: <Tags />
-    },
+    // {
+    //     name: 'Pedidos',
+    //     path: '/orders',
+    //     icon: <Bike />
+    // },
+    // {
+    //     name: 'Gastos',
+    //     path: '/tracker',
+    //     icon: <AudioWaveform />
+    // },
+    // {
+    //     name: 'Platos',
+    //     path: '/dishes',
+    //     icon: <Hamburger />
+    // },
+    // {
+    //     name: 'Categorías',
+    //     path: '/categories',
+    //     icon: <Tags />
+    // },
     // {
     //     name: 'Ventas',
     //     path: '/sales',
@@ -56,16 +56,21 @@ const Sidebar = () => {
     //     path: '/inventory',
     //     icon: <PackageSearch />
     // },
+    // {
+    //     name: 'Cocina',
+    //     path: '/kitchen',
+    //     icon: <ChefHat />
+    // },
     {
-        name: 'Cocina',
-        path: '/kitchen',
-        icon: <ChefHat />
+        name: 'Productos',
+        path: '/products',
+        icon: <PackageSearch />
     },
-    {
-        name: 'Impuestos',
-        path: '/taxes',
-        icon: <Coins />
-    }
+    // {
+    //     name: 'Impuestos',
+    //     path: '/taxes',
+    //     icon: <Coins />
+    // }
   ]
 
   console.log('userId', userId)
