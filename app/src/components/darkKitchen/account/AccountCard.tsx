@@ -1,16 +1,17 @@
 import { motion } from 'framer-motion'
-import { Trash2, Wallet } from 'lucide-react'
+import { Pencil, Trash2, Wallet } from 'lucide-react'
 import type { KitchenAccount } from '../../../services/kitchen/accountService'
 import { formatDecimal } from '../../../utils/inventoryHelpers'
 
 interface Props {
     account: KitchenAccount
     index: number
+    onEdit?: (account: KitchenAccount) => void
     onDeactivate?: (account: KitchenAccount) => void
     isDeactivating?: boolean
 }
 
-const AccountCard = ({ account, index, onDeactivate, isDeactivating }: Props) => {
+const AccountCard = ({ account, index, onEdit, onDeactivate, isDeactivating }: Props) => {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -42,17 +43,32 @@ const AccountCard = ({ account, index, onDeactivate, isDeactivating }: Props) =>
                 </div>
             </div>
 
-            {account.is_active && onDeactivate && (
-                <motion.button
-                    onClick={() => onDeactivate(account)}
-                    disabled={isDeactivating}
-                    className="mt-4 w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
-                >
-                    <Trash2 className="w-4 h-4" />
-                    <span>{isDeactivating ? 'Desactivando...' : 'Desactivar cuenta'}</span>
-                </motion.button>
+            {(onEdit || (account.is_active && onDeactivate)) && (
+                <div className="mt-4 flex gap-2">
+                    {onEdit && (
+                        <motion.button
+                            onClick={() => onEdit(account)}
+                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-emerald-50 text-emerald-600 rounded-lg text-sm font-medium hover:bg-emerald-100 transition-colors"
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.99 }}
+                        >
+                            <Pencil className="w-4 h-4" />
+                            <span>Editar</span>
+                        </motion.button>
+                    )}
+                    {account.is_active && onDeactivate && (
+                        <motion.button
+                            onClick={() => onDeactivate(account)}
+                            disabled={isDeactivating}
+                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.99 }}
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            <span>{isDeactivating ? 'Desactivando...' : 'Desactivar'}</span>
+                        </motion.button>
+                    )}
+                </div>
             )}
         </motion.div>
     )

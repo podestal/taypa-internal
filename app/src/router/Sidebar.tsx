@@ -1,5 +1,5 @@
 
-import { AudioWaveform, Bike, ChartBar, ChefHat, Coins, Hamburger, PackageSearch, Receipt, ShoppingCart, Sparkles, Tags, Wallet, X } from 'lucide-react'
+import { AudioWaveform, Bike, ChartBar, ChefHat, Coins, Hamburger, LayoutDashboard, PackageSearch, Receipt, ShoppingCart, Sparkles, Tags, Wallet, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -26,6 +26,11 @@ const Sidebar = () => {
     }
   ]
   const navigationItems = [
+    {
+        name: 'Dashboard',
+        path: '/dashboard',
+        icon: <LayoutDashboard />
+    },
     // {
     //     name: 'Pedidos',
     //     path: '/orders',

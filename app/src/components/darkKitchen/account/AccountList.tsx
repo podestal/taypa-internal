@@ -3,11 +3,12 @@ import AccountCard from './AccountCard'
 
 interface Props {
     accounts: KitchenAccount[]
+    onEdit?: (account: KitchenAccount) => void
     onDeactivate?: (account: KitchenAccount) => void
     deactivatingAccountId?: number | null
 }
 
-const AccountList = ({ accounts, onDeactivate, deactivatingAccountId }: Props) => {
+const AccountList = ({ accounts, onEdit, onDeactivate, deactivatingAccountId }: Props) => {
     if (accounts.length === 0) {
         return (
             <div className="text-center text-gray-500 py-12 bg-white rounded-lg border border-gray-200">
@@ -29,6 +30,7 @@ const AccountList = ({ accounts, onDeactivate, deactivatingAccountId }: Props) =
                             key={account.id}
                             account={account}
                             index={index}
+                            onEdit={onEdit}
                             onDeactivate={onDeactivate}
                             isDeactivating={deactivatingAccountId === account.id}
                         />
@@ -45,6 +47,7 @@ const AccountList = ({ accounts, onDeactivate, deactivatingAccountId }: Props) =
                                 key={account.id}
                                 account={account}
                                 index={index}
+                                onEdit={onEdit}
                             />
                         ))}
                     </div>

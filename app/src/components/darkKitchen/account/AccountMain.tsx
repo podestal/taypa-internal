@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Wallet, Loader2 } from 'lucide-react'
 import useGetKitchenAccounts from '../../../hooks/kitchen/account/useGetKitchenAccounts'
 import useCreateKitchenAccount from '../../../hooks/kitchen/account/useCreateKitchenAccount'
+import useUpdateKitchenAccount from '../../../hooks/kitchen/account/useUpdateKitchenAccount'
 import useDeactivateKitchenAccount from '../../../hooks/kitchen/account/useDeactivateKitchenAccount'
 import useAuthStore from '../../../store/useAuthStore'
 import useNotificationStore from '../../../store/useNotificationStore'
@@ -17,6 +18,12 @@ const initialFormData: CreateKitchenAccount = {
     is_active: true,
 }
 
+const accountToFormState = (account: KitchenAccount): CreateKitchenAccount => ({
+    name: account.name,
+    balance: account.balance,
+    is_active: account.is_active,
+})
+
 const AccountMain = () => {
     const access = useAuthStore(state => state.access) || ''
     const addNotification = useNotificationStore(state => state.addNotification)
@@ -25,9 +32,14 @@ const AccountMain = () => {
 
     const [formData, setFormData] = useState<CreateKitchenAccount>(initialFormData)
     const [errors, setErrors] = useState({ name: '', balance: '' })
+    const [showEditModal, setShowEditModal] = useState(false)
+    const [editingAccount, setEditingAccount] = useState<KitchenAccount | null>(null)
+    const [editFormData, setEditFormData] = useState<CreateKitchenAccount>(initialFormData)
+    const [editErrors, setEditErrors] = useState({ name: '', balance: '' })
     const [showDeactivateModal, setShowDeactivateModal] = useState(false)
     const [selectedAccount, setSelectedAccount] = useState<KitchenAccount | null>(null)
 
+    const updateAccount = useUpdateKitchenAccount({ accountId: editingAccount?.id ?? 0 })
     const deactivateAccount = useDeactivateKitchenAccount({
         accountId: selectedAccount?.id ?? 0,
     })
@@ -40,21 +52,26 @@ const AccountMain = () => {
         setErrors({ name: '', balance: '' })
     }
 
-    const validateForm = () => {
+    const resetEditForm = () => {
+        setEditingAccount(null)
+        setEditFormData(initialFormData)
+        setEditErrors({ name: '', balance: '' })
+    }
+
+    const validateForm = (data: CreateKitchenAccount) => {
         const newErrors = { name: '', balance: '' }
-        let hasError = false
+        let isValid = true
 
-        if (!formData.name.trim()) {
+        if (!data.name.trim()) {
             newErrors.name = 'El nombre es requerido'
-            hasError = true
+            isValid = false
         }
-        if (formData.balance < 0) {
+        if (data.balance < 0) {
             newErrors.balance = 'El saldo no puede ser negativo'
-            hasError = true
+            isValid = false
         }
 
-        setErrors(newErrors)
-        return !hasError
+        return { errors: newErrors, isValid }
     }
 
     const handleInputChange = (field: keyof CreateKitchenAccount, value: string | number | boolean) => {
@@ -65,7 +82,9 @@ const AccountMain = () => {
     }
 
     const handleSubmit = () => {
-        if (!validateForm()) return
+        const validation = validateForm(formData)
+        setErrors(validation.errors)
+        if (!validation.isValid) return
 
         createAccount.mutate({ account: formData, access }, {
             onSuccess: () => {
@@ -80,6 +99,49 @@ const AccountMain = () => {
                 addNotification({
                     title: 'Error',
                     message: 'Error al crear la cuenta',
+                    type: 'error',
+                })
+            },
+        })
+    }
+
+    const handleEditInputChange = (field: keyof CreateKitchenAccount, value: string | number | boolean) => {
+        setEditFormData(prev => ({ ...prev, [field]: value }))
+        if (field in editErrors && editErrors[field as keyof typeof editErrors]) {
+            setEditErrors(prev => ({ ...prev, [field]: '' }))
+        }
+    }
+
+    const handleEdit = (account: KitchenAccount) => {
+        setEditingAccount(account)
+        setEditFormData(accountToFormState(account))
+        setEditErrors({ name: '', balance: '' })
+        setShowEditModal(true)
+    }
+
+    const handleCloseEditModal = () => {
+        setShowEditModal(false)
+        resetEditForm()
+    }
+
+    const handleEditSubmit = () => {
+        const validation = validateForm(editFormData)
+        setEditErrors(validation.errors)
+        if (!validation.isValid || !editingAccount) return
+
+        updateAccount.mutate({ account: editFormData, access }, {
+            onSuccess: () => {
+                addNotification({
+                    title: 'Cuenta actualizada',
+                    message: 'La cuenta se actualizó correctamente',
+                    type: 'success',
+                })
+                handleCloseEditModal()
+            },
+            onError: () => {
+                addNotification({
+                    title: 'Error',
+                    message: 'Error al actualizar la cuenta',
                     type: 'error',
                 })
             },
@@ -164,11 +226,24 @@ const AccountMain = () => {
                     </div>
                     <AccountList
                         accounts={accountItems}
+                        onEdit={handleEdit}
                         onDeactivate={handleDeactivate}
                         deactivatingAccountId={deactivateAccount.isPending ? selectedAccount?.id ?? null : null}
                     />
                 </motion.div>
             </div>
+
+            <Modal isOpen={showEditModal} onClose={handleCloseEditModal}>
+                <AccountForm
+                    formData={editFormData}
+                    errors={editErrors}
+                    isSubmitting={updateAccount.isPending}
+                    isEditing
+                    onInputChange={handleEditInputChange}
+                    onSubmit={handleEditSubmit}
+                    onCancel={handleCloseEditModal}
+                />
+            </Modal>
 
             <Modal isOpen={showDeactivateModal} onClose={() => setShowDeactivateModal(false)}>
                 <div className="space-y-4">

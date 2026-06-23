@@ -20,6 +20,7 @@ import CategoriesMain from "../components/darkKitchen/categories/CategoriesMain"
 import DishesMain from "../components/darkKitchen/dishes/DishesMain";
 import SalesMain from "../components/darkKitchen/sales/SalesMain";
 import ToppingsMain from "../components/darkKitchen/toppings/ToppingsMain";
+import DashboardMain from "../components/darkKitchen/dashboard/DashboardMain";
 
 const routes = createBrowserRouter([
     {
@@ -35,6 +36,10 @@ const routes = createBrowserRouter([
                 path: "",
                 element: <MainPage />,
                 children: [
+                    {
+                        path: "dashboard",
+                        element: <DashboardMain />
+                    },
                     {
                         path: "products",
                         element: <ProductsMain />
