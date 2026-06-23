@@ -81,6 +81,16 @@ const Sidebar = () => {
         path: '/cuentas',
         icon: <Wallet />
     },
+    {
+        name: 'Categorías',
+        path: '/categorias',
+        icon: <Tags />
+    },
+    {
+        name: 'Platos',
+        path: '/platos',
+        icon: <Hamburger />
+    },
     // {
     //     name: 'Impuestos',
     //     path: '/taxes',

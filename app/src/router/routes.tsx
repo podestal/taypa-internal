@@ -16,6 +16,8 @@ import ProductsMain from "../components/darkKitchen/products/ProductsMain";
 import InventoryMain from "../components/darkKitchen/inventory/InventoryMain";
 import PurchaseMain from "../components/darkKitchen/purchases/PurchaseMain";
 import AccountMain from "../components/darkKitchen/account/AccountMain";
+import CategoriesMain from "../components/darkKitchen/categories/CategoriesMain";
+import DishesMain from "../components/darkKitchen/dishes/DishesMain";
 
 const routes = createBrowserRouter([
     {
@@ -68,6 +70,10 @@ const routes = createBrowserRouter([
                         element: <TrackerMain />
                     },
                     {
+                        path: "platos",
+                        element: <DishesMain />
+                    },
+                    {
                         path: "dishes",
                         element: <DishesPage />
                     },
@@ -79,6 +85,10 @@ const routes = createBrowserRouter([
                     //     path: "inventory",
                     //     element: <InventoryMain />
                     // },
+                    {
+                        path: "categorias",
+                        element: <CategoriesMain />
+                    },
                     {
                         path: "categories",
                         element: <CategoriesPage /> 
