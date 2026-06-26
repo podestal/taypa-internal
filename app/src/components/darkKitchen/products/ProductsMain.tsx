@@ -15,12 +15,16 @@ const initialFormData: CreateUpdateProduct = {
     quantity: 0,
     weight: null,
     volume: null,
+    product_type: 'I',
 }
 
 const ProductsMain = () => {
     const access = useAuthStore(state => state.access) || ''
     const addNotification = useNotificationStore(state => state.addNotification)
-    const { data: products, isLoading, error } = useGetProducts({ access })
+    const { data: products, isLoading, error } = useGetProducts({
+        access,
+        params: { include_all: 'true' },
+    })
     const createProduct = useCreateProduct()
 
     const [formData, setFormData] = useState<CreateUpdateProduct>(initialFormData)

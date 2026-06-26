@@ -3,13 +3,14 @@ import CurrentStockCard from './CurrentStockCard'
 
 interface Props {
     items: CurrentStockItem[]
+    emptyMessage?: string
 }
 
-const CurrentStockList = ({ items }: Props) => {
+const CurrentStockList = ({ items, emptyMessage = 'No hay productos en inventario' }: Props) => {
     if (items.length === 0) {
         return (
             <div className="text-center text-gray-500 py-10 bg-white rounded-lg border border-gray-200">
-                <p>No hay productos en inventario</p>
+                <p>{emptyMessage}</p>
             </div>
         )
     }

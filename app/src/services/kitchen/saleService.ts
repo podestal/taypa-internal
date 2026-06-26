@@ -25,6 +25,7 @@ export interface Sale {
     unit_price: number
     subtotal: number
     notes: string
+    sale_date?: string
     toppings: SaleToppingLine[]
     transaction: SaleTransaction | null
     created_at: string
@@ -40,9 +41,18 @@ export type CreateSale = {
     dish: number
     account: number
     quantity_sold: string | number
+    sale_date?: string
     unit_price?: string | number
     notes?: string
     toppings?: CreateSaleTopping[]
+}
+
+export interface SaleListParams {
+    date?: string
+    start_date?: string
+    end_date?: string
+    dish_id?: string
+    category_id?: string
 }
 
 interface Props {

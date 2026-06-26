@@ -1,6 +1,8 @@
 import type { Sale, SaleTransaction, SaleToppingLine } from '../services/kitchen/saleService'
+import type { SaleListParams } from '../services/kitchen/saleService'
 import type { KitchenTopping } from '../services/kitchen/toppingService'
-import { normalizeList } from './inventoryHelpers'
+import { getFinanceDateRange } from './financeHelpers'
+import { normalizeList, todayISO, yesterdayISO } from './inventoryHelpers'
 
 const asRecord = (value: unknown): Record<string, unknown> | null =>
     value && typeof value === 'object' ? (value as Record<string, unknown>) : null
@@ -85,6 +87,7 @@ const toSale = (item: Record<string, unknown>): Sale => {
         unit_price: unitPrice,
         subtotal,
         notes: String(item.notes ?? ''),
+        sale_date: item.sale_date != null ? String(item.sale_date) : undefined,
         toppings: normalizeSaleToppings(item.toppings),
         transaction: normalizeTransaction(item.transaction),
         created_at: String(item.created_at ?? ''),
@@ -122,11 +125,14 @@ export interface SaleFormTopping {
     quantity: number
 }
 
+export type SaleDatePreset = 'today' | 'yesterday' | 'custom'
+
 export interface SaleFormState {
     dish: number
     account: number
     quantity_sold: number
     unit_price: number
+    sale_date: string
     notes: string
     toppings: SaleFormTopping[]
 }
@@ -151,6 +157,7 @@ export const buildSalePayload = (form: SaleFormState) => {
         dish: number
         account: number
         quantity_sold: string
+        sale_date: string
         unit_price?: string
         notes?: string
         toppings?: { topping: number; quantity: string }[]
@@ -158,6 +165,7 @@ export const buildSalePayload = (form: SaleFormState) => {
         dish: form.dish,
         account: form.account,
         quantity_sold: form.quantity_sold.toFixed(2),
+        sale_date: form.sale_date,
     }
 
     if (form.unit_price > 0) {
@@ -178,3 +186,83 @@ export const buildSalePayload = (form: SaleFormState) => {
 
     return payload
 }
+
+export type SaleHistoryDatePreset = 'all' | 'today' | 'yesterday' | 'last7days' | 'thisMonth' | 'custom'
+
+export const SALE_HISTORY_DATE_PRESETS: { id: SaleHistoryDatePreset; label: string }[] = [
+    { id: 'all', label: 'Todas' },
+    { id: 'yesterday', label: 'Ayer' },
+    { id: 'today', label: 'Hoy' },
+    { id: 'last7days', label: 'Últimos 7 días' },
+    { id: 'thisMonth', label: 'Este mes' },
+]
+
+export interface SaleHistoryFilters {
+    datePreset: SaleHistoryDatePreset
+    start_date: string
+    end_date: string
+    dish_id: string
+    category_id: string
+}
+
+export const getDefaultSaleHistoryFilters = (): SaleHistoryFilters => ({
+    datePreset: 'yesterday',
+    start_date: '',
+    end_date: '',
+    dish_id: '',
+    category_id: '',
+})
+
+export const buildSaleListParams = (filters: SaleHistoryFilters): SaleListParams => {
+    const params: SaleListParams = {}
+
+    if (filters.dish_id) {
+        params.dish_id = filters.dish_id
+    }
+    if (filters.category_id) {
+        params.category_id = filters.category_id
+    }
+
+    switch (filters.datePreset) {
+        case 'today':
+            params.date = todayISO()
+            break
+        case 'yesterday':
+            params.date = yesterdayISO()
+            break
+        case 'last7days': {
+            const range = getFinanceDateRange('last7days')
+            params.start_date = range.start_date
+            params.end_date = range.end_date
+            break
+        }
+        case 'thisMonth': {
+            const range = getFinanceDateRange('thisMonth')
+            params.start_date = range.start_date
+            params.end_date = range.end_date
+            break
+        }
+        case 'custom':
+            if (filters.start_date && filters.end_date) {
+                if (filters.start_date === filters.end_date) {
+                    params.date = filters.start_date
+                } else {
+                    params.start_date = filters.start_date
+                    params.end_date = filters.end_date
+                }
+            }
+            break
+        case 'all':
+        default:
+            break
+    }
+
+    return params
+}
+
+export const sortSalesByDateDesc = <T extends { sale_date?: string; created_at: string }>(sales: T[]) =>
+    [...sales].sort((a, b) => {
+        const dateA = a.sale_date ?? a.created_at
+        const dateB = b.sale_date ?? b.created_at
+        return dateB.localeCompare(dateA)
+    })

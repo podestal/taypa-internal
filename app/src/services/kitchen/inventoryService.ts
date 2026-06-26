@@ -44,6 +44,13 @@ export interface InventoryReportParams {
     product_id?: string
 }
 
+export interface InventoryMovementListParams {
+    product_id?: string
+    start_date?: string
+    end_date?: string
+    source?: MovementSource
+}
+
 interface MovementProps {
     movementId?: number
 }

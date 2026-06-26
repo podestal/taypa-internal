@@ -3,14 +3,15 @@ import { Plus, Trash2, Loader2 } from 'lucide-react'
 import type { KitchenDish } from '../../../services/kitchen/dishService'
 import type { KitchenAccount } from '../../../services/kitchen/accountService'
 import type { KitchenTopping } from '../../../services/kitchen/toppingService'
-import { formatDecimal } from '../../../utils/inventoryHelpers'
-import type { SaleFormState, SaleFormTopping } from '../../../utils/saleHelpers'
+import { formatDecimal, todayISO, yesterdayISO } from '../../../utils/inventoryHelpers'
+import type { SaleFormState, SaleFormTopping, SaleDatePreset } from '../../../utils/saleHelpers'
 import { saleSubtotal, saleTotal } from '../../../utils/saleHelpers'
 
 interface FormErrors {
     dish: string
     account: string
     quantity_sold: string
+    sale_date: string
 }
 
 interface Props {
@@ -19,8 +20,10 @@ interface Props {
     dishes: KitchenDish[]
     accounts: KitchenAccount[]
     toppings: KitchenTopping[]
+    saleDatePreset: SaleDatePreset
     isSubmitting: boolean
     onInputChange: (field: keyof Omit<SaleFormState, 'toppings'>, value: string | number) => void
+    onSaleDatePresetChange: (preset: SaleDatePreset) => void
     onToppingChange: (index: number, field: keyof SaleFormTopping, value: number) => void
     onAddTopping: () => void
     onRemoveTopping: (index: number) => void
@@ -33,8 +36,10 @@ const SaleForm = ({
     dishes,
     accounts,
     toppings,
+    saleDatePreset,
     isSubmitting,
     onInputChange,
+    onSaleDatePresetChange,
     onToppingChange,
     onAddTopping,
     onRemoveTopping,
@@ -45,6 +50,11 @@ const SaleForm = ({
     const dishSubtotal = saleSubtotal(formData.quantity_sold, formData.unit_price)
     const total = saleTotal(formData, toppings)
     const toppingsExtra = total - dishSubtotal
+
+    const handleSaleDatePreset = (preset: 'today' | 'yesterday') => {
+        onSaleDatePresetChange(preset)
+        onInputChange('sale_date', preset === 'today' ? todayISO() : yesterdayISO())
+    }
 
     return (
         <motion.div
@@ -154,6 +164,57 @@ const SaleForm = ({
                     <p className="text-xs text-gray-500 mt-1">
                         Por defecto usa el precio del plato
                     </p>
+                </div>
+
+                <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Fecha de venta <span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex gap-2 mb-2">
+                        <motion.button
+                            type="button"
+                            onClick={() => handleSaleDatePreset('yesterday')}
+                            disabled={isSubmitting}
+                            className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                                saleDatePreset === 'yesterday'
+                                    ? 'bg-emerald-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                        >
+                            Ayer
+                        </motion.button>
+                        <motion.button
+                            type="button"
+                            onClick={() => handleSaleDatePreset('today')}
+                            disabled={isSubmitting}
+                            className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                                saleDatePreset === 'today'
+                                    ? 'bg-emerald-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                        >
+                            Hoy
+                        </motion.button>
+                    </div>
+                    <input
+                        type="date"
+                        value={formData.sale_date}
+                        onChange={(e) => {
+                            onSaleDatePresetChange('custom')
+                            onInputChange('sale_date', e.target.value)
+                        }}
+                        className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                            errors.sale_date ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                        disabled={isSubmitting}
+                    />
+                    {errors.sale_date && (
+                        <p className="text-red-500 text-xs mt-1">{errors.sale_date}</p>
+                    )}
                 </div>
 
                 <div className="md:col-span-2">

@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
-import type { CreateUpdateProduct } from '../../../services/kitchen/productService'
+import type { CreateUpdateProduct, ProductType } from '../../../services/kitchen/productService'
+import { PRODUCT_TYPE_LABELS } from '../../../utils/productHelpers'
 
 interface FormErrors {
     name: string
@@ -57,6 +58,22 @@ const ProductForm = ({
                     {errors.name && (
                         <p className="text-red-500 text-xs mt-1">{errors.name}</p>
                     )}
+                </div>
+
+                <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Tipo <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                        value={formData.product_type}
+                        onChange={(e) => onInputChange('product_type', e.target.value as ProductType)}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        disabled={isSubmitting}
+                    >
+                        {(Object.keys(PRODUCT_TYPE_LABELS) as ProductType[]).map(type => (
+                            <option key={type} value={type}>{PRODUCT_TYPE_LABELS[type]}</option>
+                        ))}
+                    </select>
                 </div>
 
                 <div>

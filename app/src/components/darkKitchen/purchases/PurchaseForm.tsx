@@ -2,8 +2,8 @@ import { motion } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
 import type { Product } from '../../../services/kitchen/productService'
 import type { KitchenAccount } from '../../../services/kitchen/accountService'
-import { formatDecimal } from '../../../utils/inventoryHelpers'
-import type { PurchaseFormState } from '../../../utils/purchaseHelpers'
+import { formatDecimal, todayISO, yesterdayISO } from '../../../utils/inventoryHelpers'
+import type { PurchaseFormState, PurchaseDatePreset } from '../../../utils/purchaseHelpers'
 import { unitPriceFromTotal } from '../../../utils/purchaseHelpers'
 
 interface FormErrors {
@@ -11,6 +11,7 @@ interface FormErrors {
     account: string
     quantity_bought: string
     total_price: string
+    purchase_date: string
 }
 
 interface Props {
@@ -18,8 +19,10 @@ interface Props {
     errors: FormErrors
     products: Product[]
     accounts: KitchenAccount[]
+    purchaseDatePreset: PurchaseDatePreset
     isSubmitting: boolean
     onInputChange: (field: keyof PurchaseFormState, value: string | number) => void
+    onPurchaseDatePresetChange: (preset: PurchaseDatePreset) => void
     onSubmit: () => void
 }
 
@@ -28,12 +31,19 @@ const PurchaseForm = ({
     errors,
     products,
     accounts,
+    purchaseDatePreset,
     isSubmitting,
     onInputChange,
+    onPurchaseDatePresetChange,
     onSubmit,
 }: Props) => {
     const unitPrice = unitPriceFromTotal(formData.total_price, formData.quantity_bought)
     const selectedAccount = accounts.find(a => a.id === formData.account)
+
+    const handlePurchaseDatePreset = (preset: 'today' | 'yesterday') => {
+        onPurchaseDatePresetChange(preset)
+        onInputChange('purchase_date', preset === 'today' ? todayISO() : yesterdayISO())
+    }
 
     return (
         <motion.div
@@ -51,7 +61,7 @@ const PurchaseForm = ({
                     <select
                         value={formData.product || ''}
                         onChange={(e) => onInputChange('product', parseInt(e.target.value, 10))}
-                        className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                        className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 ${
                             errors.product ? 'border-red-500' : 'border-gray-300'
                         }`}
                         disabled={isSubmitting}
@@ -71,7 +81,7 @@ const PurchaseForm = ({
                     <select
                         value={formData.account || ''}
                         onChange={(e) => onInputChange('account', parseInt(e.target.value, 10))}
-                        className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                        className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 ${
                             errors.account ? 'border-red-500' : 'border-gray-300'
                         }`}
                         disabled={isSubmitting}
@@ -101,7 +111,7 @@ const PurchaseForm = ({
                         min="0.01"
                         value={formData.quantity_bought || ''}
                         onChange={(e) => onInputChange('quantity_bought', parseFloat(e.target.value) || 0)}
-                        className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                        className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 ${
                             errors.quantity_bought ? 'border-red-500' : 'border-gray-300'
                         }`}
                         placeholder="0"
@@ -122,7 +132,7 @@ const PurchaseForm = ({
                         min="0.01"
                         value={formData.total_price || ''}
                         onChange={(e) => onInputChange('total_price', parseFloat(e.target.value) || 0)}
-                        className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                        className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 ${
                             errors.total_price ? 'border-red-500' : 'border-gray-300'
                         }`}
                         placeholder="0.00"
@@ -133,13 +143,64 @@ const PurchaseForm = ({
                     )}
                 </div>
 
-                <div className="md:col-span-2 lg:col-span-2">
+                <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Fecha de compra <span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex gap-2 mb-2">
+                        <motion.button
+                            type="button"
+                            onClick={() => handlePurchaseDatePreset('yesterday')}
+                            disabled={isSubmitting}
+                            className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                                purchaseDatePreset === 'yesterday'
+                                    ? 'bg-violet-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                        >
+                            Ayer
+                        </motion.button>
+                        <motion.button
+                            type="button"
+                            onClick={() => handlePurchaseDatePreset('today')}
+                            disabled={isSubmitting}
+                            className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                                purchaseDatePreset === 'today'
+                                    ? 'bg-violet-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                        >
+                            Hoy
+                        </motion.button>
+                    </div>
+                    <input
+                        type="date"
+                        value={formData.purchase_date}
+                        onChange={(e) => {
+                            onPurchaseDatePresetChange('custom')
+                            onInputChange('purchase_date', e.target.value)
+                        }}
+                        className={`w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 ${
+                            errors.purchase_date ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                        disabled={isSubmitting}
+                    />
+                    {errors.purchase_date && (
+                        <p className="text-red-500 text-xs mt-1">{errors.purchase_date}</p>
+                    )}
+                </div>
+
+                <div className="md:col-span-2">
                     <label className="block text-xs font-medium text-gray-700 mb-1">Notas</label>
                     <input
                         type="text"
                         value={formData.notes}
                         onChange={(e) => onInputChange('notes', e.target.value)}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
                         placeholder="Opcional"
                         disabled={isSubmitting}
                     />

@@ -10,11 +10,27 @@ export interface Purchase {
     unit_price: number
     transaction: number | null
     notes: string
+    purchase_date?: string
     created_at: string
     updated_at: string
 }
 
-export type CreatePurchase = Pick<Purchase, 'product' | 'account' | 'quantity_bought' | 'unit_price' | 'notes'>
+export type CreatePurchase = {
+    product: number
+    account: number
+    quantity_bought: string | number
+    unit_price: string | number
+    purchase_date?: string
+    notes?: string
+}
+
+export interface PurchaseListParams {
+    date?: string
+    start_date?: string
+    end_date?: string
+    product_id?: string
+    account_id?: string
+}
 
 interface Props {
     purchaseId?: number

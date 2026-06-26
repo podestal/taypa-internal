@@ -1,51 +1,71 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Receipt, Loader2 } from 'lucide-react'
 import useGetSales from '../../../hooks/kitchen/sale/useGetSales'
 import useCreateSale from '../../../hooks/kitchen/sale/useCreateSale'
 import useCancelSale from '../../../hooks/kitchen/sale/useCancelSale'
 import useGetKitchenDishes from '../../../hooks/kitchen/dish/useGetKitchenDishes'
+import useGetKitchenCategories from '../../../hooks/kitchen/category/useGetKitchenCategories'
 import useGetKitchenAccounts from '../../../hooks/kitchen/account/useGetKitchenAccounts'
 import useGetToppings from '../../../hooks/kitchen/topping/useGetToppings'
 import useAuthStore from '../../../store/useAuthStore'
 import useNotificationStore from '../../../store/useNotificationStore'
 import type { Sale } from '../../../services/kitchen/saleService'
-import type { SaleFormState, SaleFormTopping } from '../../../utils/saleHelpers'
-import { buildSalePayload } from '../../../utils/saleHelpers'
+import type { SaleFormState, SaleFormTopping, SaleDatePreset, SaleHistoryDatePreset } from '../../../utils/saleHelpers'
+import {
+    buildSaleListParams,
+    buildSalePayload,
+    getDefaultSaleHistoryFilters,
+} from '../../../utils/saleHelpers'
+import { yesterdayISO } from '../../../utils/inventoryHelpers'
 import Modal from '../../ui/Modal'
 import SaleForm from './SaleForm'
-import SaleList from './SaleList'
+import SalesHistoryFilters from './SalesHistoryFilters'
+import SalesHistoryTable from './SalesHistoryTable'
 
-const initialFormData: SaleFormState = {
+const getInitialFormData = (): SaleFormState => ({
     dish: 0,
     account: 0,
     quantity_sold: 0,
     unit_price: 0,
+    sale_date: yesterdayISO(),
     notes: '',
     toppings: [],
-}
+})
 
 const SalesMain = () => {
     const access = useAuthStore(state => state.access) || ''
     const addNotification = useNotificationStore(state => state.addNotification)
-    const { data: sales, isLoading: salesLoading, error: salesError } = useGetSales({ access })
+
     const { data: dishes, isLoading: dishesLoading, error: dishesError } = useGetKitchenDishes({ access })
+    const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useGetKitchenCategories({ access })
     const { data: accounts, isLoading: accountsLoading, error: accountsError } = useGetKitchenAccounts({ access })
     const { data: toppings, isLoading: toppingsLoading, error: toppingsError } = useGetToppings({ access })
     const createSale = useCreateSale()
 
-    const [formData, setFormData] = useState<SaleFormState>(initialFormData)
-    const [errors, setErrors] = useState({ dish: '', account: '', quantity_sold: '' })
+    const [historyFilters, setHistoryFilters] = useState(getDefaultSaleHistoryFilters)
+    const saleListParams = useMemo(() => buildSaleListParams(historyFilters), [historyFilters])
+
+    const {
+        data: sales,
+        isLoading: salesLoading,
+        error: salesError,
+    } = useGetSales({ access, params: saleListParams })
+
+    const [formData, setFormData] = useState<SaleFormState>(getInitialFormData)
+    const [saleDatePreset, setSaleDatePreset] = useState<SaleDatePreset>('yesterday')
+    const [errors, setErrors] = useState({ dish: '', account: '', quantity_sold: '', sale_date: '' })
     const [showCancelModal, setShowCancelModal] = useState(false)
     const [selectedSale, setSelectedSale] = useState<Sale | null>(null)
 
     const cancelSale = useCancelSale({ saleId: selectedSale?.id ?? 0 })
 
-    const isLoading = salesLoading || dishesLoading || accountsLoading || toppingsLoading
-    const error = salesError || dishesError || accountsError || toppingsError
+    const isPageLoading = dishesLoading || categoriesLoading || accountsLoading || toppingsLoading
+    const pageError = dishesError || categoriesError || accountsError || toppingsError
 
     const saleItems = Array.isArray(sales) ? sales : []
     const allDishes = Array.isArray(dishes) ? dishes : []
+    const categoryItems = Array.isArray(categories) ? categories : []
     const accountItems = Array.isArray(accounts) ? accounts : []
     const activeDishes = allDishes.filter(
         dish => dish.is_active && dish.ingredients.length > 0
@@ -53,13 +73,29 @@ const SalesMain = () => {
     const activeAccounts = accountItems.filter(account => account.is_active)
     const activeToppings = (Array.isArray(toppings) ? toppings : []).filter(t => t.is_active)
 
+    useEffect(() => {
+        if (!formData.account && activeAccounts.length > 0) {
+            setFormData(prev => ({ ...prev, account: activeAccounts[0].id }))
+        }
+    }, [activeAccounts, formData.account])
+
+    const handleHistoryDatePreset = (preset: SaleHistoryDatePreset) => {
+        setHistoryFilters(prev => ({
+            ...prev,
+            datePreset: preset,
+            start_date: preset === 'custom' ? prev.start_date : '',
+            end_date: preset === 'custom' ? prev.end_date : '',
+        }))
+    }
+
     const resetForm = () => {
-        setFormData(initialFormData)
-        setErrors({ dish: '', account: '', quantity_sold: '' })
+        setFormData(getInitialFormData())
+        setSaleDatePreset('yesterday')
+        setErrors({ dish: '', account: '', quantity_sold: '', sale_date: '' })
     }
 
     const validateForm = () => {
-        const newErrors = { dish: '', account: '', quantity_sold: '' }
+        const newErrors = { dish: '', account: '', quantity_sold: '', sale_date: '' }
         let hasError = false
 
         if (!formData.dish) {
@@ -72,6 +108,10 @@ const SalesMain = () => {
         }
         if (!formData.quantity_sold || formData.quantity_sold <= 0) {
             newErrors.quantity_sold = 'La cantidad debe ser mayor a 0'
+            hasError = true
+        }
+        if (!formData.sale_date) {
+            newErrors.sale_date = 'La fecha es requerida'
             hasError = true
         }
 
@@ -119,7 +159,11 @@ const SalesMain = () => {
                     message: 'La venta se registró correctamente',
                     type: 'success',
                 })
+                const defaultAccount = formData.account
                 resetForm()
+                if (defaultAccount) {
+                    setFormData(prev => ({ ...prev, account: defaultAccount }))
+                }
             },
             onError: () => {
                 addNotification({
@@ -159,7 +203,7 @@ const SalesMain = () => {
         })
     }
 
-    if (isLoading) {
+    if (isPageLoading) {
         return (
             <div className="flex items-center justify-center h-64">
                 <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
@@ -167,10 +211,10 @@ const SalesMain = () => {
         )
     }
 
-    if (error) {
+    if (pageError) {
         return (
             <div className="text-center text-red-500 py-8">
-                Error al cargar ventas: {error.message}
+                Error al cargar ventas: {pageError.message}
             </div>
         )
     }
@@ -196,8 +240,10 @@ const SalesMain = () => {
                         dishes={activeDishes}
                         accounts={activeAccounts}
                         toppings={activeToppings}
+                        saleDatePreset={saleDatePreset}
                         isSubmitting={createSale.isPending}
                         onInputChange={handleInputChange}
+                        onSaleDatePresetChange={setSaleDatePreset}
                         onToppingChange={handleToppingChange}
                         onAddTopping={handleAddTopping}
                         onRemoveTopping={handleRemoveTopping}
@@ -225,12 +271,23 @@ const SalesMain = () => {
                     <div className="flex items-center space-x-2">
                         <h2 className="text-2xl font-semibold text-gray-900">Historial</h2>
                         <span className="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-full">
-                            {saleItems.length}
+                            {salesLoading ? '...' : saleItems.length}
                         </span>
                     </div>
-                    <SaleList
+
+                    <SalesHistoryFilters
+                        filters={historyFilters}
+                        dishes={allDishes}
+                        categories={categoryItems}
+                        onFiltersChange={setHistoryFilters}
+                        onDatePresetChange={handleHistoryDatePreset}
+                    />
+
+                    <SalesHistoryTable
                         sales={saleItems}
                         accounts={accountItems}
+                        isLoading={salesLoading}
+                        error={salesError}
                         onCancel={handleCancel}
                         cancellingSaleId={cancelSale.isPending ? selectedSale?.id ?? null : null}
                     />

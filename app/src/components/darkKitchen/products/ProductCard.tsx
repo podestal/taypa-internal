@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Package, Scale, Droplets, Hash } from 'lucide-react'
 import type { Product } from '../../../services/kitchen/productService'
+import { PRODUCT_TYPE_LABELS } from '../../../utils/productHelpers'
 
 interface Props {
     product: Product
@@ -25,7 +26,16 @@ const ProductCard = ({ product, index }: Props) => {
                     <Package className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-gray-900 truncate">{product.name}</h3>
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-lg font-semibold text-gray-900 truncate">{product.name}</h3>
+                        <span className={`px-2 py-0.5 text-xs font-medium rounded ${
+                            product.product_type === 'I'
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : 'bg-amber-100 text-amber-800'
+                        }`}>
+                            {PRODUCT_TYPE_LABELS[product.product_type]}
+                        </span>
+                    </div>
                     {product.description ? (
                         <p className="text-sm text-gray-600 mt-1 line-clamp-2">{product.description}</p>
                     ) : (

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ShoppingCart, Loader2 } from 'lucide-react'
 import useGetPurchases from '../../../hooks/kitchen/purchase/useGetPurchases'
@@ -7,46 +7,97 @@ import useGetProducts from '../../../hooks/kitchen/product/useGetProducts'
 import useGetKitchenAccounts from '../../../hooks/kitchen/account/useGetKitchenAccounts'
 import useAuthStore from '../../../store/useAuthStore'
 import useNotificationStore from '../../../store/useNotificationStore'
-import type { CreatePurchase } from '../../../services/kitchen/purchaseService'
-import type { PurchaseFormState } from '../../../utils/purchaseHelpers'
-import { unitPriceFromTotal } from '../../../utils/purchaseHelpers'
+import type {
+    PurchaseFormState,
+    PurchaseDatePreset,
+    PurchaseHistoryDatePreset,
+} from '../../../utils/purchaseHelpers'
+import {
+    buildPurchaseListParams,
+    buildPurchasePayload,
+    getDefaultPurchaseHistoryFilters,
+} from '../../../utils/purchaseHelpers'
+import { yesterdayISO } from '../../../utils/inventoryHelpers'
 import PurchaseForm from './PurchaseForm'
-import PurchaseList from './PurchaseList'
+import PurchasesHistoryFilters from './PurchasesHistoryFilters'
+import PurchasesHistoryTable from './PurchasesHistoryTable'
 
-const initialFormData: PurchaseFormState = {
+const getInitialFormData = (): PurchaseFormState => ({
     product: 0,
     account: 0,
     quantity_bought: 0,
     total_price: 0,
+    purchase_date: yesterdayISO(),
     notes: '',
-}
+})
 
 const PurchaseMain = () => {
     const access = useAuthStore(state => state.access) || ''
     const addNotification = useNotificationStore(state => state.addNotification)
-    const { data: purchases, isLoading: purchasesLoading, error: purchasesError } = useGetPurchases({ access })
-    const { data: products, isLoading: productsLoading, error: productsError } = useGetProducts({ access })
+
+    const { data: products, isLoading: productsLoading, error: productsError } = useGetProducts({
+        access,
+        params: { include_all: 'true' },
+    })
     const { data: accounts, isLoading: accountsLoading, error: accountsError } = useGetKitchenAccounts({ access })
     const createPurchase = useCreatePurchase()
 
-    const [formData, setFormData] = useState<PurchaseFormState>(initialFormData)
-    const [errors, setErrors] = useState({ product: '', account: '', quantity_bought: '', total_price: '' })
+    const [historyFilters, setHistoryFilters] = useState(getDefaultPurchaseHistoryFilters)
+    const purchaseListParams = useMemo(() => buildPurchaseListParams(historyFilters), [historyFilters])
 
-    const isLoading = purchasesLoading || productsLoading || accountsLoading
-    const error = purchasesError || productsError || accountsError
+    const {
+        data: purchases,
+        isLoading: purchasesLoading,
+        error: purchasesError,
+    } = useGetPurchases({ access, params: purchaseListParams })
+
+    const [formData, setFormData] = useState<PurchaseFormState>(getInitialFormData)
+    const [purchaseDatePreset, setPurchaseDatePreset] = useState<PurchaseDatePreset>('yesterday')
+    const [errors, setErrors] = useState({
+        product: '',
+        account: '',
+        quantity_bought: '',
+        total_price: '',
+        purchase_date: '',
+    })
+
+    const isPageLoading = productsLoading || accountsLoading
+    const pageError = productsError || accountsError
 
     const purchaseItems = Array.isArray(purchases) ? purchases : []
     const productItems = Array.isArray(products) ? products : []
     const accountItems = Array.isArray(accounts) ? accounts : []
     const activeAccounts = accountItems.filter(account => account.is_active)
 
+    useEffect(() => {
+        if (!formData.account && activeAccounts.length > 0) {
+            setFormData(prev => ({ ...prev, account: activeAccounts[0].id }))
+        }
+    }, [activeAccounts, formData.account])
+
+    const handleHistoryDatePreset = (preset: PurchaseHistoryDatePreset) => {
+        setHistoryFilters(prev => ({
+            ...prev,
+            datePreset: preset,
+            start_date: preset === 'custom' ? prev.start_date : '',
+            end_date: preset === 'custom' ? prev.end_date : '',
+        }))
+    }
+
     const resetForm = () => {
-        setFormData(initialFormData)
-        setErrors({ product: '', account: '', quantity_bought: '', total_price: '' })
+        setFormData(getInitialFormData())
+        setPurchaseDatePreset('yesterday')
+        setErrors({ product: '', account: '', quantity_bought: '', total_price: '', purchase_date: '' })
     }
 
     const validateForm = () => {
-        const newErrors = { product: '', account: '', quantity_bought: '', total_price: '' }
+        const newErrors = {
+            product: '',
+            account: '',
+            quantity_bought: '',
+            total_price: '',
+            purchase_date: '',
+        }
         let hasError = false
 
         if (!formData.product) {
@@ -65,6 +116,10 @@ const PurchaseMain = () => {
             newErrors.total_price = 'El precio total debe ser mayor a 0'
             hasError = true
         }
+        if (!formData.purchase_date) {
+            newErrors.purchase_date = 'La fecha es requerida'
+            hasError = true
+        }
 
         setErrors(newErrors)
         return !hasError
@@ -80,22 +135,18 @@ const PurchaseMain = () => {
     const handleSubmit = () => {
         if (!validateForm()) return
 
-        const purchase: CreatePurchase = {
-            product: formData.product,
-            account: formData.account,
-            quantity_bought: formData.quantity_bought,
-            unit_price: unitPriceFromTotal(formData.total_price, formData.quantity_bought),
-            notes: formData.notes,
-        }
-
-        createPurchase.mutate({ purchase, access }, {
+        createPurchase.mutate({ purchase: buildPurchasePayload(formData), access }, {
             onSuccess: () => {
                 addNotification({
                     title: 'Compra registrada',
                     message: 'La compra se registró correctamente',
                     type: 'success',
                 })
+                const defaultAccount = formData.account
                 resetForm()
+                if (defaultAccount) {
+                    setFormData(prev => ({ ...prev, account: defaultAccount }))
+                }
             },
             onError: () => {
                 addNotification({
@@ -107,7 +158,7 @@ const PurchaseMain = () => {
         })
     }
 
-    if (isLoading) {
+    if (isPageLoading) {
         return (
             <div className="flex items-center justify-center h-64">
                 <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
@@ -115,10 +166,10 @@ const PurchaseMain = () => {
         )
     }
 
-    if (error) {
+    if (pageError) {
         return (
             <div className="text-center text-red-500 py-8">
-                Error al cargar compras: {error.message}
+                Error al cargar compras: {pageError.message}
             </div>
         )
     }
@@ -143,8 +194,10 @@ const PurchaseMain = () => {
                         errors={errors}
                         products={productItems}
                         accounts={activeAccounts}
+                        purchaseDatePreset={purchaseDatePreset}
                         isSubmitting={createPurchase.isPending}
                         onInputChange={handleInputChange}
+                        onPurchaseDatePresetChange={setPurchaseDatePreset}
                         onSubmit={handleSubmit}
                     />
                 )}
@@ -167,13 +220,24 @@ const PurchaseMain = () => {
                     <div className="flex items-center space-x-2">
                         <h2 className="text-2xl font-semibold text-gray-900">Historial</h2>
                         <span className="px-2 py-1 bg-violet-100 text-violet-800 text-xs font-semibold rounded-full">
-                            {purchaseItems.length}
+                            {purchasesLoading ? '...' : purchaseItems.length}
                         </span>
                     </div>
-                    <PurchaseList
+
+                    <PurchasesHistoryFilters
+                        filters={historyFilters}
+                        products={productItems}
+                        accounts={accountItems}
+                        onFiltersChange={setHistoryFilters}
+                        onDatePresetChange={handleHistoryDatePreset}
+                    />
+
+                    <PurchasesHistoryTable
                         purchases={purchaseItems}
                         products={productItems}
                         accounts={accountItems}
+                        isLoading={purchasesLoading}
+                        error={purchasesError}
                     />
                 </motion.div>
             </div>

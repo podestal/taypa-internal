@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Boxes, Loader2 } from 'lucide-react'
 import useGetCurrentStock from '../../../hooks/kitchen/inventory/useGetCurrentStock'
@@ -10,9 +10,16 @@ import useAuthStore from '../../../store/useAuthStore'
 import useNotificationStore from '../../../store/useNotificationStore'
 import type { CreateInventoryMovement, MovementSource } from '../../../services/kitchen/inventoryService'
 import type { InventoryReportParams } from '../../../services/kitchen/inventoryService'
-import { todayISO } from '../../../utils/inventoryHelpers'
+import {
+    todayISO,
+    buildMovementListParams,
+    getDefaultMovementHistoryFilters,
+    type MovementHistoryDatePreset,
+} from '../../../utils/inventoryHelpers'
+import { buildIngredientStockItems, isIngredientProduct } from '../../../utils/productHelpers'
 import CurrentStockList from './CurrentStockList'
 import MovementForm from './MovementForm'
+import MovementHistoryFilters from './MovementHistoryFilters'
 import MovementList from './MovementList'
 import InventoryReport from './InventoryReport'
 
@@ -30,9 +37,22 @@ const InventoryMain = () => {
     const addNotification = useNotificationStore(state => state.addNotification)
 
     const { data: currentStock, isLoading: stockLoading, error: stockError } = useGetCurrentStock({ access })
-    const { data: movements, isLoading: movementsLoading, error: movementsError } = useGetInventoryMovements({ access })
-    const { data: products, isLoading: productsLoading } = useGetProducts({ access })
+    const { data: products, isLoading: productsLoading } = useGetProducts({
+        access,
+        params: { include_all: 'true' },
+    })
     const createMovement = useCreateInventoryMovement()
+
+    const [movementFilters, setMovementFilters] = useState(getDefaultMovementHistoryFilters)
+    const movementListParams = useMemo(
+        () => buildMovementListParams(movementFilters),
+        [movementFilters],
+    )
+    const {
+        data: movements,
+        isLoading: movementsLoading,
+        error: movementsError,
+    } = useGetInventoryMovements({ access, params: movementListParams })
 
     const [formData, setFormData] = useState<CreateInventoryMovement>(initialFormData)
     const [errors, setErrors] = useState({ product: '', quantity: '', movement_date: '' })
@@ -47,13 +67,35 @@ const InventoryMain = () => {
         enabled: !!reportParams.start_date && !!reportParams.end_date,
     })
 
-    const isLoading = stockLoading || movementsLoading || productsLoading
-    const error = stockError || movementsError
+    const isLoading = stockLoading || productsLoading
+    const error = stockError
 
     const stockItems = Array.isArray(currentStock) ? currentStock : []
     const movementItems = Array.isArray(movements) ? movements : []
-    const productItems = Array.isArray(products) ? products : []
+    const ingredientProducts = useMemo(
+        () => (Array.isArray(products) ? products : []).filter(isIngredientProduct),
+        [products],
+    )
+    const ingredientProductIds = useMemo(
+        () => new Set(ingredientProducts.map(product => product.id)),
+        [ingredientProducts],
+    )
+    const ingredientStockItems = useMemo(
+        () => buildIngredientStockItems(ingredientProducts, stockItems),
+        [ingredientProducts, stockItems],
+    )
+    const ingredientMovements = movementItems.filter(item => ingredientProductIds.has(item.product))
     const reportItems = Array.isArray(report) ? report : []
+    const ingredientReportItems = reportItems.filter(item => ingredientProductIds.has(item.product_id))
+
+    const handleMovementDatePreset = (preset: MovementHistoryDatePreset) => {
+        setMovementFilters(prev => ({
+            ...prev,
+            datePreset: preset,
+            start_date: preset === 'custom' ? prev.start_date : '',
+            end_date: preset === 'custom' ? prev.end_date : '',
+        }))
+    }
 
     const resetForm = () => {
         setFormData(initialFormData)
@@ -154,17 +196,24 @@ const InventoryMain = () => {
                     <div className="flex items-center space-x-2">
                         <h2 className="text-2xl font-semibold text-gray-900">Stock actual</h2>
                         <span className="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-full">
-                            {stockItems.length}
+                            {ingredientStockItems.length}
                         </span>
                     </div>
-                    <CurrentStockList items={stockItems} />
+                    <CurrentStockList
+                        items={ingredientStockItems}
+                        emptyMessage={
+                            ingredientProducts.length === 0
+                                ? 'Crea productos tipo ingrediente en Productos para ver el inventario'
+                                : 'No hay productos en inventario'
+                        }
+                    />
                 </motion.div>
 
-                {productItems.length > 0 && (
+                {ingredientProducts.length > 0 && (
                     <MovementForm
                         formData={formData}
                         errors={errors}
-                        products={productItems}
+                        products={ingredientProducts}
                         isSubmitting={createMovement.isPending}
                         onInputChange={handleInputChange}
                         onSourceChange={handleSourceChange}
@@ -181,16 +230,27 @@ const InventoryMain = () => {
                     <div className="flex items-center space-x-2">
                         <h2 className="text-2xl font-semibold text-gray-900">Movimientos</h2>
                         <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
-                            {movementItems.length}
+                            {ingredientMovements.length}
                         </span>
                     </div>
-                    <MovementList movements={movementItems} products={productItems} />
+                    <MovementHistoryFilters
+                        filters={movementFilters}
+                        products={ingredientProducts}
+                        onFiltersChange={setMovementFilters}
+                        onDatePresetChange={handleMovementDatePreset}
+                    />
+                    <MovementList
+                        movements={ingredientMovements}
+                        products={ingredientProducts}
+                        isLoading={movementsLoading}
+                        error={movementsError}
+                    />
                 </motion.div>
 
-                {productItems.length > 0 && (
+                {ingredientProducts.length > 0 && (
                     <InventoryReport
-                        report={reportItems}
-                        products={productItems}
+                        report={ingredientReportItems}
+                        products={ingredientProducts}
                         params={reportParams}
                         isLoading={reportLoading}
                         error={reportError}
