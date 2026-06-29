@@ -24,6 +24,8 @@ export type CreatePurchase = {
     notes?: string
 }
 
+export type UpdatePurchase = CreatePurchase
+
 export interface PurchaseListParams {
     date?: string
     start_date?: string
@@ -41,7 +43,7 @@ const getPurchaseService = ({ purchaseId }: Props = {}) => {
     if (purchaseId) {
         url += `${purchaseId}/`
     }
-    return new KitchenClient<Purchase[], CreatePurchase>(url)
+    return new KitchenClient<Purchase[], CreatePurchase, UpdatePurchase>(url)
 }
 
 export default getPurchaseService

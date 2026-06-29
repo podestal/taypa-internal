@@ -3,10 +3,12 @@ import { motion } from 'framer-motion'
 import { ShoppingCart, Loader2 } from 'lucide-react'
 import useGetPurchases from '../../../hooks/kitchen/purchase/useGetPurchases'
 import useCreatePurchase from '../../../hooks/kitchen/purchase/useCreatePurchase'
+import useUpdatePurchase from '../../../hooks/kitchen/purchase/useUpdatePurchase'
 import useGetProducts from '../../../hooks/kitchen/product/useGetProducts'
 import useGetKitchenAccounts from '../../../hooks/kitchen/account/useGetKitchenAccounts'
 import useAuthStore from '../../../store/useAuthStore'
 import useNotificationStore from '../../../store/useNotificationStore'
+import type { Purchase } from '../../../services/kitchen/purchaseService'
 import type {
     PurchaseFormState,
     PurchaseDatePreset,
@@ -16,8 +18,10 @@ import {
     buildPurchaseListParams,
     buildPurchasePayload,
     getDefaultPurchaseHistoryFilters,
+    purchaseToFormState,
 } from '../../../utils/purchaseHelpers'
 import { yesterdayISO } from '../../../utils/inventoryHelpers'
+import Modal from '../../ui/Modal'
 import PurchaseForm from './PurchaseForm'
 import PurchasesHistoryFilters from './PurchasesHistoryFilters'
 import PurchasesHistoryTable from './PurchasesHistoryTable'
@@ -30,6 +34,14 @@ const getInitialFormData = (): PurchaseFormState => ({
     purchase_date: yesterdayISO(),
     notes: '',
 })
+
+const emptyErrors = {
+    product: '',
+    account: '',
+    quantity_bought: '',
+    total_price: '',
+    purchase_date: '',
+}
 
 const PurchaseMain = () => {
     const access = useAuthStore(state => state.access) || ''
@@ -53,13 +65,14 @@ const PurchaseMain = () => {
 
     const [formData, setFormData] = useState<PurchaseFormState>(getInitialFormData)
     const [purchaseDatePreset, setPurchaseDatePreset] = useState<PurchaseDatePreset>('yesterday')
-    const [errors, setErrors] = useState({
-        product: '',
-        account: '',
-        quantity_bought: '',
-        total_price: '',
-        purchase_date: '',
-    })
+    const [errors, setErrors] = useState(emptyErrors)
+    const [showEditModal, setShowEditModal] = useState(false)
+    const [editingPurchase, setEditingPurchase] = useState<Purchase | null>(null)
+    const [editFormData, setEditFormData] = useState<PurchaseFormState>(getInitialFormData)
+    const [editPurchaseDatePreset, setEditPurchaseDatePreset] = useState<PurchaseDatePreset>('custom')
+    const [editErrors, setEditErrors] = useState(emptyErrors)
+
+    const updatePurchase = useUpdatePurchase({ purchaseId: editingPurchase?.id ?? 0 })
 
     const isPageLoading = productsLoading || accountsLoading
     const pageError = productsError || accountsError
@@ -87,42 +100,42 @@ const PurchaseMain = () => {
     const resetForm = () => {
         setFormData(getInitialFormData())
         setPurchaseDatePreset('yesterday')
-        setErrors({ product: '', account: '', quantity_bought: '', total_price: '', purchase_date: '' })
+        setErrors(emptyErrors)
     }
 
-    const validateForm = () => {
-        const newErrors = {
-            product: '',
-            account: '',
-            quantity_bought: '',
-            total_price: '',
-            purchase_date: '',
-        }
+    const resetEditForm = () => {
+        setEditingPurchase(null)
+        setEditFormData(getInitialFormData())
+        setEditPurchaseDatePreset('custom')
+        setEditErrors(emptyErrors)
+    }
+
+    const validateForm = (data: PurchaseFormState) => {
+        const newErrors = { ...emptyErrors }
         let hasError = false
 
-        if (!formData.product) {
+        if (!data.product) {
             newErrors.product = 'Selecciona un producto'
             hasError = true
         }
-        if (!formData.account) {
+        if (!data.account) {
             newErrors.account = 'Selecciona una cuenta'
             hasError = true
         }
-        if (!formData.quantity_bought || formData.quantity_bought <= 0) {
+        if (!data.quantity_bought || data.quantity_bought <= 0) {
             newErrors.quantity_bought = 'La cantidad debe ser mayor a 0'
             hasError = true
         }
-        if (!formData.total_price || formData.total_price <= 0) {
+        if (!data.total_price || data.total_price <= 0) {
             newErrors.total_price = 'El precio total debe ser mayor a 0'
             hasError = true
         }
-        if (!formData.purchase_date) {
+        if (!data.purchase_date) {
             newErrors.purchase_date = 'La fecha es requerida'
             hasError = true
         }
 
-        setErrors(newErrors)
-        return !hasError
+        return { errors: newErrors, isValid: !hasError }
     }
 
     const handleInputChange = (field: keyof PurchaseFormState, value: string | number) => {
@@ -133,7 +146,9 @@ const PurchaseMain = () => {
     }
 
     const handleSubmit = () => {
-        if (!validateForm()) return
+        const validation = validateForm(formData)
+        setErrors(validation.errors)
+        if (!validation.isValid) return
 
         createPurchase.mutate({ purchase: buildPurchasePayload(formData), access }, {
             onSuccess: () => {
@@ -152,6 +167,50 @@ const PurchaseMain = () => {
                 addNotification({
                     title: 'Error',
                     message: 'Error al registrar la compra',
+                    type: 'error',
+                })
+            },
+        })
+    }
+
+    const handleEditInputChange = (field: keyof PurchaseFormState, value: string | number) => {
+        setEditFormData(prev => ({ ...prev, [field]: value }))
+        if (field in editErrors && editErrors[field as keyof typeof editErrors]) {
+            setEditErrors(prev => ({ ...prev, [field]: '' }))
+        }
+    }
+
+    const handleEdit = (purchase: Purchase) => {
+        setEditingPurchase(purchase)
+        setEditFormData(purchaseToFormState(purchase))
+        setEditPurchaseDatePreset('custom')
+        setEditErrors(emptyErrors)
+        setShowEditModal(true)
+    }
+
+    const handleCloseEditModal = () => {
+        setShowEditModal(false)
+        resetEditForm()
+    }
+
+    const handleEditSubmit = () => {
+        const validation = validateForm(editFormData)
+        setEditErrors(validation.errors)
+        if (!validation.isValid || !editingPurchase) return
+
+        updatePurchase.mutate({ purchase: buildPurchasePayload(editFormData), access }, {
+            onSuccess: () => {
+                addNotification({
+                    title: 'Compra actualizada',
+                    message: 'La compra se actualizó correctamente',
+                    type: 'success',
+                })
+                handleCloseEditModal()
+            },
+            onError: () => {
+                addNotification({
+                    title: 'Error',
+                    message: 'Error al actualizar la compra',
                     type: 'error',
                 })
             },
@@ -238,9 +297,26 @@ const PurchaseMain = () => {
                         accounts={accountItems}
                         isLoading={purchasesLoading}
                         error={purchasesError}
+                        onEdit={handleEdit}
                     />
                 </motion.div>
             </div>
+
+            <Modal isOpen={showEditModal} onClose={handleCloseEditModal} width="max-w-4xl">
+                <PurchaseForm
+                    formData={editFormData}
+                    errors={editErrors}
+                    products={productItems}
+                    accounts={accountItems}
+                    purchaseDatePreset={editPurchaseDatePreset}
+                    isSubmitting={updatePurchase.isPending}
+                    isEditing
+                    onInputChange={handleEditInputChange}
+                    onPurchaseDatePresetChange={setEditPurchaseDatePreset}
+                    onSubmit={handleEditSubmit}
+                    onCancel={handleCloseEditModal}
+                />
+            </Modal>
         </div>
     )
 }

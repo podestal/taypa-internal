@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Pencil } from 'lucide-react'
 import type { Purchase } from '../../../services/kitchen/purchaseService'
 import type { Product } from '../../../services/kitchen/productService'
 import type { KitchenAccount } from '../../../services/kitchen/accountService'
@@ -12,6 +12,7 @@ interface Props {
     accounts: KitchenAccount[]
     isLoading: boolean
     error?: Error | null
+    onEdit?: (purchase: Purchase) => void
 }
 
 const PurchasesHistoryTable = ({
@@ -20,6 +21,7 @@ const PurchasesHistoryTable = ({
     accounts,
     isLoading,
     error,
+    onEdit,
 }: Props) => {
     if (isLoading) {
         return (
@@ -70,6 +72,7 @@ const PurchasesHistoryTable = ({
                             <th className="text-right px-4 py-3 font-medium">P. unit.</th>
                             <th className="text-right px-4 py-3 font-medium">Total</th>
                             <th className="text-left px-4 py-3 font-medium">Notas</th>
+                            {onEdit && <th className="text-right px-4 py-3 font-medium">Acciones</th>}
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
@@ -96,6 +99,20 @@ const PurchasesHistoryTable = ({
                                     <td className="px-4 py-3 text-gray-600 max-w-[200px] truncate" title={purchase.notes}>
                                         {purchase.notes || '—'}
                                     </td>
+                                    {onEdit && (
+                                        <td className="px-4 py-3 text-right">
+                                            <motion.button
+                                                type="button"
+                                                onClick={() => onEdit(purchase)}
+                                                className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-violet-700 bg-violet-50 rounded-lg hover:bg-violet-100 transition-colors"
+                                                whileHover={{ scale: 1.03 }}
+                                                whileTap={{ scale: 0.97 }}
+                                            >
+                                                <Pencil className="w-3.5 h-3.5" />
+                                                Editar
+                                            </motion.button>
+                                        </td>
+                                    )}
                                 </tr>
                             )
                         })}

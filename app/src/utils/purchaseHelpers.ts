@@ -66,19 +66,23 @@ export const unitPriceFromTotal = (totalPrice: number, quantity: number) => {
     return Math.round((totalPrice / quantity) * 100) / 100
 }
 
-export const buildPurchasePayload = (form: PurchaseFormState): CreatePurchase => {
-    const payload: CreatePurchase = {
-        product: form.product,
-        account: form.account,
-        quantity_bought: form.quantity_bought.toFixed(2),
-        unit_price: unitPriceFromTotal(form.total_price, form.quantity_bought).toFixed(2),
-        purchase_date: form.purchase_date,
-    }
-    if (form.notes.trim()) {
-        payload.notes = form.notes.trim()
-    }
-    return payload
-}
+export const buildPurchasePayload = (form: PurchaseFormState): CreatePurchase => ({
+    product: form.product,
+    account: form.account,
+    quantity_bought: form.quantity_bought.toFixed(2),
+    unit_price: unitPriceFromTotal(form.total_price, form.quantity_bought).toFixed(2),
+    purchase_date: form.purchase_date,
+    notes: form.notes.trim(),
+})
+
+export const purchaseToFormState = (purchase: Purchase): PurchaseFormState => ({
+    product: purchase.product,
+    account: purchase.account,
+    quantity_bought: purchase.quantity_bought,
+    total_price: purchaseTotal(purchase.quantity_bought, purchase.unit_price),
+    purchase_date: (purchase.purchase_date ?? purchase.created_at).split('T')[0],
+    notes: purchase.notes ?? '',
+})
 
 export type PurchaseHistoryDatePreset = 'all' | 'today' | 'yesterday' | 'last7days' | 'thisMonth' | 'custom'
 

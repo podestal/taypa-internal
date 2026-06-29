@@ -1,8 +1,8 @@
 import { useMutation, type UseMutationResult, useQueryClient } from "@tanstack/react-query"
-import getPurchaseService, { type Purchase, type CreatePurchase } from "../../../services/kitchen/purchaseService"
+import getPurchaseService, { type Purchase, type UpdatePurchase } from "../../../services/kitchen/purchaseService"
 
 interface UpdatePurchaseData {
-    purchase: CreatePurchase
+    purchase: UpdatePurchase
     access: string
 }
 
@@ -21,6 +21,8 @@ const useUpdatePurchase = ({ purchaseId }: Props): UseMutationResult<Purchase, E
             queryClient.invalidateQueries({ queryKey: ['inventory-current'] })
             queryClient.invalidateQueries({ queryKey: ['inventory-movements'] })
             queryClient.invalidateQueries({ queryKey: ['inventory-report'] })
+            queryClient.invalidateQueries({ queryKey: ['products'] })
+            queryClient.invalidateQueries({ queryKey: ['kitchen-accounts'] })
         },
         onError: (error) => {
             console.error('Error updating purchase:', error)

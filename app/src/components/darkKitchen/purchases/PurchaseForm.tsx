@@ -21,9 +21,11 @@ interface Props {
     accounts: KitchenAccount[]
     purchaseDatePreset: PurchaseDatePreset
     isSubmitting: boolean
+    isEditing?: boolean
     onInputChange: (field: keyof PurchaseFormState, value: string | number) => void
     onPurchaseDatePresetChange: (preset: PurchaseDatePreset) => void
     onSubmit: () => void
+    onCancel?: () => void
 }
 
 const PurchaseForm = ({
@@ -33,9 +35,11 @@ const PurchaseForm = ({
     accounts,
     purchaseDatePreset,
     isSubmitting,
+    isEditing = false,
     onInputChange,
     onPurchaseDatePresetChange,
     onSubmit,
+    onCancel,
 }: Props) => {
     const unitPrice = unitPriceFromTotal(formData.total_price, formData.quantity_bought)
     const selectedAccount = accounts.find(a => a.id === formData.account)
@@ -51,7 +55,9 @@ const PurchaseForm = ({
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-lg shadow-md p-5 border border-gray-200"
         >
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Nueva compra</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                {isEditing ? 'Editar compra' : 'Nueva compra'}
+            </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="md:col-span-2">
@@ -216,7 +222,19 @@ const PurchaseForm = ({
                 </div>
             </div>
 
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-end gap-3 mt-4">
+                {isEditing && onCancel && (
+                    <motion.button
+                        type="button"
+                        onClick={onCancel}
+                        disabled={isSubmitting}
+                        className="px-5 py-2 text-sm bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors disabled:opacity-50"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                    >
+                        Cancelar
+                    </motion.button>
+                )}
                 <motion.button
                     onClick={onSubmit}
                     disabled={isSubmitting}
@@ -225,7 +243,11 @@ const PurchaseForm = ({
                     whileTap={{ scale: 0.98 }}
                 >
                     {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                    <span>{isSubmitting ? 'Registrando...' : 'Registrar compra'}</span>
+                    <span>
+                        {isSubmitting
+                            ? (isEditing ? 'Guardando...' : 'Registrando...')
+                            : (isEditing ? 'Guardar cambios' : 'Registrar compra')}
+                    </span>
                 </motion.button>
             </div>
         </motion.div>
