@@ -87,6 +87,11 @@ const Sidebar = () => {
         icon: <Wallet />
     },
     {
+        name: 'Transacciones',
+        path: '/transacciones',
+        icon: <AudioWaveform />
+    },
+    {
         name: 'Categorías',
         path: '/categorias',
         icon: <Tags />

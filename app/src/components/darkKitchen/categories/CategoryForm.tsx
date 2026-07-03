@@ -1,17 +1,22 @@
 import { motion } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
-import type { CreateKitchenCategory } from '../../../services/kitchen/categoryService'
+import {
+    MENU_ITEM_LABELS,
+    type CategoryFormState,
+} from '../../../utils/categoryHelpers'
 
 interface FormErrors {
     name: string
+    description: string
 }
 
 interface Props {
-    formData: CreateKitchenCategory
+    formData: CategoryFormState
     errors: FormErrors
     isSubmitting: boolean
     isEditing?: boolean
-    onInputChange: (field: keyof CreateKitchenCategory, value: string | boolean) => void
+    onInputChange: (field: keyof CategoryFormState, value: string | boolean) => void
+    onMenuItemTypeChange?: (isMenu: boolean) => void
     onSubmit: () => void
     onCancel?: () => void
 }
@@ -22,6 +27,7 @@ const CategoryForm = ({
     isSubmitting,
     isEditing = false,
     onInputChange,
+    onMenuItemTypeChange,
     onSubmit,
     onCancel,
 }: Props) => {
@@ -56,28 +62,58 @@ const CategoryForm = ({
                 <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
                         Descripción
+                        {!formData.menu_item && <span className="text-red-500"> *</span>}
+                        {!formData.menu_item && (
+                            <span className="text-gray-400 font-normal"> (ej. Gas)</span>
+                        )}
                     </label>
                     <input
                         type="text"
                         value={formData.description}
                         onChange={(e) => onInputChange('description', e.target.value)}
                         className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Opcional"
-                        disabled={isSubmitting}
+                        placeholder={formData.menu_item ? 'No aplica para menú' : 'Ej. Gas'}
+                        disabled={isSubmitting || formData.menu_item}
                     />
+                    {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
                 </div>
 
-                <div className="flex items-center justify-end gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={formData.is_active}
-                            onChange={(e) => onInputChange('is_active', e.target.checked)}
-                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                            disabled={isSubmitting}
-                        />
-                        <span className="text-sm text-gray-700">Activa</span>
+                <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Tipo
                     </label>
+                    <select
+                        value={formData.menu_item ? 'menu' : 'finance'}
+                        onChange={(e) => {
+                            const isMenu = e.target.value === 'menu'
+                            if (onMenuItemTypeChange) {
+                                onMenuItemTypeChange(isMenu)
+                            } else {
+                                onInputChange('menu_item', isMenu)
+                                if (isMenu) onInputChange('description', '')
+                            }
+                        }}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        disabled={isSubmitting}
+                    >
+                        <option value="menu">{MENU_ITEM_LABELS.menu}</option>
+                        <option value="finance">{MENU_ITEM_LABELS.finance}</option>
+                    </select>
+                </div>
+
+                <div className="flex items-center justify-end gap-4 md:col-span-2 lg:col-span-3">
+                    {isEditing && (
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={formData.is_active}
+                                onChange={(e) => onInputChange('is_active', e.target.checked)}
+                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                disabled={isSubmitting}
+                            />
+                            <span className="text-sm text-gray-700">Activa</span>
+                        </label>
+                    )}
 
                     <div className="flex items-center gap-2">
                         {isEditing && onCancel && (

@@ -28,7 +28,10 @@ const DishesMain = () => {
     const addNotification = useNotificationStore(state => state.addNotification)
 
     const { data: dishes, isLoading: dishesLoading, error: dishesError } = useGetKitchenDishes({ access })
-    const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useGetKitchenCategories({ access })
+    const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useGetKitchenCategories({
+        access,
+        params: { menu_item: 'true' },
+    })
     const { data: products, isLoading: productsLoading, error: productsError } = useGetProducts({ access })
     const createDish = useCreateKitchenDish()
 

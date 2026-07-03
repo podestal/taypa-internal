@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Tag, Trash2, Pencil } from 'lucide-react'
 import type { KitchenCategory } from '../../../services/kitchen/categoryService'
+import { MENU_ITEM_LABELS } from '../../../utils/categoryHelpers'
 
 interface Props {
     category: KitchenCategory
@@ -27,6 +28,13 @@ const CategoryCard = ({ category, index, onEdit, onDeactivate, isDeactivating }:
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="text-lg font-semibold text-gray-900 truncate">{category.name}</h3>
+                        <span className={`px-2 py-0.5 text-xs font-medium rounded ${
+                            category.menu_item
+                                ? 'bg-orange-100 text-orange-800'
+                                : 'bg-indigo-100 text-indigo-800'
+                        }`}>
+                            {category.menu_item ? MENU_ITEM_LABELS.menu : MENU_ITEM_LABELS.finance}
+                        </span>
                         <span className={`px-2 py-0.5 text-xs font-medium rounded ${
                             category.is_active
                                 ? 'bg-emerald-100 text-emerald-800'

@@ -21,6 +21,7 @@ import DishesMain from "../components/darkKitchen/dishes/DishesMain";
 import SalesMain from "../components/darkKitchen/sales/SalesMain";
 import ToppingsMain from "../components/darkKitchen/toppings/ToppingsMain";
 import DashboardMain from "../components/darkKitchen/dashboard/DashboardMain";
+import TransactionsMain from "../components/darkKitchen/transactions/TransactionsMain";
 
 const routes = createBrowserRouter([
     {
@@ -63,6 +64,14 @@ const routes = createBrowserRouter([
                     {
                         path: "cuentas",
                         element: <AccountMain />
+                    },
+                    {
+                        path: "transacciones",
+                        element: <TransactionsMain />
+                    },
+                    {
+                        path: "transactions",
+                        element: <TransactionsMain />
                     },
                     {
                         path: "accounts",

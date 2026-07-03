@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Tag, Loader2 } from 'lucide-react'
 import useGetKitchenCategories from '../../../hooks/kitchen/category/useGetKitchenCategories'
@@ -7,35 +7,42 @@ import useUpdateKitchenCategory from '../../../hooks/kitchen/category/useUpdateK
 import useDeactivateKitchenCategory from '../../../hooks/kitchen/category/useDeactivateKitchenCategory'
 import useAuthStore from '../../../store/useAuthStore'
 import useNotificationStore from '../../../store/useNotificationStore'
-import type { CreateKitchenCategory, KitchenCategory } from '../../../services/kitchen/categoryService'
+import type { KitchenCategory } from '../../../services/kitchen/categoryService'
+import {
+    buildCategoryCreatePayload,
+    buildCategoryListParams,
+    buildCategoryUpdatePayload,
+    categoryToFormState,
+    validateCategoryForm,
+    CATEGORY_MENU_ITEM_FILTERS,
+    initialCategoryFormData,
+    type CategoryFormState,
+    type CategoryMenuItemFilter,
+} from '../../../utils/categoryHelpers'
 import Modal from '../../ui/Modal'
 import CategoryForm from './CategoryForm'
 import CategoryList from './CategoryList'
 
-const initialFormData: CreateKitchenCategory = {
-    name: '',
-    description: '',
-    is_active: true,
-}
-
-const categoryToFormState = (category: KitchenCategory): CreateKitchenCategory => ({
-    name: category.name,
-    description: category.description,
-    is_active: category.is_active,
-})
-
 const CategoriesMain = () => {
     const access = useAuthStore(state => state.access) || ''
     const addNotification = useNotificationStore(state => state.addNotification)
-    const { data: categories, isLoading, error } = useGetKitchenCategories({ access })
+    const [menuItemFilter, setMenuItemFilter] = useState<CategoryMenuItemFilter>('all')
+    const categoryListParams = useMemo(
+        () => buildCategoryListParams(menuItemFilter),
+        [menuItemFilter],
+    )
+    const { data: categories, isLoading, error } = useGetKitchenCategories({
+        access,
+        params: categoryListParams,
+    })
     const createCategory = useCreateKitchenCategory()
 
-    const [formData, setFormData] = useState<CreateKitchenCategory>(initialFormData)
-    const [errors, setErrors] = useState({ name: '' })
+    const [formData, setFormData] = useState<CategoryFormState>(() => initialCategoryFormData())
+    const [errors, setErrors] = useState({ name: '', description: '' })
     const [showEditModal, setShowEditModal] = useState(false)
     const [editingCategory, setEditingCategory] = useState<KitchenCategory | null>(null)
-    const [editFormData, setEditFormData] = useState<CreateKitchenCategory>(initialFormData)
-    const [editErrors, setEditErrors] = useState({ name: '' })
+    const [editFormData, setEditFormData] = useState<CategoryFormState>(() => initialCategoryFormData())
+    const [editErrors, setEditErrors] = useState({ name: '', description: '' })
     const [showDeactivateModal, setShowDeactivateModal] = useState(false)
     const [selectedCategory, setSelectedCategory] = useState<KitchenCategory | null>(null)
 
@@ -46,38 +53,55 @@ const CategoriesMain = () => {
 
     const categoryItems = Array.isArray(categories) ? categories : []
     const activeCount = categoryItems.filter(c => c.is_active).length
+    const menuCount = categoryItems.filter(c => c.menu_item).length
+    const financeCount = categoryItems.filter(c => !c.menu_item).length
 
     const resetForm = () => {
-        setFormData(initialFormData)
-        setErrors({ name: '' })
+        setFormData({
+            ...initialCategoryFormData(),
+            menu_item: menuItemFilter === 'finance' ? false : true,
+        })
+        setErrors({ name: '', description: '' })
     }
 
     const resetEditForm = () => {
         setEditingCategory(null)
-        setEditFormData(initialFormData)
-        setEditErrors({ name: '' })
+        setEditFormData(initialCategoryFormData())
+        setEditErrors({ name: '', description: '' })
     }
 
-    const validateForm = (data: CreateKitchenCategory) => {
-        if (!data.name.trim()) {
-            return { name: 'El nombre es requerido', isValid: false }
-        }
-        return { name: '', isValid: true }
-    }
+    const validateForm = validateCategoryForm
 
-    const handleInputChange = (field: keyof CreateKitchenCategory, value: string | boolean) => {
+    const handleInputChange = (field: keyof CategoryFormState, value: string | boolean) => {
         setFormData(prev => ({ ...prev, [field]: value }))
-        if (field === 'name' && errors.name) {
-            setErrors({ name: '' })
+        if (field in errors && errors[field as keyof typeof errors]) {
+            setErrors(prev => ({ ...prev, [field]: '' }))
         }
+    }
+
+    const handleMenuItemTypeChange = (isMenu: boolean) => {
+        setFormData(prev => ({
+            ...prev,
+            menu_item: isMenu,
+            description: isMenu ? '' : prev.description,
+        }))
+        setErrors(prev => ({ ...prev, description: '' }))
+    }
+
+    const handleMenuItemFilterChange = (filter: CategoryMenuItemFilter) => {
+        setMenuItemFilter(filter)
+        setFormData(prev => ({
+            ...prev,
+            menu_item: filter === 'finance' ? false : filter === 'menu' ? true : prev.menu_item,
+        }))
     }
 
     const handleSubmit = () => {
         const validation = validateForm(formData)
-        setErrors({ name: validation.name })
+        setErrors(validation.errors)
         if (!validation.isValid) return
 
-        createCategory.mutate({ category: formData, access }, {
+        createCategory.mutate({ category: buildCategoryCreatePayload(formData), access }, {
             onSuccess: () => {
                 addNotification({
                     title: 'Categoría creada',
@@ -86,27 +110,37 @@ const CategoriesMain = () => {
                 })
                 resetForm()
             },
-            onError: () => {
+            onError: (error) => {
+                const message = error instanceof Error ? error.message : 'Error al crear la categoría'
                 addNotification({
                     title: 'Error',
-                    message: 'Error al crear la categoría',
+                    message,
                     type: 'error',
                 })
             },
         })
     }
 
-    const handleEditInputChange = (field: keyof CreateKitchenCategory, value: string | boolean) => {
+    const handleEditInputChange = (field: keyof CategoryFormState, value: string | boolean) => {
         setEditFormData(prev => ({ ...prev, [field]: value }))
-        if (field === 'name' && editErrors.name) {
-            setEditErrors({ name: '' })
+        if (field in editErrors && editErrors[field as keyof typeof editErrors]) {
+            setEditErrors(prev => ({ ...prev, [field]: '' }))
         }
+    }
+
+    const handleEditMenuItemTypeChange = (isMenu: boolean) => {
+        setEditFormData(prev => ({
+            ...prev,
+            menu_item: isMenu,
+            description: isMenu ? '' : prev.description,
+        }))
+        setEditErrors(prev => ({ ...prev, description: '' }))
     }
 
     const handleEdit = (category: KitchenCategory) => {
         setEditingCategory(category)
         setEditFormData(categoryToFormState(category))
-        setEditErrors({ name: '' })
+        setEditErrors({ name: '', description: '' })
         setShowEditModal(true)
     }
 
@@ -117,10 +151,10 @@ const CategoriesMain = () => {
 
     const handleEditSubmit = () => {
         const validation = validateForm(editFormData)
-        setEditErrors({ name: validation.name })
+        setEditErrors(validation.errors)
         if (!validation.isValid || !editingCategory) return
 
-        updateCategory.mutate({ category: editFormData, access }, {
+        updateCategory.mutate({ category: buildCategoryUpdatePayload(editFormData), access }, {
             onSuccess: () => {
                 addNotification({
                     title: 'Categoría actualizada',
@@ -200,6 +234,7 @@ const CategoriesMain = () => {
                     errors={errors}
                     isSubmitting={createCategory.isPending}
                     onInputChange={handleInputChange}
+                    onMenuItemTypeChange={handleMenuItemTypeChange}
                     onSubmit={handleSubmit}
                 />
 
@@ -209,12 +244,39 @@ const CategoriesMain = () => {
                     transition={{ delay: 0.1 }}
                     className="space-y-4"
                 >
-                    <div className="flex items-center space-x-2">
-                        <h2 className="text-2xl font-semibold text-gray-900">Categorías registradas</h2>
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
-                            {activeCount} activas
-                        </span>
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center space-x-2">
+                            <h2 className="text-2xl font-semibold text-gray-900">Categorías registradas</h2>
+                            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
+                                {activeCount} activas
+                            </span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            {CATEGORY_MENU_ITEM_FILTERS.map(filter => (
+                                <motion.button
+                                    key={filter.id}
+                                    type="button"
+                                    onClick={() => handleMenuItemFilterChange(filter.id)}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                                        menuItemFilter === filter.id
+                                            ? 'bg-blue-600 text-white'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
+                                    whileHover={{ scale: 1.03 }}
+                                    whileTap={{ scale: 0.97 }}
+                                >
+                                    {filter.label}
+                                </motion.button>
+                            ))}
+                        </div>
                     </div>
+
+                    {menuItemFilter === 'all' && (
+                        <p className="text-sm text-gray-500">
+                            {menuCount} de menú · {financeCount} de finanzas
+                        </p>
+                    )}
+
                     <CategoryList
                         categories={categoryItems}
                         onEdit={handleEdit}
@@ -231,6 +293,7 @@ const CategoriesMain = () => {
                     isSubmitting={updateCategory.isPending}
                     isEditing
                     onInputChange={handleEditInputChange}
+                    onMenuItemTypeChange={handleEditMenuItemTypeChange}
                     onSubmit={handleEditSubmit}
                     onCancel={handleCloseEditModal}
                 />
