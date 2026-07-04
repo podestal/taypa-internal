@@ -3,7 +3,7 @@ import { Loader2, Pencil } from 'lucide-react'
 import type { Purchase } from '../../../services/kitchen/purchaseService'
 import type { Product } from '../../../services/kitchen/productService'
 import type { KitchenAccount } from '../../../services/kitchen/accountService'
-import { purchaseTotal, sortPurchasesByDateDesc } from '../../../utils/purchaseHelpers'
+import { getPurchaseTotal, sortPurchasesByDateDesc } from '../../../utils/purchaseHelpers'
 import { formatDate, formatDecimal } from '../../../utils/inventoryHelpers'
 
 interface Props {
@@ -52,8 +52,14 @@ const PurchasesHistoryTable = ({
     const getProductName = (purchase: Purchase) =>
         purchase.product_name ?? products.find(p => p.id === purchase.product)?.name ?? `Producto #${purchase.product}`
 
-    const getAccountName = (purchase: Purchase) =>
-        purchase.account_name ?? accounts.find(a => a.id === purchase.account)?.name ?? `Cuenta #${purchase.account}`
+    const getAccountName = (purchase: Purchase) => {
+        const accountId = purchase.account || purchase.transaction?.account
+        if (!accountId) return '—'
+        return purchase.account_name
+            ?? purchase.transaction?.account_name
+            ?? accounts.find(a => a.id === accountId)?.name
+            ?? `Cuenta #${accountId}`
+    }
 
     return (
         <motion.div
@@ -77,7 +83,7 @@ const PurchasesHistoryTable = ({
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                         {sorted.map(purchase => {
-                            const total = purchaseTotal(purchase.quantity_bought, purchase.unit_price)
+                            const total = getPurchaseTotal(purchase)
                             return (
                                 <tr key={purchase.id} className="hover:bg-gray-50">
                                     <td className="px-4 py-3 text-gray-700 whitespace-nowrap">

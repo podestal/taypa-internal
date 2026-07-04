@@ -1,5 +1,14 @@
 import KitchenClient from "./kitchenClient"
 
+export interface PurchaseTransaction {
+    id: number
+    transaction_type: string
+    amount: string
+    account: number
+    account_name?: string
+    description: string
+}
+
 export interface Purchase {
     id: number
     product: number
@@ -8,7 +17,8 @@ export interface Purchase {
     account_name?: string
     quantity_bought: number
     unit_price: number
-    transaction: number | null
+    total: number
+    transaction: PurchaseTransaction | null
     notes: string
     purchase_date?: string
     created_at: string
@@ -19,7 +29,7 @@ export type CreatePurchase = {
     product: number
     account: number
     quantity_bought: string | number
-    unit_price: string | number
+    total: string | number
     purchase_date?: string
     notes?: string
 }
