@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Boxes, Loader2 } from 'lucide-react'
+import { Boxes, Loader2, Search } from 'lucide-react'
 import useGetCurrentStock from '../../../hooks/kitchen/inventory/useGetCurrentStock'
 import useGetInventoryMovements from '../../../hooks/kitchen/inventory/useGetInventoryMovements'
 import useGetInventoryReport from '../../../hooks/kitchen/inventory/useGetInventoryReport'
@@ -56,6 +56,7 @@ const InventoryMain = () => {
 
     const [formData, setFormData] = useState<CreateInventoryMovement>(initialFormData)
     const [errors, setErrors] = useState({ product: '', quantity: '', movement_date: '' })
+    const [stockSearch, setStockSearch] = useState('')
     const [reportParams, setReportParams] = useState<InventoryReportParams>({
         start_date: todayISO(),
         end_date: todayISO(),
@@ -84,6 +85,13 @@ const InventoryMain = () => {
         () => buildIngredientStockItems(ingredientProducts, stockItems),
         [ingredientProducts, stockItems],
     )
+    const filteredStockItems = useMemo(() => {
+        const query = stockSearch.trim().toLowerCase()
+        if (!query) return ingredientStockItems
+        return ingredientStockItems.filter(item =>
+            item.product_name.toLowerCase().includes(query),
+        )
+    }, [ingredientStockItems, stockSearch])
     const ingredientMovements = movementItems.filter(item => ingredientProductIds.has(item.product))
     const reportItems = Array.isArray(report) ? report : []
     const ingredientReportItems = reportItems.filter(item => ingredientProductIds.has(item.product_id))
@@ -196,15 +204,31 @@ const InventoryMain = () => {
                     <div className="flex items-center space-x-2">
                         <h2 className="text-2xl font-semibold text-gray-900">Stock actual</h2>
                         <span className="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-semibold rounded-full">
-                            {ingredientStockItems.length}
+                            {stockSearch.trim()
+                                ? `${filteredStockItems.length} / ${ingredientStockItems.length}`
+                                : ingredientStockItems.length}
                         </span>
                     </div>
+                    {ingredientStockItems.length > 0 && (
+                        <div className="relative max-w-md">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <input
+                                type="text"
+                                value={stockSearch}
+                                onChange={(e) => setStockSearch(e.target.value)}
+                                placeholder="Buscar producto..."
+                                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                        </div>
+                    )}
                     <CurrentStockList
-                        items={ingredientStockItems}
+                        items={filteredStockItems}
                         emptyMessage={
-                            ingredientProducts.length === 0
-                                ? 'Crea productos tipo ingrediente en Productos para ver el inventario'
-                                : 'No hay productos en inventario'
+                            stockSearch.trim()
+                                ? 'No hay productos que coincidan con la búsqueda'
+                                : ingredientProducts.length === 0
+                                    ? 'Crea productos tipo ingrediente en Productos para ver el inventario'
+                                    : 'No hay productos en inventario'
                         }
                     />
                 </motion.div>
