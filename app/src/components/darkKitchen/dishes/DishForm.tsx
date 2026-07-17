@@ -18,7 +18,7 @@ interface Props {
     categories: KitchenCategory[]
     isSubmitting: boolean
     isEditing?: boolean
-    onInputChange: (field: keyof Omit<DishFormState, 'ingredients'>, value: string | number | boolean) => void
+    onInputChange: (field: keyof Omit<DishFormState, 'ingredients'>, value: string | number | boolean | null) => void
     onIngredientChange: (index: number, field: keyof DishFormIngredient, value: number) => void
     onAddIngredient: () => void
     onRemoveIngredient: (index: number) => void
@@ -50,7 +50,7 @@ const DishForm = ({
                 {isEditing ? 'Editar plato' : 'Nuevo plato'}
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
                 <div className="md:col-span-2">
                     <label className="block text-xs font-medium text-gray-700 mb-1">
                         Nombre <span className="text-red-500">*</span>
@@ -66,6 +66,25 @@ const DishForm = ({
                         disabled={isSubmitting}
                     />
                     {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+                </div>
+
+                <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                        Puntos
+                    </label>
+                    <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={formData.points ?? ''}
+                        onChange={(e) => onInputChange(
+                            'points',
+                            e.target.value === '' ? null : parseFloat(e.target.value),
+                        )}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="Opcional"
+                        disabled={isSubmitting}
+                    />
                 </div>
 
                 <div>
@@ -107,7 +126,7 @@ const DishForm = ({
                     {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category}</p>}
                 </div>
 
-                <div className="md:col-span-2 lg:col-span-3">
+                <div className="md:col-span-2 lg:col-span-4">
                     <label className="block text-xs font-medium text-gray-700 mb-1">Descripción</label>
                     <input
                         type="text"

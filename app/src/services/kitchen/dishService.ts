@@ -12,6 +12,7 @@ export interface KitchenDish {
     name: string
     description: string
     price: number
+    points?: number | null
     category: number
     category_name?: string
     is_active: boolean
@@ -20,7 +21,7 @@ export interface KitchenDish {
     updated_at: string
 }
 
-export type CreateKitchenDish = Pick<KitchenDish, 'name' | 'description' | 'price' | 'category' | 'is_active'> & {
+export type CreateKitchenDish = Pick<KitchenDish, 'name' | 'description' | 'price' | 'points' | 'category' | 'is_active'> & {
     ingredients: Pick<DishIngredient, 'product' | 'quantity'>[]
 }
 

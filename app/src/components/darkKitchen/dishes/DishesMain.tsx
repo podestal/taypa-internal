@@ -108,7 +108,7 @@ const DishesMain = () => {
 
     const handleInputChange = (
         field: keyof Omit<DishFormState, 'ingredients'>,
-        value: string | number | boolean
+        value: string | number | boolean | null
     ) => {
         setFormData(prev => ({ ...prev, [field]: value }))
         if (field in errors && errors[field as keyof typeof errors]) {
@@ -118,7 +118,7 @@ const DishesMain = () => {
 
     const handleEditInputChange = (
         field: keyof Omit<DishFormState, 'ingredients'>,
-        value: string | number | boolean
+        value: string | number | boolean | null
     ) => {
         setEditFormData(prev => ({ ...prev, [field]: value }))
         if (field in editErrors && editErrors[field as keyof typeof editErrors]) {

@@ -53,6 +53,11 @@ const DishCard = ({ dish, categories, products, index, onEdit, onDeactivate, isD
                 </div>
                 <div className="text-right shrink-0">
                     <p className="text-xl font-bold text-orange-600">S/ {formatDecimal(dish.price)}</p>
+                    {dish.points != null && (
+                        <p className="mt-0.5 text-xs font-medium text-indigo-600">
+                            {formatDecimal(dish.points)} puntos
+                        </p>
+                    )}
                 </div>
             </div>
 

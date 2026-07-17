@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import MainPage from "../pages/MainPage";
-import OrdersMain from "../components/orders/OrdersMain";
+import OrdersMain from "../components/darkKitchen/orders/OrdersMain";
 import TrackerMain from "../components/tracker/TrackerMain";
 // import SalesMain from "../components/sales/SalesMain";
 // import InventoryMain from "../components/inventory/InventoryMain";
@@ -79,6 +79,10 @@ const routes = createBrowserRouter([
                     },
                     {
                         path: "orders",
+                        element: <OrdersMain />
+                    },
+                    {
+                        path: "ordenes",
                         element: <OrdersMain />
                     },
                     {

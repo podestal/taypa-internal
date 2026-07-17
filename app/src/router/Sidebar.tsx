@@ -1,5 +1,5 @@
 
-import { AudioWaveform, Bike, ChartBar, ChefHat, Coins, Hamburger, LayoutDashboard, PackageSearch, Receipt, ShoppingCart, Sparkles, Tags, Wallet, X } from 'lucide-react'
+import { AudioWaveform, ChartBar, ClipboardList, Hamburger, LayoutDashboard, PackageSearch, Receipt, ShoppingCart, Sparkles, Tags, Wallet, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -10,26 +10,18 @@ const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const location = useLocation()
+  const username = useAuthStore((state) => state.username)
 
-  const userId = useAuthStore((state) => state.userId)
-
-  const restrictedNavigationItems = [
-    {
-      name: 'Pedidos',
-      path: '/orders',
-      icon: <Bike />
-    },
-    {
-      name: 'Cocina',
-      path: '/kitchen',
-      icon: <ChefHat />
-    }
-  ]
   const navigationItems = [
     {
         name: 'Dashboard',
         path: '/dashboard',
         icon: <LayoutDashboard />
+    },
+    {
+        name: 'Órdenes',
+        path: '/ordenes',
+        icon: <ClipboardList />
     },
     // {
     //     name: 'Pedidos',
@@ -118,8 +110,11 @@ const Sidebar = () => {
     // }
   ]
 
-  console.log('userId', userId)
-  const finalRoutes = userId === 2 ? restrictedNavigationItems : navigationItems
+  const podestalOnlyPaths = new Set(['/dashboard', '/transacciones', '/ventas'])
+  const isPodestal = username.trim().toLowerCase() === 'podestal'
+  const finalRoutes = isPodestal
+    ? navigationItems
+    : navigationItems.filter(item => !podestalOnlyPaths.has(item.path))
 
   const mockUser = {
     name: 'Luis Rodriguez',

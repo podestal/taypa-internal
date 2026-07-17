@@ -6,8 +6,8 @@ const useGetAccess = (): UseMutationResult<AccessResponse, Error, AccessRequest>
     const setTokens = useAuthStore((state) => state.setTokens)
     return useMutation({
         mutationFn: (data: AccessRequest) => accessService.post(data),
-        onSuccess: (data) => {
-            setTokens(data.access, data.refresh)
+        onSuccess: (data, variables) => {
+            setTokens(data.access, data.refresh, variables.username)
         },
         onError: (error) => {
             console.log("Error", error)

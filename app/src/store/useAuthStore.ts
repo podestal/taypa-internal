@@ -13,8 +13,9 @@ interface AuthState {
     access: string | null 
     refresh: string | null 
     userId: number
+    username: string
     setUserId: (id: number) => void
-    setTokens: (access: string, refresh: string) => void
+    setTokens: (access: string, refresh: string, username?: string) => void
     clearTokens: () => void
     getDecodedToken: () => DecodedToken | null
 }
@@ -42,18 +43,23 @@ const useAuthStore = create<AuthState>((set, get) => {
         access,
         refresh: localStorage.getItem('refresh'),
         userId,
+        username: localStorage.getItem('username') ?? '',
 
-        setTokens: (access, refresh) => {
+        setTokens: (access, refresh, username) => {
             localStorage.setItem('access', access) 
             localStorage.setItem('refresh', refresh)
+            if (username) {
+                localStorage.setItem('username', username)
+            }
             const userId = decodeToken(access)
-            set({ access, refresh, userId }) 
+            set({ access, refresh, userId, username: username ?? '' })
         },
 
         clearTokens: () => {
             localStorage.removeItem('access') 
             localStorage.removeItem('refresh')
-            set({ access: '', refresh: '', userId: 0 }) 
+            localStorage.removeItem('username')
+            set({ access: '', refresh: '', userId: 0, username: '' })
         },
 
         setUserId: (id) => {

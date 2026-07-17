@@ -50,6 +50,7 @@ export const normalizeKitchenDishes = (data: unknown): KitchenDish[] =>
         name: String(item.name ?? ''),
         description: String(item.description ?? ''),
         price: Number(item.price ?? 0),
+        points: item.points != null ? Number(item.points) : null,
         category: resolveCategoryId(item),
         category_name: resolveCategoryName(item),
         is_active: Boolean(item.is_active ?? true),
@@ -67,6 +68,7 @@ export interface DishFormState {
     name: string
     description: string
     price: number
+    points: number | null
     category: number
     is_active: boolean
     ingredients: DishFormIngredient[]
@@ -78,6 +80,7 @@ export const initialDishFormData: DishFormState = {
     name: '',
     description: '',
     price: 0,
+    points: null,
     category: 0,
     is_active: true,
     ingredients: [emptyIngredient()],
@@ -87,6 +90,7 @@ export const dishToFormState = (dish: KitchenDish): DishFormState => ({
     name: dish.name,
     description: dish.description,
     price: dish.price,
+    points: dish.points ?? null,
     category: dish.category,
     is_active: dish.is_active,
     ingredients: dish.ingredients.length > 0
@@ -102,6 +106,7 @@ export const buildDishPayload = (formData: DishFormState): CreateKitchenDish => 
         name: formData.name,
         description: formData.description,
         price: formData.price,
+        ...(formData.points != null ? { points: formData.points } : {}),
         category: formData.category,
         is_active: formData.is_active,
         ingredients: validIngredients.map(ing => ({
