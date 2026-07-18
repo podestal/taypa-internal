@@ -146,7 +146,7 @@ export const emptyOrderItem = (): OrderFormItem => ({
 })
 
 export const initialOrderForm = (): OrderFormState => ({
-    customer_mode: 'anonymous',
+    customer_mode: 'new',
     customer: null,
     customer_names: '',
     customer_address: '',
@@ -154,7 +154,7 @@ export const initialOrderForm = (): OrderFormState => ({
     account: 0,
     notes: '',
     order_date: todayISO(),
-    order_items: [emptyOrderItem()],
+    order_items: [],
 })
 
 export const orderToFormState = (order: KitchenOrder): OrderFormState => ({
@@ -168,7 +168,7 @@ export const orderToFormState = (order: KitchenOrder): OrderFormState => ({
     order_date: order.order_date.split('T')[0],
     order_items: order.items.map(item => ({
         dish: item.dish,
-        quantity: item.quantity,
+        quantity: Math.max(1, Math.round(item.quantity)),
         unit_price: item.unit_price,
         notes: item.notes ?? '',
         toppings: item.toppings.map(line => ({

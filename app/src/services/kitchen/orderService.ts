@@ -68,6 +68,10 @@ export interface CreateKitchenOrder {
 
 export type UpdateKitchenOrder = Partial<CreateKitchenOrder>
 
+export interface KitchenOrderListParams {
+    date?: string
+}
+
 interface Props {
     orderId?: number
 }

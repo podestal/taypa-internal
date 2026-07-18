@@ -1,4 +1,4 @@
-import { Loader2, Pencil, Trash2 } from 'lucide-react'
+import { Loader2, Pencil, XCircle } from 'lucide-react'
 import type { KitchenOrder } from '../../../services/kitchen/orderService'
 import type { KitchenAccount } from '../../../services/kitchen/accountService'
 import { formatDate, formatDecimal } from '../../../utils/inventoryHelpers'
@@ -105,9 +105,9 @@ const OrdersTable = ({ orders, accounts, isLoading, error, onEdit, onDelete }: P
                                                 type="button"
                                                 onClick={() => onDelete(order)}
                                                 className="p-2 text-red-600 rounded-lg hover:bg-red-50"
-                                                title="Eliminar orden"
+                                                title="Cancelar orden"
                                             >
-                                                <Trash2 className="w-4 h-4" />
+                                                <XCircle className="w-4 h-4" />
                                             </button>
                                         </div>
                                     </td>

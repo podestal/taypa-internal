@@ -16,4 +16,7 @@ export interface CreateKitchenCustomer {
 const getKitchenCustomerService = () =>
     new KitchenClient<KitchenCustomer, CreateKitchenCustomer>('customers/')
 
+export const getKitchenCustomersService = () =>
+    new KitchenClient<KitchenCustomer[]>('customers/')
+
 export default getKitchenCustomerService

@@ -1,4 +1,4 @@
-import { useMutation, type UseMutationResult } from "@tanstack/react-query"
+import { useMutation, type UseMutationResult, useQueryClient } from "@tanstack/react-query"
 import getKitchenCustomerService, {
     type CreateKitchenCustomer,
     type KitchenCustomer,
@@ -11,8 +11,12 @@ interface CreateCustomerData {
 
 const useCreateKitchenCustomer = (): UseMutationResult<KitchenCustomer, Error, CreateCustomerData> => {
     const service = getKitchenCustomerService()
+    const queryClient = useQueryClient()
     return useMutation({
         mutationFn: (data: CreateCustomerData) => service.post(data.customer, data.access),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['kitchen-customers'] })
+        },
     })
 }
 
