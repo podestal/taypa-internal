@@ -110,17 +110,17 @@ const Sidebar = () => {
     // }
   ]
 
-  const podestalOnlyPaths = new Set(['/dashboard', '/transacciones', '/ventas'])
+  const podestalOnlyPaths = new Set(['/dashboard', '/transacciones', '/ventas', '/inventario', '/cuentas'])
   const isPodestal = username.trim().toLowerCase() === 'podestal'
   const finalRoutes = isPodestal
     ? navigationItems
     : navigationItems.filter(item => !podestalOnlyPaths.has(item.path))
 
   const mockUser = {
-    name: 'Luis Rodriguez',
-    email: 'luis@taypa.com',
+    name: username,
+    email: '',
     avatar: '👤',
-    role: 'Admin'
+    role: 'User'
   }
 
   return (
